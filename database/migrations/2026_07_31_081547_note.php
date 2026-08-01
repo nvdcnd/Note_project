@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             $table->foreignID('organizationID')->references('id')->on('organizations')->onDelete('cascade');
+            $table->foreignId('replied_note_id')->references('id')->on('note')->onDelete('cascade');
         });
     }
 

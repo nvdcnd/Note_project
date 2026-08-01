@@ -7,9 +7,14 @@ use App\Mail\UserEmail;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Note;
 use App\Models\User;
+use App\Models\pivot_for_note;
+use App\Models\mark_as_done;
+use App\Models\reply_note;
+use App\Models\Organization;
+use Illuminate\Support\Facades\Auth;
 
 
-class pivot_for_note extends Controller
+class pivot_for_note_controller extends Controller
 {
     function mail_for_no_account(Request $request, $users, $noteid){
         foreach($users as $user){
@@ -39,9 +44,19 @@ class pivot_for_note extends Controller
         }
         if(count($no_account) == 0){
             pivot_for_note::mail_for_no_account($no_account, $noteid);
-            return redirect()->route('note')->with('error', 'Note shared successfully with ' . count($no_account) . ' users');
+            return redirect()->route('note', $noteID->id)->with('error', 'Note shared successfully with ' . count($no_account) . ' users');
         } else {
-            return redirect()->route('note')->with('success', 'Note shared successfully');
+            return redirect()->route('note', $noteID->id)->with('success', 'Note shared successfully');
         }
+    }
+
+    public function undo_shared_note(Request $request, $id){
+        $pivot = pivot_for_note::find($id);
+        $note = Note::find($pivot->note_id);
+        if($note->creater_id != Auth::user()->id){
+            return redirect()->route('note', $note->id)->with('error', 'You are not authorized to delete this note');
+        }
+        $pivot->delete();
+        return redirect()->route('note', $note->id)->with('success', 'Note deleted successfully');
     }
 }

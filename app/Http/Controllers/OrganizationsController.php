@@ -29,6 +29,9 @@ class OrganizationsController extends Controller
     }
 
     public function edit_organization(Request $request, $id){
+        if(Organization::find($id)->hostID != Auth::user()->id){
+            return redirect()->route('organization')->with('error', 'You are not authorized to edit this organization');
+        }
         $data = $request->all();
         $organization = organizations::find($id);
         $organization->name = $data['name'];
@@ -38,6 +41,9 @@ class OrganizationsController extends Controller
     }
 
     public function delete_organization(Request $request, $id){
+        if(Organization::find($id)->hostID != Auth::user()->id){
+            return redirect()->route('organization')->with('error', 'You are not authorized to delete this organization');
+        }
         $data = $request->all();
         $organization = organizations::find($id);
         $organization->delete();

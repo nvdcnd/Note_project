@@ -33,4 +33,31 @@ class MarkAsDoneController extends Controller
             return redirect()->route('note')->with('error', 'You are not authorized to mark this note as done');
         } 
     } 
+
+    public function undo_mark_as_done(Request $request, $id){
+        $user = Auth::user();
+        $note = Note::find($id);
+        if(!$note){
+            return redirect()->route('note')->with('error', 'Note not found');
+        }
+        $pivot = pivot_for_note::where('noteID', $id)->where('userID', $user->id)->first();
+        if($pivot or ($note->creater_id == $user->id)){
+            $mark_as_done = Mark_as_done::where('noteID', $id)->where('userID', $user->id)->first();
+            if($mark_as_done){
+                $mark_as_done->status = false;
+                $mark_as_done->save();
+                return redirect()->route('note')->with('success', 'Note unmarked as done');
+            }else{
+                $mark_as_done = new Mark_as_done();
+                $mark_as_done->noteID = $id;
+                $mark_as_done->userID = $user->id;
+                $mark_as_done->status = false;
+                $mark_as_done->save();
+                return redirect()->route('note')->with('success', 'Note unmarked as done');
+            }
+        }
+        else {
+            return redirect()->route('note')->with('error', 'You are not authorized to unmark this note as done');
+        } 
+    }
 }

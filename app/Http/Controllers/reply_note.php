@@ -19,4 +19,13 @@ class reply_note extends Controller
             return redirect('note')->with('error', 'Note not replied');
         }
     }
+
+    public function unreply_note(Request $request, $id){
+        $note = Note::find($id);
+        if($note->creater_id != Auth::user()->id){
+            return redirect()->route('note', $note->id)->with('error', 'You are not authorized to delete this note');
+        }
+        $note->delete();
+        return redirect()->route('note', $note->id)->with('success', 'Note deleted successfully');
+    }
 }
