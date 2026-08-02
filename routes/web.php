@@ -10,6 +10,14 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\MarkAsDoneController;
 use App\Http\Controllers\reply_note;
 use App\Http\Controllers\pivot_for_note_controller;
+use App\Http\Controllers\User2userTransactionController;
+use App\Http\Controllers\User2organizationTransactionController;
+use App\Models\user2user_transaction;
+use App\Models\organization2user;
+use App\Http\Controllers\Organization2userTransactionController;
+use App\Models\Theme_request;
+use App\Http\Controllers\ThemeRequestController;
+
 
 
 Route::get('/', function () {
@@ -127,3 +135,116 @@ Route::get("/organization/dashboard/{id}/pending/member", function($id){
     }
     return view("organization")->with("error","You are not authorized to view this organization!");
 })->name("organization.pending_member");
+
+
+# User2user transaction
+Route::get("user2user/create/transaction", function(){
+    return view("user2user_transaction");
+})->name("user2user_transaction_view");
+
+Route::get("user2user/verify/transaction/{id}", function($id){
+    $user2user_transaction = user2user_transaction::where('id', $id)->first();
+    if($user2user_transaction){
+        if(Auth::user()->id == $user2user_transaction->from || Auth::user()->id == $user2user_transaction->to){
+            return view("user2user_transaction_verify", compact("user2user_transaction"));
+        }else{
+            return view("user2user_transaction")->with("error","You are not authorized to verify this transaction!");
+        }
+    }else{
+        return view("user2user_transaction")->with("error","Invalid transaction ID!");
+    }
+})->name("user2user_transaction_verify_view");
+
+Route::get("user2user/{id}/transaction/history", function(){
+    $user2user_all_transactions = user2user_transaction::where('from', Auth::user()->id)->orWhere('to', Auth::user()->id)->get();
+    $user2user_from_transactions = user2user_transaction::where('from', Auth::user()->id)->get();
+    $user2user_to_transactions = user2user_transaction::where('to', Auth::user()->id)->get();
+    $user2user_success_transaction = user2user_transaction::where('from', Auth::user()->id)->where('status',true)->orWhere('to', Auth::user()->id)->where('status',true)->get();
+    $user2user_pending_transaction = user2user_transaction::where('from', Auth::user()->id)->where('status',false)->orWhere('to', Auth::user()->id)->where('status',false)->get();
+    $user2user_failed_transaction = user2user_transaction::where('from', Auth::user()->id)->where('status',false)->orWhere('to', Auth::user()->id)->where('status',false)->get();
+    return view("user2user_transaction_history", compact("user2user_all_transactions","user2user_from_transactions","user2user_to_transactions"));
+})->name("user2user_transaction_history_view");
+
+Route::post("user2user/create/transaction", [User2userTransactionController::class, "create_transaction"])->name("user2user_transaction_create");
+Route::post("user2user/verify/transaction", [User2userTransactionController::class, "verify_transaction"])->name("user2user_transaction_verify");
+Route::post("user2user/cancel/transaction", [User2userTransactionController::class, "cancel_transaction"])->name("user2user_transaction_cancel");
+
+# User2organization transaction
+Route::get("user2organization/create/transaction", function(){
+    return view("user2organization_transaction");
+})->name("user2organization_transaction_view");
+
+Route::get("user2organization/verify/transaction/{id}", function($id){
+    $user2organization_transaction = user2organization_transaction::where('id', $id)->first();
+    if($user2organization_transaction){
+        if(Auth::user()->id == $user2organization_transaction->from || Auth::user()->id == $user2organization_transaction->to){
+            return view("user2organization_transaction_verify", compact("user2organization_transaction"));
+        }else{
+            return view("user2organization_transaction")->with("error","You are not authorized to verify this transaction!");
+        }
+    }else{
+        return view("user2organization_transaction")->with("error","Invalid transaction ID!");
+    }
+})->name("user2organization_transaction_verify_view");
+
+Route::get("user2organization/{id}/transaction/history", function(){
+    $user2organization_all_transactions = user2organization_transaction::where('from', Auth::user()->id)->orWhere('to', Auth::user()->id)->get();
+    $user2organization_from_transactions = user2organization_transaction::where('from', Auth::user()->id)->get();
+    $user2organization_to_transactions = user2organization_transaction::where('to', Auth::user()->id)->get();
+    $user2organization_success_transaction = user2organization_transaction::where('from', Auth::user()->id)->where('status',true)->orWhere('to', Auth::user()->id)->where('status',true)->get();
+    $user2organization_pending_transaction = user2organization_transaction::where('from', Auth::user()->id)->where('status',false)->orWhere('to', Auth::user()->id)->where('status',false)->get();
+    $user2organization_failed_transaction = user2organization_transaction::where('from', Auth::user()->id)->where('status',false)->orWhere('to', Auth::user()->id)->where('status',false)->get();
+    return view("user2organization_transaction_history", compact("user2organization_all_transactions","user2organization_from_transactions","user2organization_to_transactions","user2organization_success_transaction","user2organization_pending_transaction","user2organization_failed_transaction"));
+})->name("user2organization_transaction_history_view");
+
+Route::post("user2organization/create/transaction", [User2organizationTransactionController::class, "create_transaction"])->name("user2organization_transaction_create");
+Route::post("user2organization/verify/transaction", [User2organizationTransactionController::class, "verify_transaction"])->name("user2organization_transaction_verify");
+Route::post("user2organization/cancel/transaction", [User2organizationTransactionController::class, "cancel_transaction"])->name("user2organization_transaction_cancel");
+
+# Organization2user transaction
+Route::get("organization2user/{id}/create/transaction", function(){
+    return view("organization2user_transaction");
+})->name("organization2user_transaction_view");
+
+Route::get("organization2user/verify/transaction/{id}", function($id){
+    $organization2user_transaction = organization2user_transaction::where('id', $id)->first();
+    if($organization2user_transaction){
+        if(Auth::user()->id == $organization2user_transaction->from || Auth::user()->id == $organization2user_transaction->to){
+            return view("organization2user_transaction_verify", compact("organization2user_transaction"));
+        }else{
+            return view("organization2user_transaction")->with("error","You are not authorized to verify this transaction!");
+        }
+    }else{
+        return view("organization2user_transaction")->with("error","Invalid transaction ID!");
+    }
+})->name("organization2user_transaction_verify_view");
+
+Route::get("organization2user/{id}/transaction/history", function($id){
+    $organization2user_all_transactions = organization2user_transaction::where('from', Auth::user()->id)->orWhere('to', Auth::user()->id)->get();
+    $organization2user_from_transactions = organization2user_transaction::where('from', Auth::user()->id)->get();
+    $organization2user_to_transactions = organization2user_transaction::where('to', Auth::user()->id)->get();
+    $organization2user_success_transaction = organization2user_transaction::where('from', Auth::user()->id)->where('status',true)->orWhere('to', Auth::user()->id)->where('status',true)->get();
+    $organization2user_pending_transaction = organization2user_transaction::where('from', Auth::user()->id)->where('status',false)->orWhere('to', Auth::user()->id)->where('status',false)->get();
+    $organization2user_failed_transaction = organization2user_transaction::where('from', Auth::user()->id)->where('status',false)->orWhere('to', Auth::user()->id)->where('status',false)->get();
+    return view("organization2user_transaction_history", compact("organization2user_all_transactions","organization2user_from_transactions","organization2user_to_transactions","organization2user_success_transaction","organization2user_pending_transaction","organization2user_failed_transaction"));
+})->name("organization2user_transaction_history_view");
+
+Route::post("organization2user/{id}/crete/transaction", [User2organizationTransactionController::class, "create_transaction"])->name("organization2user_transaction_create");
+Route::post("organization2user/{id}/verify/transaction", [User2organizationTransactionController::class, "verify_transaction"])->name("organization2user_transaction_verify");
+Route::post("organization2user/{id}/cancel/transaction", [User2organizationTransactionController::class, "cancel_transaction"])->name("organization2user_transaction_cancel");
+
+# Theme create request
+Route::get("create/theme/request", function(){
+    return view("create_theme_request");
+})->name("create_theme_request_view");
+
+Route::post("create/theme/request", [ThemeController::class, "create_theme_request"])->name("create_theme_request");
+
+Route::get("create/theme/request/success/{id}", function($id){
+    $theme = Theme_request::where('id', $id)->first();
+    if($theme){
+        return view("create_theme_request_success", compact("theme"));
+    }else{
+        return view("create_theme_request")->with("error","Invalid theme ID!");
+    }
+})->name("create_theme_request_success_view");
