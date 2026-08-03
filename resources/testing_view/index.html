@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sticky Notes App - Complete Drag Gesture & Mobile Flow</title>
+  <!-- Google Fonts: Inter & Caveat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      --bg-color: #f4f4f7;
+      --app-bg: #ffffff;
+      --note-yellow: #fde047;
+      --note-yellow-dark: #eab308;
+      --note-shadow: rgba(0, 0, 0, 0.08);
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      --accent-color: #2563eb;
+      --fold-color: #374151;
+      --radius-card: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Device Preview Toggle Switch */
+    .preview-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: #ffffff;
+      padding: 6px;
+      border-radius: 99px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .toggle-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 16px;
+      border-radius: 99px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-btn.active {
+      background: var(--text-main);
+      color: #ffffff;
+    }
+
+    /* Main App Container */
+    .app-frame {
+      background: var(--app-bg);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Mobile Mode (Candybar) */
+    .app-frame.mobile-mode {
+      width: 380px;
+      height: 760px;
+      border-radius: 40px;
+      border: 8px solid #1f2937;
+    }
+
+    /* Tablet Mode (Unfolded) */
+    .app-frame.tablet-mode {
+      width: 820px;
+      height: 600px;
+      border-radius: 28px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Top App Bar */
+    .top-bar {
+      height: 60px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+
+    .top-bar-left, .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: #f3f4f6;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .pill-select {
+      background: #f3f4f6;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    /* App Body Area */
+    .app-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Sidebar Navigation (Visible ONLY in Tablet Mode) */
+    .sidebar-nav {
+      width: 72px;
+      background: #fafafa;
+      border-right: 1px solid var(--border-color);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      gap: 20px;
+    }
+
+    .app-frame.tablet-mode .sidebar-nav {
+      display: flex;
+    }
+
+    .nav-item-side {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item-side span {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .nav-item-side.active {
+      background: #ffffff;
+      color: var(--text-main);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Main Content Area */
+    .content-area {
+      flex: 1;
+      padding: 24px;
+      overflow: hidden;
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      align-items: center;
+      background: #fdfdfd;
+      position: relative;
+    }
+
+    /* Sticky Note Wrapper & Cards */
+    .note-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 320px;
+      position: relative;
+      touch-action: none;
+    }
+
+    .sticky-note {
+      position: relative;
+      background: var(--note-yellow);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      box-shadow: 0 10px 25px var(--note-shadow), 0 2px 5px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      transform-origin: top left;
+      will-change: transform;
+      cursor: grab;
+    }
+
+    .sticky-note:active {
+      cursor: grabbing;
+    }
+
+    .push-pin {
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      font-size: 24px;
+      filter: drop-shadow(2px 4px 2px rgba(0, 0, 0, 0.15));
+      z-index: 5;
+    }
+
+    .note-input-title, .note-view-title {
+      font-family: 'Caveat', cursive;
+      font-size: 26px;
+      font-weight: 700;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      user-select: text;
+    }
+
+    .note-input-body, .note-view-body {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      line-height: 1.4;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #262626;
+      resize: none;
+      flex: 1;
+      width: 100%;
+      user-select: text;
+    }
+
+    .note-footer-meta {
+      font-size: 13px;
+      color: #71717a;
+      margin-top: 12px;
+      font-weight: 600;
+    }
+
+    /* Curl / Fold Corner Angle */
+    .curl-corner {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, transparent 50%, var(--fold-color) 50%);
+      border-bottom-right-radius: var(--radius-card);
+      cursor: grab;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 8px;
+      box-sizing: border-box;
+      box-shadow: -3px -3px 8px rgba(0,0,0,0.1);
+      z-index: 10;
+    }
+
+    .curl-corner i {
+      color: #ffffff;
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    .note-tip {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 10px;
+      font-style: italic;
+      pointer-events: none;
+    }
+
+    /* Mobile Navigation & Mode Toggle Logic */
+    /* On Mobile: Switch between Create Note vs View Note */
+    .app-frame.mobile-mode .note-wrapper {
+      position: absolute;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .app-frame.mobile-mode .note-wrapper.create-mode {
+      z-index: 2;
+    }
+
+    .app-frame.mobile-mode .note-wrapper.view-mode {
+      z-index: 1;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.95);
+    }
+
+    .app-frame.mobile-mode.show-view-mode .note-wrapper.create-mode {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.95);
+    }
+
+    .app-frame.mobile-mode.show-view-mode .note-wrapper.view-mode {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+      z-index: 3;
+    }
+
+    /* Floating Round Button (Nút tròn ở góc để về lại Create Note khi ở View Note trên Mobile) */
+    .floating-create-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--text-main);
+      color: #ffffff;
+      border: none;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 20;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .floating-create-btn:hover {
+      transform: scale(1.08);
+      background: #000;
+    }
+
+    /* Show Floating Button ONLY in Mobile Mode when reading notes */
+    .app-frame.mobile-mode.show-view-mode .floating-create-btn {
+      display: flex;
+    }
+
+    /* Tablet Mode Layout Adjustments */
+    .app-frame.tablet-mode .note-wrapper {
+      position: relative;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transform: none !important;
+      max-width: 310px;
+    }
+
+    .app-frame.mobile-mode .sticky-note {
+      width: 100%;
+      height: 380px;
+    }
+
+    .app-frame.tablet-mode .sticky-note {
+      width: 100%;
+      height: 380px;
+    }
+
+    /* Bottom Navigation Bar (ONLY in Mobile Mode) */
+    .bottom-nav {
+      height: 64px;
+      border-top: 1px solid var(--border-color);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 10px;
+      z-index: 10;
+    }
+
+    .app-frame.tablet-mode .bottom-nav {
+      display: none;
+    }
+
+    .nav-item-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .nav-item-bottom span {
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .nav-item-bottom.active {
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls to Toggle Preview Between Folded & Unfolded Mode -->
+  <div class="preview-controls">
+    <button class="toggle-btn active" onclick="setDeviceMode('tablet')">
+      <i class="ph ph-device-tablet"></i> Tablet / Unfolded (2 Notes + Sidebar)
+    </button>
+    <button class="toggle-btn" onclick="setDeviceMode('mobile')">
+      <i class="ph ph-device-mobile"></i> Mobile / Folded (1 Note + Bottom Bar)
+    </button>
+  </div>
+
+  <!-- App Frame Container -->
+  <div class="app-frame tablet-mode" id="appFrame">
+
+    <!-- Top Navigation / Status Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button class="icon-btn" title="Home"><i class="ph ph-house"></i></button>
+        <button class="pill-select">done <i class="ph ph-caret-down"></i></button>
+      </div>
+      <div class="top-bar-right">
+        <button class="pill-select">org <i class="ph ph-caret-down"></i></button>
+        <div class="avatar">U</div>
+      </div>
+    </header>
+
+    <!-- App Body -->
+    <div class="app-body">
+
+      <!-- Sidebar Navigation (Only in Tablet/Unfolded Mode) -->
+      <aside class="sidebar-nav">
+        <button class="nav-item-side active">
+          <i class="ph ph-note-pencil"></i>
+          <span>Note</span>
+        </button>
+        <button class="nav-item-side">
+          <i class="ph ph-tree-structure"></i>
+          <span>Org</span>
+        </button>
+        <button class="nav-item-side">
+          <i class="ph ph-arrows-down-up"></i>
+          <span>Transac</span>
+        </button>
+        <button class="nav-item-side" style="margin-top: auto;">
+          <i class="ph ph-gear"></i>
+          <span>Setting</span>
+        </button>
+      </aside>
+
+      <!-- Main Content Container -->
+      <main class="content-area">
+
+        <!-- Nút Tròn Ở Góc khi đang Đọc Note trên Mobile để quay lại Thêm Note -->
+        <button class="floating-create-btn" id="btnBackToCreate" title="Tạo Note Mới">
+          <i class="ph ph-plus-bold"></i>
+        </button>
+
+        <!-- NOTE 1: Create Note -->
+        <div class="note-wrapper create-mode" id="createNoteWrapper">
+          <div class="sticky-note" id="createNoteCard">
+            <span class="push-pin">📌</span>
+            <input type="text" class="note-input-title" id="inputTitle" placeholder="Type the title..." value="type the title">
+            <textarea class="note-input-body" id="inputBody" placeholder="Type your text here...">typ the text&#10;typ the text</textarea>
+
+            <!-- Nút Click DUY NHẤT để Submit -->
+            <div class="curl-corner" id="submitBtn" title="Click to submit">
+              <i class="ph ph-paper-plane-tilt-bold"></i>
+            </div>
+          </div>
+          <p class="note-tip">tip: click icon to submit, or drag corner to view notes</p>
+        </div>
+
+        <!-- NOTE 2: Note View (BẢN KÉO CHÉO A -> B ĐỂ SANG NOTE) -->
+        <div class="note-wrapper view-mode" id="viewNoteWrapper">
+          <div class="sticky-note" id="viewNoteCard">
+            <span class="push-pin">📌</span>
+            <div class="note-view-title" id="viewTitle">Meeting Notes</div>
+            <div class="note-view-body" id="viewBody">texting content here for reviewing... Kéo chéo góc dưới từ phải sang trái để chuyển note!</div>
+            <div class="note-footer-meta" id="viewUser">@username</div>
+
+            <!-- Góc Kéo Lật Note -->
+            <div class="curl-corner" id="dragCorner" title="Kéo chéo từ góc dưới phải lên trên trái">
+              <i class="ph ph-hand-swipe-left-bold"></i>
+            </div>
+          </div>
+          <p class="note-tip">tip: drag diagonally (A -> B) to see next note</p>
+        </div>
+
+      </main>
+
+    </div>
+
+    <!-- Bottom Navigation Bar (ONLY in Mobile Mode) -->
+    <nav class="bottom-nav">
+      <button class="nav-item-bottom active" onclick="switchToCreateMode()">
+        <i class="ph ph-note-pencil"></i>
+        <span>Note</span>
+      </button>
+      <button class="nav-item-bottom">
+        <i class="ph ph-tree-structure"></i>
+        <span>Org</span>
+      </button>
+      <button class="nav-item-bottom">
+        <i class="ph ph-arrows-down-up"></i>
+        <span>Transac</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <script>
+    // Dữ liệu mẫu danh sách các Note
+    const sampleNotes = [
+      { title: "Meeting Notes", body: "1. Thống nhất kéo chéo A->B để lật Note. 2. Submit dùng click nút máy bay. 3. Nút tròn hiện ở mobile để thêm note mới.", user: "@alex" },
+      { title: "Idea App Sticky", body: "Thiết kế Responsive cho Fold Phone: Tablet mode có Sidebar, Mobile mode dùng Bottom Bar + Floating Button.", user: "@dev_pro" },
+      { title: "Shopping List", body: "1. Mua cà phê 2. Mua sổ tay phác thảo 3. Mua điện thoại gập", user: "@sarah" }
+    ];
+
+    let currentNoteIndex = 0;
+    const appFrame = document.getElementById('appFrame');
+
+    // 1. Chuyển Chế độ Màn hình (Tablet vs Mobile)
+    function setDeviceMode(mode) {
+      const buttons = document.querySelectorAll('.toggle-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      if (mode === 'tablet') {
+        appFrame.className = 'app-frame tablet-mode';
+        buttons[0].classList.add('active');
+      } else {
+        appFrame.className = 'app-frame mobile-mode';
+        buttons[1].classList.add('active');
+      }
+    }
+
+    // 2. Chuyển đổi qua lại giữa Create Note & View Note trên Mobile
+    function switchToViewMode() {
+      if (appFrame.classList.contains('mobile-mode')) {
+        appFrame.classList.add('show-view-mode');
+      }
+    }
+
+    function switchToCreateMode() {
+      if (appFrame.classList.contains('mobile-mode')) {
+        appFrame.classList.remove('show-view-mode');
+      }
+    }
+
+    document.getElementById('btnBackToCreate').addEventListener('click', switchToCreateMode);
+
+    // 3. SUBMIT NOTE (CHỈ BẤM NÚT MÁY BAY)
+    const submitBtn = document.getElementById('submitBtn');
+    const createNoteCard = document.getElementById('createNoteCard');
+
+    submitBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const title = document.getElementById('inputTitle').value || 'Untitled Note';
+      const body = document.getElementById('inputBody').value || '';
+
+      // Thêm note mới vào mảng
+      sampleNotes.unshift({ title, body, user: '@me' });
+      currentNoteIndex = 0;
+      updateNoteViewContent();
+
+      // Hiệu ứng bay đi khi submit
+      createNoteCard.style.transition = 'transform 0.5s ease-in-out, opacity 0.4s';
+      createNoteCard.style.transform = 'translateY(-120%) rotate(-15deg)';
+      createNoteCard.style.opacity = '0';
+
+      setTimeout(() => {
+        // Clear input
+        document.getElementById('inputTitle').value = '';
+        document.getElementById('inputBody').value = '';
+
+        createNoteCard.style.transition = 'none';
+        createNoteCard.style.transform = 'translateY(50px) scale(0.9)';
+
+        setTimeout(() => {
+          createNoteCard.style.transition = 'all 0.4s ease';
+          createNoteCard.style.transform = 'none';
+          createNoteCard.style.opacity = '1';
+
+          // Chuyển sang View Mode trên Mobile
+          switchToViewMode();
+        }, 50);
+      }, 500);
+    });
+
+    // 4. KÉO CHÉO (DIAGONAL DRAG GESTURE A -> B) CHO NOTE VIEW & CREATE NOTE
+    function setupDiagonalDrag(cardElement, onComplete) {
+      let isDragging = false;
+      let startX = 0, startY = 0;
+      let deltaX = 0, deltaY = 0;
+
+      const handleStart = (e) => {
+        // Chỉ bắt đầu kéo nếu tương tác vào góc nếp gấp hoặc thẻ note
+        isDragging = true;
+        const pointer = e.touches ? e.touches[0] : e;
+        startX = pointer.clientX;
+        startY = pointer.clientY;
+        cardElement.style.transition = 'none';
+      };
+
+      const handleMove = (e) => {
+        if (!isDragging) return;
+        const pointer = e.touches ? e.touches[0] : e;
+        deltaX = pointer.clientX - startX;
+        deltaY = pointer.clientY - startY;
+
+        // Ưu tiên kéo chéo lên phía trên bên trái (deltaX < 0, deltaY < 0)
+        if (deltaX < 0 && deltaY < 0) {
+          const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+          const rotation = deltaX * 0.1; // Góc xoay theo lực kéo
+          cardElement.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
+        }
+      };
+
+      const handleEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        // Ngưỡng lật Note (Nếu kéo chéo đủ xa > 80px về góc trên trái)
+        if (deltaX < -80 && deltaY < -80) {
+          // Animation lật văng note ra ngoài
+          cardElement.style.transition = 'transform 0.3s ease-out, opacity 0.3s';
+          cardElement.style.transform = 'translate(-120%, -120%) rotate(-30deg)';
+          cardElement.style.opacity = '0';
+
+          setTimeout(() => {
+            onComplete();
+            // Reset thẻ note
+            cardElement.style.transition = 'none';
+            cardElement.style.transform = 'translate(60px, 60px) scale(0.9)';
+
+            setTimeout(() => {
+              cardElement.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+              cardElement.style.transform = 'none';
+              cardElement.style.opacity = '1';
+            }, 50);
+          }, 300);
+
+        } else {
+          // Chưa đủ ngưỡng -> Bật nhả lại vị trí cũ (Spring back)
+          cardElement.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+          cardElement.style.transform = 'none';
+        }
+
+        deltaX = 0;
+        deltaY = 0;
+      };
+
+      // Event listeners cho cả Mouse & Touch
+      cardElement.addEventListener('mousedown', handleStart);
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', handleEnd);
+
+      cardElement.addEventListener('touchstart', handleStart, { passive: true });
+      window.addEventListener('touchmove', handleMove, { passive: true });
+      window.addEventListener('touchend', handleEnd);
+    }
+
+    // Gắn Gesture Kéo Chéo cho Note View -> Chuyển sang Note Tiếp Theo
+    const viewNoteCard = document.getElementById('viewNoteCard');
+    setupDiagonalDrag(viewNoteCard, () => {
+      currentNoteIndex = (currentNoteIndex + 1) % sampleNotes.length;
+      updateNoteViewContent();
+    });
+
+    // Gắn Gesture Kéo Chéo cho Create Note trên Mobile -> Lướt chéo đi để xem Note luôn
+    const createNoteWrapper = document.getElementById('createNoteWrapper');
+    setupDiagonalDrag(createNoteCard, () => {
+      switchToViewMode();
+    });
+
+    function updateNoteViewContent() {
+      const data = sampleNotes[currentNoteIndex];
+      document.getElementById('viewTitle').innerText = data.title;
+      document.getElementById('viewBody').innerText = data.body;
+      document.getElementById('viewUser').innerText = data.user;
+    }
+  </script>
+
+</body>
+</html>
