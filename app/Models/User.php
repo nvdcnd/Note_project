@@ -26,7 +26,7 @@ class User extends Authenticatable
 
     public function sharedNotes()
     {
-        return $this->belongsToMany(Note::class, 'pivot_for_note', 'shared_with', 'note_id');
+        return $this->belongsToMany(Note::class, 'PivotForNote', 'shared_with', 'note_id');
     }
 
     /**

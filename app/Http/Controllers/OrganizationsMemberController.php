@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Mail\user_accept_organization;
-use App\Models\organizations;
-use App\Models\organizations_member;
+use App\Models\Organization;
+use App\Models\OrganizationsMember;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +17,7 @@ class OrganizationsMemberController extends Controller
         $data = $request->all();
         $user_list = $data['user_list'] ?? [];
         foreach ($user_list as $userID) {
-            $organization_member = new organizations_member;
+            $organization_member = new OrganizationsMember;
             $organization_member->organizationID = $organizationID;
             $targetUser = User::where('email', $userID)->first();
             if ($targetUser) {
@@ -35,7 +35,7 @@ class OrganizationsMemberController extends Controller
 
     public function accept_member(Request $request, $id)
     {
-        $organization_member = organizations_member::find($id);
+        $organization_member = OrganizationsMember::find($id);
         if ($organization_member) {
             $organization_member->status = true;
             $organization_member->save();
@@ -48,7 +48,7 @@ class OrganizationsMemberController extends Controller
 
     public function decline_member(Request $request, $id)
     {
-        $organization_member = organizations_member::find($id);
+        $organization_member = OrganizationsMember::find($id);
         if ($organization_member) {
             $organization_member->status = false;
             $organization_member->save();
@@ -61,9 +61,9 @@ class OrganizationsMemberController extends Controller
 
     public function member_leave(Request $request, $id)
     {
-        $organization_member = organizations_member::where('organizationID', $id)->where('userID', Auth::user()->id)->first();
+        $organization_member = OrganizationsMember::where('organizationID', $id)->where('userID', Auth::user()->id)->first();
         if ($organization_member && $organization_member->userID == Auth::user()->id) {
-            if (organizations::where('hostID', $organization_member->userID)->where('id', $id)->first()) {
+            if (Organization::where('hostID', $organization_member->userID)->where('id', $id)->first()) {
                 return redirect()->route('organization', $id)->with('error', 'You are the host of this organization. First, change the host. And then you can leave');
             }
             $organization_member->delete();
@@ -76,8 +76,8 @@ class OrganizationsMemberController extends Controller
 
     public function remove_member(Request $request, $organizationid, $userID)
     {
-        $organization_member = organizations_member::where('organizationID', $organizationid)->where('userID', $userID)->first();
-        $organization = organizations::find($organizationid);
+        $organization_member = OrganizationsMember::where('organizationID', $organizationid)->where('userID', $userID)->first();
+        $organization = Organization::find($organizationid);
         if ($organization_member && $organization && ($organization->hostID == Auth::user()->id)) {
             $organization_member->delete();
 

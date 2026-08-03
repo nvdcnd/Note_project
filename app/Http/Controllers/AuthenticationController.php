@@ -6,13 +6,13 @@ use Illuminate\Http\Request;
 use App\Mail\Password_change;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
-use App\Models\Password_change_request;
+use App\Models\PasswordChangeRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-use App\Models\pivot_for_note;
-use App\Models\pivot_change_host_organization;
-use App\Models\organizations_member;
+use App\Models\PivotForNote;
+use App\Models\PivotChangeHostOrganization;
+use App\Models\OrganizationsMember;
 
 class AuthenticationController extends Controller
 {
@@ -50,7 +50,7 @@ class AuthenticationController extends Controller
     }
 
     public function signup40acc_note(Request $request, $shareid){
-        $pivot = pivot_for_note::where('id', $shareid)->first();
+        $pivot = PivotForNote::where('id', $shareid)->first();
         if(!$pivot){
             return redirect('login')->with('error', 'Invalid share id');
         }
@@ -73,7 +73,7 @@ class AuthenticationController extends Controller
     }
 
     public function signup40acc_host_org(Request $request, $shareid){
-        $pivot = pivot_change_host_organization::where('id', $shareid)->first();
+        $pivot = PivotChangeHostOrganization::where('id', $shareid)->first();
         if(!$pivot){
             return redirect('login')->with('error', 'Invalid share id');
         }
@@ -96,7 +96,7 @@ class AuthenticationController extends Controller
     }
      
     public function signup40acc_member_org(Request $request, $shareid){
-        $pivot = organizations_member::where('id', $shareid)->first();
+        $pivot = OrganizationsMember::where('id', $shareid)->first();
         if(!$pivot){
             return redirect('login')->with('error', 'Invalid share id');
         }

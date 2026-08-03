@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\organizations;
-use App\Models\organizations_member;
+use App\Models\Organization;
+use App\Models\OrganizationsMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,7 +13,7 @@ class OrganizationsController extends Controller
     {
         $data = $request->all();
 
-        $organization = new organizations;
+        $organization = new Organization;
         $organization->name = $data['name'];
         $organization->description = $data['description'];
         $organization->hostID = Auth::user()->id;
@@ -21,7 +21,7 @@ class OrganizationsController extends Controller
 
         $organizationID = $organization->id;
         $userID = Auth::user()->id;
-        $organization_member = new organizations_member;
+        $organization_member = new OrganizationsMember;
         $organization_member->organizationID = $organizationID;
         $organization_member->userID = $userID;
         $organization_member->save();
@@ -31,7 +31,7 @@ class OrganizationsController extends Controller
 
     public function edit_organization(Request $request, $id)
     {
-        $organization = organizations::find($id);
+        $organization = Organization::find($id);
         if (! $organization || $organization->hostID != Auth::user()->id) {
             return redirect()->route('home')->with('error', 'You are not authorized to edit this organization');
         }
@@ -45,7 +45,7 @@ class OrganizationsController extends Controller
 
     public function delete_organization(Request $request, $id)
     {
-        $organization = organizations::find($id);
+        $organization = Organization::find($id);
         if (! $organization || $organization->hostID != Auth::user()->id) {
             return redirect()->route('home')->with('error', 'You are not authorized to delete this organization');
         }

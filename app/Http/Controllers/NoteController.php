@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Mark_as_done;
+use App\Models\MarkAsDone;
 use App\Models\Note;
-use App\Models\pivot_for_note;
+use App\Models\PivotForNote;
 use Illuminate\Http\Request;
 
 class NoteController extends Controller
@@ -18,7 +18,7 @@ class NoteController extends Controller
         $note->creater_id = Auth::user()->id;
         $note->save();
 
-        $mark_as_done = new Mark_as_done;
+        $mark_as_done = new MarkAsDone;
         $mark_as_done->noteID = $note->id;
         $mark_as_done->userID = Auth::user()->id;
         $mark_as_done->status = false;
@@ -37,7 +37,7 @@ class NoteController extends Controller
         $note->organizationID = $organizationID;
         $note->save();
 
-        $mark_as_done = new Mark_as_done;
+        $mark_as_done = new MarkAsDone;
         $mark_as_done->noteID = $note->id;
         $mark_as_done->userID = Auth::user()->id;
         $mark_as_done->status = false;
@@ -62,7 +62,7 @@ class NoteController extends Controller
 
     public function delete_note_request(Request $request, $id)
     {
-        $pivot = pivot_for_note::find($id);
+        $pivot = PivotForNote::find($id);
         if (! $pivot) {
             return redirect()->route('home')->with('error', 'Note record not found');
         }

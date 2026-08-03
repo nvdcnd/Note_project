@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Mark_as_done;
+use App\Models\MarkAsDone;
 use App\Models\Note;
-use App\Models\pivot_for_note;
+use App\Models\PivotForNote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,16 +17,16 @@ class MarkAsDoneController extends Controller
         if (! $note) {
             return redirect()->route('home')->with('error', 'Note not found');
         }
-        $pivot = pivot_for_note::where('note_id', $noteID)->where('shared_with', $user->id)->first();
+        $pivot = PivotForNote::where('note_id', $noteID)->where('shared_with', $user->id)->first();
         if ($pivot or ($note->creater_id == $user->id)) {
-            $mark_as_done = Mark_as_done::where('noteID', $noteID)->where('userID', $user->id)->first();
+            $mark_as_done = MarkAsDone::where('noteID', $noteID)->where('userID', $user->id)->first();
             if ($mark_as_done) {
                 $mark_as_done->status = true;
                 $mark_as_done->save();
 
                 return redirect()->route('note', $noteID)->with('success', 'Note marked as done');
             } else {
-                $mark_as_done = new Mark_as_done;
+                $mark_as_done = new MarkAsDone;
                 $mark_as_done->noteID = $noteID;
                 $mark_as_done->userID = $user->id;
                 $mark_as_done->status = true;
@@ -46,16 +46,16 @@ class MarkAsDoneController extends Controller
         if (! $note) {
             return redirect()->route('home')->with('error', 'Note not found');
         }
-        $pivot = pivot_for_note::where('note_id', $id)->where('shared_with', $user->id)->first();
+        $pivot = PivotForNote::where('note_id', $id)->where('shared_with', $user->id)->first();
         if ($pivot or ($note->creater_id == $user->id)) {
-            $mark_as_done = Mark_as_done::where('noteID', $id)->where('userID', $user->id)->first();
+            $mark_as_done = MarkAsDone::where('noteID', $id)->where('userID', $user->id)->first();
             if ($mark_as_done) {
                 $mark_as_done->status = false;
                 $mark_as_done->save();
 
                 return redirect()->route('note', $id)->with('success', 'Note unmarked as done');
             } else {
-                $mark_as_done = new Mark_as_done;
+                $mark_as_done = new MarkAsDone;
                 $mark_as_done->noteID = $id;
                 $mark_as_done->userID = $user->id;
                 $mark_as_done->status = false;

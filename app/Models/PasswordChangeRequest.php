@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Password_change_request extends Model
+class PasswordChangeRequest extends Model
 {
+    protected $table = 'password_change_requests';
+
     protected $fillable = [
         'user_id',
         'token',

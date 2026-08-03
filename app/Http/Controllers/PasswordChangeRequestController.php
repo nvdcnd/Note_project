@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Password_change;
-use App\Models\Password_change_request;
+use App\Models\PasswordChangeRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +18,7 @@ class PasswordChangeRequestController extends Controller
         for ($i = 0; $i < $length; $i++) {
             $pass .= $chars[rand(0, strlen($chars) - 1)];
         }
-        $check = Password_change_request::where('token', $pass)->first();
+        $check = PasswordChangeRequest::where('token', $pass)->first();
         if ($check) {
             return $this->one_time_password_generator();
         } else {
@@ -33,7 +33,7 @@ class PasswordChangeRequestController extends Controller
         $user = User::where('email', $email)->first();
         if ($user) {
             $passkey = $this->one_time_password_generator();
-            $password_change_request = new Password_change_request;
+            $password_change_request = new PasswordChangeRequest;
             $password_change_request->user_id = $user->id;
             $password_change_request->token = $passkey;
             $password_change_request->expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));

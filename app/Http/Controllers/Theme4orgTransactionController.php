@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Theme4org_transaction;
+use App\Models\Theme4orgTransaction;
 use Illuminate\Http\Request;
 
 class Theme4orgTransactionController extends Controller
@@ -34,7 +34,7 @@ class Theme4orgTransactionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Theme4org_transaction $theme4org_transaction)
+    public function show(Theme4orgTransaction $theme4org_transaction)
     {
         //
     }
@@ -42,7 +42,7 @@ class Theme4orgTransactionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Theme4org_transaction $theme4org_transaction)
+    public function edit(Theme4orgTransaction $theme4org_transaction)
     {
         //
     }
@@ -50,7 +50,7 @@ class Theme4orgTransactionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Theme4org_transaction $theme4org_transaction)
+    public function update(Request $request, Theme4orgTransaction $theme4org_transaction)
     {
         //
     }
@@ -58,7 +58,7 @@ class Theme4orgTransactionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Theme4org_transaction $theme4org_transaction)
+    public function destroy(Theme4orgTransaction $theme4org_transaction)
     {
         //
     }

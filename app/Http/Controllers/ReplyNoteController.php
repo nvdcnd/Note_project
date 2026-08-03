@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Note;
-use App\Models\Mark_as_done;
+use App\Models\MarkAsDone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,7 +19,7 @@ class ReplyNoteController extends Controller
             $note->replied_note_id = $replied_note->id;
             $note->save();
 
-            $mark_as_done = new Mark_as_done();
+            $mark_as_done = new MarkAsDone();
             $mark_as_done->noteID = $note->id;
             $mark_as_done->userID = Auth::user()->id;
             $mark_as_done->status = false;

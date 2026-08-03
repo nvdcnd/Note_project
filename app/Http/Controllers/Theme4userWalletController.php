@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\theme4user_wallet;
+use App\Models\Theme4userWallet;
 use Illuminate\Http\Request;
 use App\Models\user;
-use App\Models\theme4user;
-use App\Models\user2theme4_transaction;
+use App\Models\Theme4user;
+use App\Models\User2theme4Transaction;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\user2theme4_trans_otp;
 //use App\Mail\user2theme4_trans_verify;
-//use App\Models\user2theme4_transaction;
+//use App\Models\User2theme4Transaction;
 
 class Theme4userWalletController extends Controller
 {
    function user2theme4_transaction_OTP_generator()
     {
         $otp = rand(100000, 999999);
-        if(user2theme4_transaction::where('otp', $otp)->exists()){
+        if(User2theme4Transaction::where('otp', $otp)->exists()){
             return $this->user2theme4_transaction_OTP_generator();
         }
         return $otp;
@@ -27,7 +27,7 @@ class Theme4userWalletController extends Controller
 
     public function user_buy_theme(Request $request, $themeID){
         $user = Auth::user();
-        $theme = theme4user::where('id', $themeID)->first();
+        $theme = Theme4user::where('id', $themeID)->first();
         if(!$user){
             return redirect()->back()->with('error', 'You are not logged in');
         }
@@ -40,7 +40,7 @@ class Theme4userWalletController extends Controller
         }
     
         if($user->password == Hash::make($request->password)){
-           $transaction = new user2theme4_transaction();
+           $transaction = new User2theme4Transaction();
             $transaction->userID = $user->id;
             $transaction->themeID = $themeID;
             $transaction->amount = $theme->price;
@@ -56,12 +56,12 @@ class Theme4userWalletController extends Controller
 
    public function user_buy_theme_verify_otp(Request $request,$otp){
      $user = Auth::user();
-     $transaction = user2theme4_transaction::where('otp', $otp)->where('userID', $user->id)->first();
+     $transaction = User2theme4Transaction::where('otp', $otp)->where('userID', $user->id)->first();
      if(!$transaction){
          return redirect()->back()->with('error', 'Invalid OTP');
      }
      $theme = theme4::where('id', $transaction->themeID)->first();
-     $user_wallet = theme4user_wallet::where('userID', $user->id)->first();
+     $user_wallet = Theme4userWallet::where('userID', $user->id)->first();
      if($user_wallet->balance < $theme->price){
          return redirect()->back()->with('error', 'Insufficient balance');
      }

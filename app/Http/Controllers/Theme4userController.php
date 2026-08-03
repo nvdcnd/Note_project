@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\theme4user;
+use App\Models\Theme4user;
 use Illuminate\Http\Request;
 
 class Theme4userController extends Controller
@@ -34,7 +34,7 @@ class Theme4userController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(theme4user $theme4user)
+    public function show(Theme4user $Theme4user)
     {
         //
     }
@@ -42,7 +42,7 @@ class Theme4userController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(theme4user $theme4user)
+    public function edit(Theme4user $Theme4user)
     {
         //
     }
@@ -50,7 +50,7 @@ class Theme4userController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, theme4user $theme4user)
+    public function update(Request $request, Theme4user $Theme4user)
     {
         //
     }
@@ -58,7 +58,7 @@ class Theme4userController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(theme4user $theme4user)
+    public function destroy(Theme4user $Theme4user)
     {
         //
     }

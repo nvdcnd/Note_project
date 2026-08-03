@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Mail\change_host_organization;
 use App\Mail\host_changed_40_acc;
 use App\Mail\user_accept_host_organization;
-use App\Models\organizations;
-use App\Models\organizations_member;
-use App\Models\pivot_change_host_organization;
+use App\Models\Organization;
+use App\Models\OrganizationsMember;
+use App\Models\PivotChangeHostOrganization;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,9 +18,9 @@ class PivotChangeHostOrganizationController extends Controller
     public function change_host_for_organization(Request $request, $id)
     {
         $data = $request->all();
-        $organization = organizations::find($id);
+        $organization = Organization::find($id);
         if ($organization && $organization->hostID == Auth::user()->id) {
-            $pivot = new pivot_change_host_organization;
+            $pivot = new PivotChangeHostOrganization;
             $pivot->organizationID = $organization->id;
             $pivot->current_host_ID = $organization->hostID;
             $pivot->save();
@@ -38,7 +38,7 @@ class PivotChangeHostOrganizationController extends Controller
     public function change_host_real(Request $request, $id)
     {
         $data = $request->all();
-        $pivot = pivot_change_host_organization::find($id);
+        $pivot = PivotChangeHostOrganization::find($id);
         if ($pivot && $pivot->current_host_ID == Auth::user()->id) {
             $new_host = $data['new_host_email'] ?? '';
             $user = User::where('email', $new_host)->first();
@@ -61,7 +61,7 @@ class PivotChangeHostOrganizationController extends Controller
 
     public function delete_old_request($id)
     {
-        $pivot = pivot_change_host_organization::find($id);
+        $pivot = PivotChangeHostOrganization::find($id);
         if ($pivot) {
             $orgId = $pivot->organizationID;
             $pivot->delete();
@@ -74,11 +74,11 @@ class PivotChangeHostOrganizationController extends Controller
 
     public function new_host_accept(Request $request, $id)
     {
-        $pivot = pivot_change_host_organization::find($id);
+        $pivot = PivotChangeHostOrganization::find($id);
         if ($pivot && Auth::user()->id == $pivot->new_host_ID) {
-            $check_joined = organizations_member::where('organizationID', $pivot->organizationID)->where('userID', Auth::user()->id)->first();
+            $check_joined = OrganizationsMember::where('organizationID', $pivot->organizationID)->where('userID', Auth::user()->id)->first();
             if (! $check_joined) {
-                $member = new organizations_member;
+                $member = new OrganizationsMember;
                 $member->organizationID = $pivot->organizationID;
                 $member->userID = Auth::user()->id;
                 $member->status = true;
@@ -86,7 +86,7 @@ class PivotChangeHostOrganizationController extends Controller
             }
             $pivot->new_host_acceptance_status = true;
             $pivot->save();
-            $organ = organizations::find($pivot->organizationID);
+            $organ = Organization::find($pivot->organizationID);
             if ($organ) {
                 $organ->hostID = $pivot->new_host_ID;
                 $organ->save();
@@ -98,7 +98,7 @@ class PivotChangeHostOrganizationController extends Controller
 
     public function new_host_decline(Request $request, $id)
     {
-        $pivot = pivot_change_host_organization::find($id);
+        $pivot = PivotChangeHostOrganization::find($id);
         if ($pivot) {
             $pivot->new_host_acceptance_status = false;
             $pivot->save();

@@ -20,7 +20,7 @@ class UserEmail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(private $user,private $notes, private $email)
+    public function __construct(private $user,private $notes)
     {
         $this->user = User::find($user->id);
         $this->notes = Note::find($notes->id);

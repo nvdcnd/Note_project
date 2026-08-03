@@ -23,7 +23,7 @@ class Note extends Model
 
     public function shared_notes()
     {
-        return $this->belongsToMany(User::class, 'pivot_for_note', 'note_id', 'shared_with');
+        return $this->belongsToMany(User::class, 'PivotForNote', 'note_id', 'shared_with');
     }
 
     public function replies()

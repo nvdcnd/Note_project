@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class user2organization_transaction extends Model
+class Theme4orgStyle extends Model
 {
+    protected $table = 'theme4org_styles';
+
     //
 }

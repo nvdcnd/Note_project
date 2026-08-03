@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\theme4user_style;
+use App\Models\Theme4userStyle;
 use Illuminate\Http\Request;
 
 class Theme4userStyleController extends Controller
@@ -34,7 +34,7 @@ class Theme4userStyleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(theme4user_style $theme4user_style)
+    public function show(Theme4userStyle $Theme4userStyle)
     {
         //
     }
@@ -42,7 +42,7 @@ class Theme4userStyleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(theme4user_style $theme4user_style)
+    public function edit(Theme4userStyle $Theme4userStyle)
     {
         //
     }
@@ -50,7 +50,7 @@ class Theme4userStyleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, theme4user_style $theme4user_style)
+    public function update(Request $request, Theme4userStyle $Theme4userStyle)
     {
         //
     }
@@ -58,7 +58,7 @@ class Theme4userStyleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(theme4user_style $theme4user_style)
+    public function destroy(Theme4userStyle $Theme4userStyle)
     {
         //
     }

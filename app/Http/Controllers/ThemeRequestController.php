@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Theme_request;
+use App\Models\ThemeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,7 +17,7 @@ class ThemeRequestController extends Controller
             'drag_type' => 'required',
             'price' => 'required',
         ]);
-        $theme_request = new Theme_request;
+        $theme_request = new ThemeRequest;
         $theme_request->name = $request->name;
         $theme_request->description = $request->description;
         $theme_request->style = $request->style;

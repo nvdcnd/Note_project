@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Theme4org_style;
+use App\Models\Theme4orgStyle;
 use Illuminate\Http\Request;
 
 class Theme4orgStyleController extends Controller
@@ -34,7 +34,7 @@ class Theme4orgStyleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Theme4org_style $theme4org_style)
+    public function show(Theme4orgStyle $theme4org_style)
     {
         //
     }
@@ -42,7 +42,7 @@ class Theme4orgStyleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Theme4org_style $theme4org_style)
+    public function edit(Theme4orgStyle $theme4org_style)
     {
         //
     }
@@ -50,7 +50,7 @@ class Theme4orgStyleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Theme4org_style $theme4org_style)
+    public function update(Request $request, Theme4orgStyle $theme4org_style)
     {
         //
     }
@@ -58,7 +58,7 @@ class Theme4orgStyleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Theme4org_style $theme4org_style)
+    public function destroy(Theme4orgStyle $theme4org_style)
     {
         //
     }

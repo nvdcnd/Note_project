@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Password_change_request;
+use App\Models\PasswordChangeRequest;
 
 class Password_change extends Mailable
 {
@@ -21,7 +21,7 @@ class Password_change extends Mailable
     public function __construct(private $passkey)
     {
         //$this->user = $user;
-        $this->passkey = Password_change_request::find(passkey);
+        $this->passkey = PasswordChangeRequest::find(passkey);
     }
 
     /**

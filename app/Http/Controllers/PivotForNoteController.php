@@ -7,7 +7,7 @@ use App\Mail\UserEmail;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Note;
 use App\Models\User;
-use App\Models\pivot_for_note;
+use App\Models\PivotForNote;
 use App\Models\mark_as_done;
 use App\Models\reply_note;
 use App\Models\Organization;
@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 
 
 use App\Mail\Mail40account;
+//use App\Mail;
 
 class PivotForNoteController extends Controller
 {
@@ -35,11 +36,11 @@ class PivotForNoteController extends Controller
         foreach($sharedwith as $user){
             $userID = User::where('email',$user)->first();
             if($userID){
-                $note = pivot_for_note::create([
+                $note = PivotForNote::create([
                     "note_id"=> $noteID->id,
                     "shared_with"=> $userID->id,
                 ]);
-                Mail::to($userID->email)->send(new UserEmail($note));
+                Mail::to($userID->email)->send(new UserEmail($userID, $noteID));
             } else {
                 $no_account[] = $user;
             }
@@ -53,7 +54,7 @@ class PivotForNoteController extends Controller
     }
 
     public function undo_shared_note(Request $request, $id){
-        $pivot = pivot_for_note::find($id);
+        $pivot = PivotForNote::find($id);
         if(!$pivot){
             return redirect()->route('home')->with('error', 'Shared note record not found');
         }

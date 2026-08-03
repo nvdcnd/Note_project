@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mail;
+namespace App\Mail\Mail40account;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,6 +9,9 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use App\Models\User;
+use App\Models\Note;
+
 
 class Mail40account extends Mailable
 {
@@ -17,7 +20,7 @@ class Mail40account extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(private $user,private $notes, private $email)
+    public function __construct(private $user,private $notes)
     {
         $this->user = User::find($user->id);
         $this->notes = Note::find($notes->id);

@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class user2theme4_transaction extends Model
+class MarkAsDone extends Model
 {
+    protected $table = 'mark_as_dones';
+
     //
 }
