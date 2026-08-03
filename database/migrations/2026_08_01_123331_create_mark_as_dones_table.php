@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('mark_as_dones', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('noteID')->constrained('notes')->onDelete('cascade');
+            $table->foreignId('noteID')->constrained('note')->onDelete('cascade');
             $table->foreignId('userID')->constrained('users')->onDelete('cascade');
             $table->boolean('status')->default(false);
             $table->timestamps();

@@ -14,9 +14,11 @@ use App\Models\Organization;
 use Illuminate\Support\Facades\Auth;
 
 
-class pivot_for_note_controller extends Controller
+use App\Mail\Mail40account;
+
+class PivotForNoteController extends Controller
 {
-    function mail_for_no_account(Request $request, $users, $noteid){
+    public function mail_for_no_account($users, $noteid){
         foreach($users as $user){
             Mail::to($user)->send(new Mail40account($user, $noteid));
         }
@@ -24,11 +26,11 @@ class pivot_for_note_controller extends Controller
 
     public function share_note(Request $request, $noteid){
         $data = $request->all();
-        $sharedwith = $data['shared_with'];
+        $sharedwith = $data['shared_with'] ?? [];
         $noteID = Note::find($noteid);
         $no_account = [];
         if(!$noteID){
-            return redirect('note')->with('error', 'Note not found');
+            return redirect()->route('home')->with('error', 'Note not found');
         }
         foreach($sharedwith as $user){
             $userID = User::where('email',$user)->first();
@@ -42,9 +44,9 @@ class pivot_for_note_controller extends Controller
                 $no_account[] = $user;
             }
         }
-        if(count($no_account) == 0){
-            pivot_for_note::mail_for_no_account($no_account, $noteid);
-            return redirect()->route('note', $noteID->id)->with('error', 'Note shared successfully with ' . count($no_account) . ' users');
+        if(count($no_account) > 0){
+            $this->mail_for_no_account($no_account, $noteid);
+            return redirect()->route('note', $noteID->id)->with('success', 'Invitation sent to ' . count($no_account) . ' unregistered users');
         } else {
             return redirect()->route('note', $noteID->id)->with('success', 'Note shared successfully');
         }
@@ -52,11 +54,14 @@ class pivot_for_note_controller extends Controller
 
     public function undo_shared_note(Request $request, $id){
         $pivot = pivot_for_note::find($id);
+        if(!$pivot){
+            return redirect()->route('home')->with('error', 'Shared note record not found');
+        }
         $note = Note::find($pivot->note_id);
-        if($note->creater_id != Auth::user()->id){
-            return redirect()->route('note', $note->id)->with('error', 'You are not authorized to delete this note');
+        if(!$note || $note->creater_id != Auth::user()->id){
+            return redirect()->route('home')->with('error', 'You are not authorized to unshare this note');
         }
         $pivot->delete();
-        return redirect()->route('note', $note->id)->with('success', 'Note deleted successfully');
+        return redirect()->route('note', $note->id)->with('success', 'Unshared note successfully');
     }
 }

@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\organizations;
+use App\Models\organizations_member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\organizations_member;
 
 class OrganizationsController extends Controller
 {
-    public function create_organization(Request $request){
+    public function create_organization(Request $request)
+    {
         $data = $request->all();
-        
-        $organization = new organizations();
+
+        $organization = new organizations;
         $organization->name = $data['name'];
         $organization->description = $data['description'];
         $organization->hostID = Auth::user()->id;
@@ -20,34 +21,36 @@ class OrganizationsController extends Controller
 
         $organizationID = $organization->id;
         $userID = Auth::user()->id;
-        $organization_member = new organizations_member();
+        $organization_member = new organizations_member;
         $organization_member->organizationID = $organizationID;
         $organization_member->userID = $userID;
         $organization_member->save();
-        
-        return redirect()->route('organization')->with('success', 'Organization created successfully');
+
+        return redirect()->route('organization', $organizationID)->with('success', 'Organization created successfully');
     }
 
-    public function edit_organization(Request $request, $id){
-        if(Organization::find($id)->hostID != Auth::user()->id){
-            return redirect()->route('organization')->with('error', 'You are not authorized to edit this organization');
+    public function edit_organization(Request $request, $id)
+    {
+        $organization = organizations::find($id);
+        if (! $organization || $organization->hostID != Auth::user()->id) {
+            return redirect()->route('home')->with('error', 'You are not authorized to edit this organization');
         }
         $data = $request->all();
-        $organization = organizations::find($id);
         $organization->name = $data['name'];
         $organization->description = $data['description'];
         $organization->save();
-        return redirect()->route('organization')->with('success', 'Organization edited successfully');
+
+        return redirect()->route('organization', $id)->with('success', 'Organization edited successfully');
     }
 
-    public function delete_organization(Request $request, $id){
-        if(Organization::find($id)->hostID != Auth::user()->id){
-            return redirect()->route('organization')->with('error', 'You are not authorized to delete this organization');
-        }
-        $data = $request->all();
+    public function delete_organization(Request $request, $id)
+    {
         $organization = organizations::find($id);
+        if (! $organization || $organization->hostID != Auth::user()->id) {
+            return redirect()->route('home')->with('error', 'You are not authorized to delete this organization');
+        }
         $organization->delete();
-        return redirect()->route('organization')->with('success', 'Organization deleted successfully');
-    }
 
+        return redirect()->route('home')->with('success', 'Organization deleted successfully');
+    }
 }

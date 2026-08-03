@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Theme_request;
 use Illuminate\Http\Request;
-use App\Models\ThemeRequest;
+use Illuminate\Support\Facades\Auth;
 
 class ThemeRequestController extends Controller
 {
-    public function create_theme_request(Request $request){
+    public function create_theme_request(Request $request)
+    {
         $request->validate([
             'name' => 'required',
             'description' => 'required',
@@ -16,7 +17,7 @@ class ThemeRequestController extends Controller
             'drag_type' => 'required',
             'price' => 'required',
         ]);
-        $theme_request = new Theme_request();
+        $theme_request = new Theme_request;
         $theme_request->name = $request->name;
         $theme_request->description = $request->description;
         $theme_request->style = $request->style;
@@ -24,12 +25,13 @@ class ThemeRequestController extends Controller
         $theme_request->price = $request->price;
         $theme_request->catalog_link = $request->catalog_link;
         $theme_request->status = 'pending';
-        if(Auth::user()->exist()){    
+        if (Auth::check()) {
             $theme_request->email = Auth::user()->email;
-        }else{
+        } else {
             $theme_request->email = $request->email;
         }
         $theme_request->save();
+
         return redirect()->back()->with('success', 'Theme request created successfully');
     }
 }

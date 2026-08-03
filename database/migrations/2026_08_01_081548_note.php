@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreignId('creater_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
-            $table->foreignID('organizationID')->references('id')->on('organizations')->onDelete('cascade');
-            $table->foreignId('replied_note_id')->references('id')->on('note')->onDelete('cascade');
+            $table->foreignID('organizationID')->nullable()->references('id')->on('organizations')->onDelete('cascade');
+            $table->foreignId('replied_note_id')->nullable()->references('id')->on('note')->onDelete('cascade');
         });
     }
 

@@ -10,7 +10,11 @@ use App\Models\Password_change_request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-class authentication extends Controller
+use App\Models\pivot_for_note;
+use App\Models\pivot_change_host_organization;
+use App\Models\organizations_member;
+
+class AuthenticationController extends Controller
 {
     public function login(Request $request)
     {
@@ -21,7 +25,7 @@ class authentication extends Controller
 
         if(Auth::attempt(['email' => $email, 'password' => $password], $remember)){
             $request->session()->regenerate();
-            return redirect()->intended('home')->with('success', 'User logged in successfully');
+            return redirect()->route('home')->with('success', 'User logged in successfully');
         }else{
             return redirect('login')->with('error', 'Invalid username or password');
         }
@@ -42,7 +46,7 @@ class authentication extends Controller
         Auth::login($user, $remember);
         $request->session()->regenerate();
 
-        return redirect('home')->with('success', 'User logged in successfully');
+        return redirect()->route('home')->with('success', 'User logged in successfully');
     }
 
     public function signup40acc_note(Request $request, $shareid){
@@ -65,7 +69,7 @@ class authentication extends Controller
         Auth::login($user, $remember);
         $request->session()->regenerate();
 
-        return redirect('note',$pivot->noteID)->with('success', 'You have accepted the invitation');
+        return redirect()->route('note', $pivot->noteID)->with('success', 'You have accepted the invitation');
     }
 
     public function signup40acc_host_org(Request $request, $shareid){
@@ -88,7 +92,7 @@ class authentication extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect('change_host_organzation_request', $pivot->id)->with('success', 'You have accepted the invitation');
+        return redirect()->route('home')->with('success', 'You have accepted the invitation');
     }
      
     public function signup40acc_member_org(Request $request, $shareid){
@@ -111,7 +115,7 @@ class authentication extends Controller
         Auth::login($user, $remember);
         $request->session()->regenerate();
 
-        return redirect('organization_acceptance_request', $pivot->id)->with('success', 'You have accepted the invitation');
+        return redirect()->route('home')->with('success', 'You have accepted the invitation');
     }
 
 }
