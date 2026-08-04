@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Style Notes App - Full Sketch Layout</title>
+    <!-- CSS Frameworks -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" />
+    
+    <style>
+        /* --- 1. BASE & RESET --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+        }
+        input, textarea { user-select: text !important; }
+
+        /* --- 2. DESKTOP SIDEBAR STYLES --- */
+        .sidebar {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .sidebar-content {
+            min-height: 380px;
+            width: 110px;
+            border-radius: 20px;
+            background-color: #00d1b2;
+            padding: 1.2rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,209,178,0.25);
+        }
+        .sidebar-content-container { width: 100%; }
+        .sidebar-content .navbar-item,
+        .sidebar-content .sidebar-item-active {
+            width: 100%;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            padding: 0.6rem 0.2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            color: white !important;
+            transition: background-color 0.2s;
+        }
+        .sidebar-content .sidebar-item-active { background-color: #00b89c; }
+        .sidebar-content i { font-size: 1.5rem !important; margin-bottom: 0.2rem !important; }
+        .sidebar-content p { margin: 0 !important; font-size: 0.75rem !important; }
+
+        /* --- 3. DROPDOWN CONTROL BAR (DESKTOP & MOBILE) --- */
+        .filter-control-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .filter-control-bar .select select {
+            border-radius: 12px;
+            border-color: #cbd5e1;
+            font-weight: 600;
+            background-color: #ffffff;
+        }
+
+        /* --- 4. SKEUOMORPHIC NOTE STYLES --- */
+        .note {
+            width: 100%;
+            min-height: 330px;
+            background: linear-gradient(135deg, transparent 18px, #fef08a 0) !important;
+            border-radius: 4px 4px 0 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            cursor: grab;
+            touch-action: none;
+            will-change: transform;
+        }
+        .note:active { cursor: grabbing; }
+        
+        .note::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 18px 18px 0 0;
+            border-color: #eab308 transparent transparent transparent;
+            box-shadow: -2px -2px 4px rgba(0,0,0,0.15);
+            cursor: pointer;
+        }
+
+        .note-header {
+            width: 100%;
+            height: 3.2rem;
+            background-color: #00d1b2;
+            border-radius: 4px 4px 0 0;
+            padding: 0.7rem 1rem;
+            position: relative;
+        }
+        .note-header::before {
+            content: '📌';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.3));
+            z-index: 10;
+        }
+        .note-header-content {
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .note-content {
+            padding: 1.2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .title {
+            color: #1e293b;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem !important;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 0.8rem !important;
+        }
+        .input, .textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px dashed #cbd5e1;
+            border-radius: 6px;
+            background-color: rgba(255,255,255,0.65);
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+        .input:focus, .textarea:focus {
+            outline: none;
+            background-color: #ffffff;
+            border-color: #00d1b2;
+            box-shadow: 0 0 0 2px rgba(0,209,178,0.2);
+        }
+
+        .btn-tear {
+            margin-top: auto;
+            background-color: #00d1b2;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .drag-badge {
+            position: absolute;
+            bottom: 8px;
+            left: 12px;
+            font-size: 0.7rem;
+            color: #854d0e;
+            font-weight: 600;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        /* --- 5. MOBILE TOP BAR & DRAWER --- */
+        .mobile-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.8rem;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            margin-bottom: 1rem;
+        }
+        .icon-circle-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #334155;
+            cursor: pointer;
+        }
+
+        /* Mobile Drawer Sidebar */
+        .mobile-drawer-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 1050;
+            display: none;
+        }
+        .mobile-drawer {
+            position: fixed;
+            top: 0; left: -260px; width: 250px; height: 100%;
+            background-color: #00d1b2;
+            z-index: 1060;
+            transition: left 0.3s ease;
+            padding: 2rem 1rem;
+            color: white;
+        }
+        .mobile-drawer.active { left: 0; }
+        .mobile-drawer-overlay.active { display: block; }
+
+        /* Mobile FAB Add Button (Bay lơ lửng) */
+        .fab-add-btn {
+            position: fixed;
+            bottom: 75px;
+            right: 20px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background-color: #00d1b2;
+            color: white;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 14px rgba(0,209,178,0.5);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .fab-add-btn:active { transform: scale(0.9); }
+
+        /* --- 6. RESPONSIVE BREAKPOINTS --- */
+
+        /* LAPTOP (> 1025px) */
+        @media (min-width: 1025px) {
+            .mobile-navbar, .mobile-view-section, .fab-add-btn, .mobile-header-bar { display: none !important; }
+            
+            .columns.big-screen-only {
+                width: 100%;
+                margin: 0 !important;
+                padding: 2rem !important;
+                display: flex !important;
+            }
+            .big-screen-only > .column:first-child {
+                flex: 0 0 130px !important;
+                max-width: 130px !important;
+            }
+            .big-screen-only > .column:last-child {
+                flex: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+            .notes-section {
+                display: flex !important;
+                justify-content: center !important;
+                gap: 24px !important;
+                width: 100%;
+            }
+            .notes-container {
+                width: 340px !important;
+                flex: 0 0 340px !important;
+            }
+        }
+
+        /* Z FOLD 7 / TABLET (576px - 1024px) */
+        @media (min-width: 576px) and (max-width: 1024px) {
+            .mobile-navbar, .mobile-view-section, .fab-add-btn, .mobile-header-bar { display: none !important; }
+
+            .columns.big-screen-only {
+                width: 100%;
+                margin: 0 !important;
+                padding: 1.2rem !important;
+                display: flex !important;
+                gap: 15px !important;
+            }
+            .big-screen-only > .column:first-child { flex: 0 0 110px !important; }
+            .big-screen-only > .column:last-child { flex: 1 !important; }
+            .notes-section {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 16px !important;
+                width: 100%;
+            }
+            .notes-container { width: 100% !important; }
+        }
+
+        /* MOBILE (< 575px) */
+        @media (max-width: 575px) {
+            .big-screen-only { display: none !important; }
+            .mobile-view-section {
+                display: block !important;
+                padding: 1rem 1rem 5rem 1rem;
+            }
+            
+            .mobile-stack-wrapper {
+                position: relative;
+                width: 100%;
+                max-width: 350px;
+                height: 380px;
+                margin: 0.5rem auto 0 auto;
+            }
+            .mobile-stack-wrapper .note-under {
+                position: absolute;
+                top: 10px; left: 10px; right: 10px; bottom: 0;
+                z-index: 1;
+                opacity: 0.85;
+                transform: scale(0.96);
+                transition: all 0.3s ease;
+            }
+            .mobile-stack-wrapper .note-top {
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+                z-index: 2;
+            }
+            .mobile-stack-wrapper.is-torn-active .note-under {
+                top: 0; left: 0; right: 0;
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            .mobile-navbar {
+                position: fixed;
+                bottom: 0; left: 0; width: 100%;
+                padding: 0.6rem 1rem;
+                z-index: 980;
+            }
+            .nav-content {
+                background-color: #00d1b2;
+                padding: 0.4rem;
+                border-radius: 20px;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+            .nav-item-btn {
+                color: white;
+                text-decoration: none;
+                font-size: 1.1rem;
+                padding: 0.3rem 0.8rem;
+                border-radius: 12px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .nav-item-btn p { font-size: 0.65rem; margin: 0; }
+            .nav-item-btn.active { background-color: #00b89c; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================
+         MOBILE SIDEBAR DRAWER (Trượt ra khi bấm Avatar)
+         ========================================== -->
+    <div class="mobile-drawer-overlay" id="drawerOverlay" onclick="toggleMobileSidebar()"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 fw-bold text-white">📌 User Menu</h5>
+            <button class="btn-close btn-close-white" onclick="toggleMobileSidebar()"></button>
+        </div>
+        <div class="d-flex flex-column gap-3">
+            <a href="#" class="text-white text-decoration-none p-2 rounded bg-black-50"><i class="bi bi-house me-2"></i> Home</a>
+            <a href="#" class="text-white text-decoration-none p-2"><i class="bi bi-building me-2"></i> Organizations</a>
+            <a href="#" class="text-white text-decoration-none p-2"><i class="bi bi-brush me-2"></i> Themes</a>
+            <a href="#" class="text-white text-decoration-none p-2"><i class="bi bi-wallet2 me-2"></i> Balance</a>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         LAYOUT FOR LAPTOP & Z FOLD 7 (≥ 576px)
+         ========================================== -->
+    <div class="columns big-screen-only">
+        <!-- LEFT SIDEBAR -->
+        <div class="column">
+            <div class="sidebar">
+                <div class="sidebar-content">
+                    <div class="sidebar-content-container">
+                        <a href="#" class="sidebar-item-active">
+                            <i class="bi bi-house"></i>
+                            <p>Home</p>
+                        </a>
+                    </div>
+                    <div class="sidebar-content-container">
+                        <a href="#" class="navbar-item">
+                            <i class="bi bi-building"></i>
+                            <p>Org</p>
+                        </a>
+                    </div>
+                    <div class="sidebar-content-container">
+                        <a href="#" class="navbar-item">
+                            <i class="bi bi-brush"></i>
+                            <p>Theme</p>
+                        </a>
+                    </div>
+                    <div class="sidebar-content-container">
+                        <a href="#" class="navbar-item">
+                            <i class="bi bi-wallet2"></i>
+                            <p>Balance</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN DUAL-PANEL CONTENT -->
+        <div class="column">
+            
+            <!-- DESKTOP TOP FILTER BAR (CÓ THÊM DROPDOWN ORG NHƯ BẢN PHÁC THẢO) -->
+            <div class="filter-control-bar justify-content-center">
+                <button class="icon-circle-btn" title="Home"><i class="bi bi-house-door-fill"></i></button>
+                <div class="select is-small">
+                    <select>
+                        <option>done ∨</option>
+                        <option>not done ∨</option>
+                        <option>all notes</option>
+                    </select>
+                </div>
+                <div class="select is-small">
+                    <select>
+                        <option>org ∨</option>
+                        <option>Personal</option>
+                        <option>Work</option>
+                        <option>School</option>
+                    </select>
+                </div>
+            </div>
+
+            <section class="notes-section">
+                <!-- Panel 1: Create Note (Kéo để Reset Form) -->
+                <div class="notes-container">
+                    <div class="note" id="desktopCreateNote">
+                        <div class="note-header">
+                            <div class="note-header-content">
+                                <span>Create new note</span>
+                            </div>
+                        </div>
+                        <div class="note-content">
+                            <form id="desktopNoteForm" method="post" action="/submit-note" onsubmit="return false;">
+                                <input type="text" id="desktopTitleInput" placeholder="Title" class="input mb-2" value="Title">
+                                <textarea id="desktopContentInput" placeholder="Here is my note..." class="textarea mb-2" rows="3" style="resize:none;">Here is my note</textarea>
+                                <button type="submit" class="button is-primary is-fullwidth" style="border-radius:6px;">Create Note</button>
+                            </form>
+                        </div>
+                        <span class="drag-badge">🖐️ Kéo để Reset Form</span>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Saved Note View (Kéo để sang Note tiếp theo) -->
+                <div class="notes-container">
+                    <div class="note" id="desktopViewNote">
+                        <div class="note-header">
+                            <div class="note-header-content">
+                                <span id="desktopNoteHeader">@User - 10:00 AM 10/10/2026</span>
+                            </div>
+                        </div>
+                        <div class="note-content">
+                            <h2 class="title" id="desktopNoteTitle">Note Title 1</h2>
+                            <p class="subtitle" id="desktopNoteSubtitle">Ý tưởng thiết kế giao diện UI/UX</p>
+                            <p id="desktopNoteBody" style="font-size: 0.9rem; color: #334155;">Đây là nội dung note số 1. Bạn hãy thử dùng chuột nhấn giữ và kéo tờ note này sang một bên để xem Note tiếp theo!</p>
+                        </div>
+                        <span class="drag-badge">🖐️ Kéo xem Note tiếp ➔</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         LAYOUT FOR MOBILE (< 575px) - SKETCH DESIGN
+         ========================================== -->
+    <section class="mobile-view-section">
+        
+        <!-- MOBILE TOP BAR (HOME + DROPDOWN DONE + USER AVATAR) -->
+        <div class="mobile-header-bar">
+            <button class="icon-circle-btn" title="Home"><i class="bi bi-house-door-fill"></i></button>
+            
+            <div class="select is-small">
+                <select>
+                    <option>done ∨</option>
+                    <option>not done ∨</option>
+                    <option>all notes</option>
+                </select>
+            </div>
+
+            <button class="icon-circle-btn" onclick="toggleMobileSidebar()" title="User Profile & Sidebar">
+                <i class="bi bi-person-circle"></i>
+            </button>
+        </div>
+
+        <div class="mobile-stack-wrapper" id="mobileStack">
+            
+            <!-- NOTE BÊN DƯỚI (Kéo để sang Note tiếp theo) -->
+            <div class="note note-under" id="mobileViewNote">
+                <div class="note-header">
+                    <div class="note-header-content">
+                        <span id="mobileNoteHeader">@User - 10:00 AM</span>
+                    </div>
+                </div>
+                <div class="note-content">
+                    <h2 class="title" id="mobileNoteTitle">Note Title 1</h2>
+                    <p class="subtitle" id="mobileNoteSubtitle">Ý tưởng thiết kế giao diện UI/UX</p>
+                    <p id="mobileNoteBody" style="font-size: 0.85rem; color: #334155;">Đây là nội dung note số 1. Vuốt tờ note này để xem note tiếp theo!</p>
+                </div>
+                <span class="drag-badge">🖐️ Vuốt xem Note tiếp theo</span>
+            </div>
+
+            <!-- NOTE TRÊN CÙNG (Form Create Note đè lên, Kéo để Xé) -->
+            <div class="note note-top" id="mobileCreateCard">
+                <div class="note-header">
+                    <div class="note-header-content">
+                        <span>Create new note</span>
+                    </div>
+                </div>
+                <div class="note-content">
+                    <input type="text" id="mobileTitleInput" placeholder="Title" class="input mb-2">
+                    <textarea id="mobileContentInput" placeholder="Write your text here..." class="textarea mb-2" rows="3" style="resize:none;"></textarea>
+                    
+                    <button type="button" class="btn-tear" onclick="tearCurrentNote()">Xé & Lưu 📄</button>
+                </div>
+                <span class="drag-badge">🖐️ Vuốt/Kéo để Xé Note</span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FLOATING ACTION BUTTON (+) - BAY LƠ LỬNG TRÊN MOBILE -->
+    <button class="fab-add-btn" onclick="resetCreateNote()" title="Tạo Note Mới">+</button>
+
+    <!-- MOBILE BOTTOM NAVIGATION (CHUẨN NHƯ BẢN VẼ TAY) -->
+    <section class="mobile-navbar">
+        <div class="nav-content">
+            <a class="nav-item-btn active" href="#">
+                <i class="bi bi-file-earmark-text"></i>
+                <p>Note</p>
+            </a>
+            <a class="nav-item-btn" href="#">
+                <i class="bi bi-building"></i>
+                <p>Org</p>
+            </a>
+            <a class="nav-item-btn" href="#">
+                <i class="bi bi-gear"></i>
+                <p>Setting</p>
+            </a>
+            <a class="nav-item-btn" href="#">
+                <i class="bi bi-wallet2"></i>
+                <p>Transac</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         JAVASCRIPT - DRAG ENGINE & LOGICS
+         ========================================== -->
+    <script>
+        // MẢNG DỮ LIỆU CÁC NOTE LƯU MẪU
+        const savedNotes = [
+            {
+                header: "@User - 10:00 AM 10/10/2026",
+                title: "Note Title 1",
+                subtitle: "Ý tưởng thiết kế giao diện UI/UX",
+                body: "Đây là nội dung note số 1. Bạn có thể kéo/swipe tờ note này để xoay vòng danh sách các ghi chú đã lưu!"
+            },
+            {
+                header: "@HungAnh - 11:30 AM 11/10/2026",
+                title: "Note Title 2",
+                subtitle: "Machine Learning & VOAI 2026",
+                body: "Chuẩn bị lại công thức ConvNeXt-Tiny, EfficientNetV2-S và Focal Loss cho các bài toán Computer Vision."
+            },
+            {
+                header: "@HungAnh - 02:15 PM 12/10/2026",
+                title: "Note Title 3",
+                subtitle: "Luyện IELTS Reading & Speaking",
+                body: "Luyện tập chiến thuật Matching Headings và chuẩn bị các Cue Card chủ đề Công nghệ / F1 Racing."
+            }
+        ];
+
+        let currentNoteIndex = 0;
+
+        // BẬT / TẮT MOBILE SIDEBAR DRAWER
+        function toggleMobileSidebar() {
+            document.getElementById('mobileDrawer').classList.toggle('active');
+            document.getElementById('drawerOverlay').classList.toggle('active');
+        }
+
+        // CƠ CHẾ KÉO DRAG & DROP CHO MỌI NOTE
+        function attachDragGesture(element, onSwipeSuccess) {
+            let startX = 0, startY = 0, currentX = 0, currentY = 0;
+            let isDragging = false;
+
+            function onStart(e) {
+                if (['INPUT', 'TEXTAREA', 'BUTTON', 'A', 'SELECT', 'OPTION'].includes(e.target.tagName)) return;
+
+                isDragging = true;
+                const point = e.touches ? e.touches[0] : e;
+                startX = point.clientX;
+                startY = point.clientY;
+                
+                element.style.transition = 'none';
+                element.style.zIndex = '100';
+            }
+
+            function onMove(e) {
+                if (!isDragging) return;
+                const point = e.touches ? e.touches[0] : e;
+                currentX = point.clientX - startX;
+                currentY = point.clientY - startY;
+
+                const rotate = currentX * 0.08;
+                element.style.transform = `translate(${currentX}px, ${currentY}px) rotate(${rotate}deg)`;
+            }
+
+            function onEnd() {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                const distance = Math.hypot(currentX, currentY);
+
+                if (distance > 100 || Math.abs(currentX) > 90 || Math.abs(currentY) > 90) {
+                    element.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+                    
+                    const exitX = currentX * 3;
+                    const exitY = currentY * 3;
+                    element.style.transform = `translate(${exitX}px, ${exitY}px) rotate(${currentX * 0.2}deg)`;
+                    element.style.opacity = '0';
+
+                    setTimeout(() => {
+                        onSwipeSuccess();
+                        element.style.transition = 'none';
+                        element.style.transform = 'none';
+                        element.style.opacity = '1';
+                        element.style.zIndex = '';
+                    }, 350);
+                } else {
+                    element.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    element.style.transform = 'none';
+                    setTimeout(() => { element.style.zIndex = ''; }, 300);
+                }
+
+                currentX = 0; currentY = 0;
+            }
+
+            element.addEventListener('mousedown', onStart);
+            element.addEventListener('touchstart', onStart, { passive: true });
+
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove, { passive: true });
+
+            window.addEventListener('mouseup', onEnd);
+            window.addEventListener('touchend', onEnd);
+        }
+
+        // HÀM CẬP NHẬT NOTE TIẾP THEO
+        function loadNextNote() {
+            currentNoteIndex = (currentNoteIndex + 1) % savedNotes.length;
+            const data = savedNotes[currentNoteIndex];
+
+            document.getElementById('desktopNoteHeader').innerText = data.header;
+            document.getElementById('desktopNoteTitle').innerText = data.title;
+            document.getElementById('desktopNoteSubtitle').innerText = data.subtitle;
+            document.getElementById('desktopNoteBody').innerText = data.body;
+
+            document.getElementById('mobileNoteHeader').innerText = data.header;
+            document.getElementById('mobileNoteTitle').innerText = data.title;
+            document.getElementById('mobileNoteSubtitle').innerText = data.subtitle;
+            document.getElementById('mobileNoteBody').innerText = data.body;
+        }
+
+        // HÀM RESET FORM DESKTOP
+        function resetDesktopForm() {
+            document.getElementById('desktopTitleInput').value = '';
+            document.getElementById('desktopContentInput').value = '';
+            document.getElementById('desktopTitleInput').placeholder = 'Clean form! Enter new title...';
+        }
+
+        // KHỞI TẠO CÁC PHÂN ĐOẠN DRAG
+        const desktopCreateNote = document.getElementById('desktopCreateNote');
+        const desktopViewNote = document.getElementById('desktopViewNote');
+        const mobileCreateCard = document.getElementById('mobileCreateCard');
+        const mobileViewNote = document.getElementById('mobileViewNote');
+        const mobileStack = document.getElementById('mobileStack');
+
+        attachDragGesture(desktopCreateNote, resetDesktopForm);
+        attachDragGesture(desktopViewNote, loadNextNote);
+        attachDragGesture(mobileViewNote, loadNextNote);
+        attachDragGesture(mobileCreateCard, function() {
+            tearCurrentNote();
+        });
+
+        function tearCurrentNote() {
+            if (!mobileCreateCard.classList.contains('is-torn')) {
+                mobileCreateCard.style.display = 'none';
+                mobileStack.classList.add('is-torn-active');
+            }
+        }
+
+        function resetCreateNote() {
+            mobileCreateCard.style.display = 'flex';
+            mobileCreateCard.style.transform = 'none';
+            mobileCreateCard.style.opacity = '1';
+            mobileStack.classList.remove('is-torn-active');
+            
+            document.getElementById('mobileTitleInput').value = '';
+            document.getElementById('mobileContentInput').value = '';
+        }
+
+        mobileCreateCard.addEventListener('click', function(e) {
+            const rect = mobileCreateCard.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            if (clickX > rect.width - 35 && clickY > rect.height - 35) {
+                tearCurrentNote();
+            }
+        });
+    </script>
+</body>
+</html>
