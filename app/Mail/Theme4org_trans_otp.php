@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class user2user_trans_otp extends Mailable
+class Theme4org_trans_otp extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -28,7 +28,7 @@ class user2user_trans_otp extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'User2User Trans Otp',
+            subject: 'Theme4Org Trans Otp',
         );
     }
 
@@ -38,7 +38,7 @@ class user2user_trans_otp extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.user2user_otp_send',
+            view: 'view.name',
         );
     }
 
