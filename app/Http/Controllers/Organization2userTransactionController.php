@@ -9,16 +9,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Carbon;
 
 class Organization2userTransactionController extends Controller
 {
     public function organization2user_transaction_OTP_generator()
     {
-        $otp = rand(100000, 999999);
-        if (Organization2userTransaction::where('otp', $otp)->first()) {
-            return $this->organization2user_transaction_OTP_generator();
-        } else {
-            return $otp;
+        $otp =  rand(100000, 999999);
+        $check = Organization2userTransaction::where('otp', $otp)->first();
+        if($check->status != 'finished' || now()->greaterThan(Carbon::prase($check->expires_at)) || $check){
+            return $this->user2organization_transaction_OTP_generator();
+        }else{
+            return (string)$otp;
         }
     }
 
@@ -40,9 +42,12 @@ class Organization2userTransactionController extends Controller
                 $Organization2userTransaction->amount = $data['amount'];
                 $Organization2userTransaction->current_hostID = Auth::user()->id;
                 $Organization2userTransaction->status = 'pending';
-                $Organization2userTransaction->otp = $this->organization2user_transaction_OTP_generator();
+                $Organization2userTransaction->otp = Hash::make($this->organization2user_transaction_OTP_generator());
+                $Organization2userTransaction->expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
                 $Organization2userTransaction->save();
                 Mail::to(Auth::user()->email)->send(new organization2user_trans_otp($Organization2userTransaction));
+
+                return redirect("org2user_transaction_view",$Organization2userTransaction->id);
             } else {
                 return response()->json(['error' => 'Invalid password']);
             }
@@ -50,6 +55,35 @@ class Organization2userTransactionController extends Controller
 
         return response()->json($Organization2userTransaction);
     }
+
+    public function organization2user_transaction_verify(Request $request, $id){
+        $transaction = Organization2userTransaction::where('id',$id)->where('status','pending')->first();
+        $request->validate([
+            'passkey'=>'required'
+        ]);
+        $data = $request->all();
+        $user = Auth::user();
+        //$organization = Organization::find($transaction->organizationID);
+        $passkey = $data['passkey'];
+        $time = Carbon::prase($transaction->expires_at);
+
+        if ($transaction && Hash::check($passkey,$transaction)) {
+            if (now()->greaterThan($time)) {
+                $transaction->delete();
+                return redirect()->route('home')->with('error','the time was expire. Please create the new transaction');
+            } else {
+                $organization->balance += $transaction->amount;
+                $user->balance -= $transaction->amount;
+                $transaction->status = 'finished';
+                return redirect()->route('user2user_bill.view',$id)->with('success');
+            }
+        } else {
+            $transaction->delete();
+            return redirect()->route('home')->with('error','something have wrong. please try again');
+        }
+    }
+
+    /*
 
     public function organization2user_transaction_cancel(Request $request, $id)
     {
@@ -88,5 +122,5 @@ class Organization2userTransactionController extends Controller
         } else {
             return response()->json(['error' => 'Invalid transaction ID']);
         }
-    }
+    } */
 }

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\user2theme4_trans_otp;
+use Illuminate\Support\Carbon;
 //use App\Mail\user2theme4_trans_verify;
 //use App\Models\User2theme4Transaction;
 
@@ -19,10 +20,13 @@ class Theme4userWalletController extends Controller
    function user2theme4_transaction_OTP_generator()
     {
         $otp = rand(100000, 999999);
-        if(User2theme4Transaction::where('otp', $otp)->exists()){
+        $check = User2theme4Transaction::where('otp', $otp)->exists();
+        if($check->status != 'finished' || now()->greaterThan(Carbon::prase($check->expires_at)) || !$check){
             return $this->user2theme4_transaction_OTP_generator();
+        } else {
+            return (string)$otp;
         }
-        return $otp;
+        //return $otp;
     }
 
     public function user_buy_theme(Request $request, $themeID){
@@ -47,7 +51,8 @@ class Theme4userWalletController extends Controller
             $transaction->themeID = $themeID;
             $transaction->amount = $theme->price;
             $transaction->status = 'pending';
-            $transaction->otp = $this->user2theme4_transaction_OTP_generator();
+            $transaction->otp = Hash::make($this->user2theme4_transaction_OTP_generator());
+            $transaction->expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
             $transaction->save();
             Mail::to($user->email)->send(new user2theme4_trans_otp($transaction));
         }else{
@@ -56,21 +61,30 @@ class Theme4userWalletController extends Controller
         return redirect()->back()->with('success', 'Transaction request sent to your email');
    }
 
-   public function user_buy_theme_verify_otp(Request $request,$otp){
+   public function user_buy_theme_verify_otp(Request $request, $id){
      $user = Auth::user();
-     $transaction = User2theme4Transaction::where('otp', $otp)->where('userID', $user->id)->first();
+     $transaction = User2theme4_transactions::where('id',$id)->first();
      if(!$transaction){
          return redirect()->back()->with('error', 'Invalid OTP');
      }
-     $theme = theme4::where('id', $transaction->themeID)->first();
-     $user_wallet = Theme4userWallet::where('userID', $user->id)->first();
-     if($user_wallet->balance < $theme->price){
+     $theme = theme4user::where('id', $transaction->themeID)->first();
+     $user_wallet = Theme4user_wallets::where('userID', $user->id)->first();
+     if($user->balance < $theme->price){
          return redirect()->back()->with('error', 'Insufficient balance');
+     } else {
+        $time = Carbon::parse($transaction->expires_at);
+        if (Hash::check($request->passkey,$otp)){
+            if (now()->greaterThan($time)){
+                $transaction->delete();
+                return redirect("user_buy_theme_view")->with('error','otp has expired. Please buying it agian');
+            } else {
+                $user->balance -= $theme->price;
+                $user->save();
+                $transaction->status = 'finished';
+                $transaction->save();
+                return redirect()->back()->with('success', 'Theme purchased successfully');
+            }
+        }
      }
-     $user_wallet->balance -= $theme->price;
-     $user_wallet->save();
-     $transaction->status = 'completed';
-     $transaction->save();
-     return redirect()->back()->with('success', 'Theme purchased successfully');
    }
 }

@@ -18,6 +18,7 @@ return new class extends Migration
             //$table->string("image")->nullable();
             $table->string('logo_url')->nullable();
             $table->string('banner_url')->nullable();
+            $table->float('balance')->default(0);
             $table->foreignID('hostID')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

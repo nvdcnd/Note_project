@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('status');
             $table->foreignID('current_hostID')->nullable()->references('id')->on('users')->onDelete('cascade');
             $table->string('otp');
+            $table->timestamp('expires_at');
             $table->timestamps();
         });
     }

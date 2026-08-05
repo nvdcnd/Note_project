@@ -18,6 +18,7 @@ return new class extends Migration
             $table->float('amount');
             $table->string('status');
             $table->string('otp');
+            $table->timestamp('expires_at');
             $table->timestamps();
         });
     }
