@@ -6,7 +6,11 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\Organization2userTransactionController;
 use App\Http\Controllers\OrganizationsController;
 use App\Http\Controllers\OrganizationsMemberController;
+use App\Http\Controllers\PasswordChangeRequestController;
+use App\Http\Controllers\PivotChangeHostOrganizationController;
 use App\Http\Controllers\ReplyNoteController;
+use App\Http\Controllers\Theme4orgWalletController;
+use App\Http\Controllers\Theme4userWalletController;
 use App\Http\Controllers\ThemeRequestController;
 use App\Http\Controllers\User2organizationTransactionController;
 use App\Http\Controllers\User2userTransactionController;
@@ -170,8 +174,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('user2user_transaction_history_view');
 
     Route::post('user2user/create/transaction', [User2userTransactionController::class, 'user2user_transaction_create'])->name('user2user_transaction_create');
-    Route::post('user2user/verify/transaction', [User2userTransactionController::class, 'user2user_transaction_verify'])->name('user2user_transaction_verify');
-    Route::post('user2user/cancel/transaction', [User2userTransactionController::class, 'user2user_transaction_cancel'])->name('user2user_transaction_cancel');
+    Route::post('user2user/verify/transaction/{id}', [User2userTransactionController::class, 'user2user_transaction_verify'])->name('user2user_transaction_verify');
+    Route::post('user2user/cancel/transaction/{id}', [User2userTransactionController::class, 'user2user_transaction_cancel'])->name('user2user_transaction_cancel');
 
     // User2organization transaction
     Route::get('user2organization/create/transaction', function () {
@@ -200,8 +204,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('user2organization_transaction_history_view');
 
     Route::post('user2organization/create/transaction', [User2organizationTransactionController::class, 'user2organization_transaction_create'])->name('user2organization_transaction_create');
-    Route::post('user2organization/verify/transaction', [User2organizationTransactionController::class, 'user2organization_transaction_verify'])->name('user2organization_transaction_verify');
-    Route::post('user2organization/cancel/transaction', [User2organizationTransactionController::class, 'user2organization_transaction_cancel'])->name('user2organization_transaction_cancel');
+    Route::post('user2organization/verify/transaction/{id}', [User2organizationTransactionController::class, 'user2organization_transaction_verify'])->name('user2organization_transaction_verify');
+    Route::post('user2organization/cancel/transaction/{id}', [User2organizationTransactionController::class, 'user2organization_transaction_cancel'])->name('user2organization_transaction_cancel');
 
     // Organization2user transaction
     Route::get('organization2user/{id}/create/transaction', function ($id) {
@@ -244,9 +248,30 @@ Route::middleware(['auth'])->group(function () {
         $theme = ThemeRequest::query()->find($id);
         if ($theme) {
             return view('create_theme_request_success', compact('theme'));
-        } else {
-            return view('create_theme_request')->with('error', 'Invalid theme ID!');
         }
     })->name('create_theme_request_success_view');
 
+    // Host Organization Management
+    Route::post('/organization/{id}/change-host', [PivotChangeHostOrganizationController::class, 'change_host_for_organization'])->name('organization.change_host');
+    Route::post('/organization/change-host/{id}/confirm', [PivotChangeHostOrganizationController::class, 'change_host_real'])->name('organization.change_host_real');
+    Route::delete('/organization/change-host/{id}', [PivotChangeHostOrganizationController::class, 'delete_old_request'])->name('organization.delete_host_request');
+    Route::post('/organization/change-host/{id}/accept', [PivotChangeHostOrganizationController::class, 'new_host_accept'])->name('organization.accept_host');
+    Route::post('/organization/change-host/{id}/decline', [PivotChangeHostOrganizationController::class, 'new_host_decline'])->name('organization.decline_host');
+
+    // Organization Member Management
+    Route::post('/member/accept/{id}', [OrganizationsMemberController::class, 'accept_member'])->name('member.accept');
+    Route::post('/member/decline/{id}', [OrganizationsMemberController::class, 'decline_member'])->name('member.decline');
+    Route::post('/organization/{organizationid}/remove-member/{userID}', [OrganizationsMemberController::class, 'remove_member'])->name('member.remove');
+
+    // Theme Buy Routes
+    Route::post('/theme/user/buy/{themeID}', [Theme4userWalletController::class, 'user_buy_theme'])->name('theme.user.buy');
+    Route::post('/theme/user/buy/verify/{id}', [Theme4userWalletController::class, 'user_buy_theme_verify_otp'])->name('theme.user.buy.verify');
+    Route::post('/theme/org/buy/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme'])->name('theme.org.buy');
+    Route::post('/theme/org/buy/verify/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme_verify_otp'])->name('theme.org.buy.verify');
+
 });
+
+// Password Reset Routes (Public)
+Route::get('/forgot-password', [PasswordChangeRequestController::class, 'forgot_password'])->name('password.forgot');
+Route::get('/reset-password/{id}', [PasswordChangeRequestController::class, 'change_password_view'])->name('password.reset.view');
+Route::post('/reset-password/{id}', [PasswordChangeRequestController::class, 'change_password'])->name('password.reset');

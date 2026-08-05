@@ -3,13 +3,11 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\PasswordChangeRequest;
 
 class Password_change extends Mailable
 {
@@ -18,10 +16,9 @@ class Password_change extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(private $passkey)
+    public function __construct(public mixed $passkey)
     {
-        //$this->user = $user;
-        $this->passkey = PasswordChangeRequest::find(passkey);
+        //
     }
 
     /**

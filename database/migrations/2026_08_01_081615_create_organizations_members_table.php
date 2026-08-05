@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id()->autoIncrement()->unique();
             $table->foreignId('organizationID')->constrained('organizations')->onDelete('cascade');
             $table->foreignId('userID')->constrained('users')->onDelete('cascade');
-            $table->boolean('status')->default(false);   
+            $table->boolean('status')->default(false);
             $table->timestamps();
         });
     }

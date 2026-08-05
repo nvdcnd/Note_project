@@ -22,7 +22,7 @@ class Theme4userWalletController extends Controller
         $existing = User2theme4Transaction::query()->where('status', '!=', 'finished')->get();
 
         foreach ($existing as $transaction) {
-            if (Hash::check($otp, $transaction->otp)) {
+            if (Hash::check((string) $otp, $transaction->otp)) {
                 return $this->user2theme4_transaction_OTP_generator();
             }
         }
@@ -86,7 +86,7 @@ class Theme4userWalletController extends Controller
 
         $time = Carbon::parse($transaction->expires_at);
 
-        if (! Hash::check($request->passkey, $transaction->otp)) {
+        if (! Hash::check((string) $request->passkey, $transaction->otp)) {
             return redirect()->back()->with('error', 'Invalid passkey');
         }
 

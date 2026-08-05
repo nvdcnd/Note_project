@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id()->autoIncrement()->unique();
             $table->foreignId('organizationID')->constrained('organizations')->onDelete('cascade');
             $table->foreignId('current_host_ID')->constrained('users')->onDelete('cascade');
-            $table->foreignId('new_host_ID')->constrained('users')->onDelete('cascade')->nullable();
-            $table->boolean('new_host_acceptance_status')->default(false);   
+            $table->foreignId('new_host_ID')->nullable()->constrained('users')->onDelete('cascade');
+            $table->boolean('new_host_acceptance_status')->default(false);
             $table->timestamps();
         });
     }

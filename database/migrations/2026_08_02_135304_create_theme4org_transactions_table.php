@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('theme4org_transactions', function (Blueprint $table) {
             $table->id();
-            //$table->foreignId('from')->references('id')->on('users')->onDelete('cascade');
+            // $table->foreignId('from')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('organizationID')->references('id')->on('organizations')->onDelete('cascade');
             $table->float('amount');
             $table->string('status');

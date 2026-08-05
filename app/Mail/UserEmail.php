@@ -2,16 +2,14 @@
 
 namespace App\Mail;
 
+use App\Models\Note;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-
-use App\Models\User;
-use App\Models\Note;
 
 class UserEmail extends Mailable
 {
@@ -20,11 +18,11 @@ class UserEmail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(private $user,private $notes)
+    public function __construct(private $user, private $notes)
     {
         $this->user = User::find($user->id);
         $this->notes = Note::find($notes->id);
-        //$this->email = $email;
+        // $this->email = $email;
     }
 
     /**
@@ -33,7 +31,7 @@ class UserEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Note no." . $this->notes->id . " has been shared with you by" . $this->user->username,
+            subject: 'Note no.'.$this->notes->id.' has been shared with you by'.$this->user->username,
         );
     }
 

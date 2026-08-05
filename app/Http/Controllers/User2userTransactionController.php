@@ -19,7 +19,7 @@ class User2userTransactionController extends Controller
         $existing = User2userTransaction::query()->where('status', '!=', 'finished')->get();
 
         foreach ($existing as $transaction) {
-            if (Hash::check($otp, $transaction->otp)) {
+            if (Hash::check((string) $otp, $transaction->otp)) {
                 return $this->user2user_transaction_OTP_generator();
             }
         }
@@ -42,7 +42,7 @@ class User2userTransactionController extends Controller
             return response()->json(['error' => 'You cannot send money to yourself']);
         }
 
-        if (! Hash::check($data['password'], Auth::user()->password)) {
+        if (! Hash::check((string) $data['password'], Auth::user()->password)) {
             return response()->json(['error' => 'Invalid password']);
         }
 
@@ -68,7 +68,7 @@ class User2userTransactionController extends Controller
 
         $data = $request->all();
         $user = Auth::user();
-        $passkey = $data['passkey'];
+        $passkey = (string) $data['passkey'];
 
         if (! $transaction) {
             return redirect()->route('home')->with('error', 'Invalid transaction');
@@ -108,7 +108,7 @@ class User2userTransactionController extends Controller
         $transaction->status = 'finished';
         $transaction->save();
 
-        return redirect()->route('user2user_bill.view', $id)->with('success', 'Transaction completed successfully');
+        return redirect()->route('user2user_transaction_history_view', $user->id)->with('success', 'Transaction completed successfully');
     }
 
     /*

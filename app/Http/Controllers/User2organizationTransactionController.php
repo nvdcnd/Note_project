@@ -19,7 +19,7 @@ class User2organizationTransactionController extends Controller
         $existing = User2organizationTransaction::query()->where('status', '!=', 'finished')->get();
 
         foreach ($existing as $transaction) {
-            if (Hash::check($otp, $transaction->otp)) {
+            if (Hash::check((string) $otp, $transaction->otp)) {
                 return $this->user2organization_transaction_OTP_generator();
             }
         }
@@ -43,7 +43,7 @@ class User2organizationTransactionController extends Controller
             return response()->json(['error' => 'Organization not found']);
         }
 
-        if (! Hash::check($data['password'], Auth::user()->password)) {
+        if (! Hash::check((string) $data['password'], Auth::user()->password)) {
             return response()->json(['error' => 'Invalid password']);
         }
 
@@ -70,7 +70,7 @@ class User2organizationTransactionController extends Controller
 
         $data = $request->all();
         $user = Auth::user();
-        $passkey = $data['passkey'];
+        $passkey = (string) $data['passkey'];
 
         if (! $transaction) {
             return redirect()->route('home')->with('error', 'Invalid transaction');
@@ -88,17 +88,17 @@ class User2organizationTransactionController extends Controller
         if (! Hash::check($passkey, $transaction->otp)) {
             User2organizationTransaction::destroy($transaction->id);
 
-            return redirect()->route('user2org.view', $organization->id)->with('error', 'Invalid passkey');
+            return redirect()->route('organization', $organization->id)->with('error', 'Invalid passkey');
         }
 
         if (now()->greaterThan($time)) {
             User2organizationTransaction::destroy($transaction->id);
 
-            return redirect()->route('user2org.view', $organization->id)->with('error', 'The transaction has expired. Please create a new transaction');
+            return redirect()->route('organization', $organization->id)->with('error', 'The transaction has expired. Please create a new transaction');
         }
 
         if ($user->balance < $transaction->amount) {
-            return redirect()->route('user2org.view', $organization->id)->with('error', 'Insufficient balance');
+            return redirect()->route('organization', $organization->id)->with('error', 'Insufficient balance');
         }
 
         $organization->balance += $transaction->amount;
@@ -110,7 +110,7 @@ class User2organizationTransactionController extends Controller
         $transaction->status = 'finished';
         $transaction->save();
 
-        return redirect()->route('user2org_bill.view', $id)->with('success', 'Transaction completed successfully');
+        return redirect()->route('user2organization_transaction_history_view', $user->id)->with('success', 'Transaction completed successfully');
     }
 
     /*

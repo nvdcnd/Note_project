@@ -20,7 +20,7 @@ class Theme4orgWalletController extends Controller
         $existing = Theme4orgTransaction::query()->where('status', '!=', 'finished')->get();
 
         foreach ($existing as $transaction) {
-            if (Hash::check($otp, $transaction->otp)) {
+            if (Hash::check((string) $otp, $transaction->otp)) {
                 return $this->Theme4org_otp_generator();
             }
         }
@@ -86,12 +86,12 @@ class Theme4orgWalletController extends Controller
 
         $time = Carbon::parse($transaction->expires_at);
 
-        if (! Hash::check($request->passkey, $transaction->otp)) {
+        if (! Hash::check((string) $request->passkey, $transaction->otp)) {
             return redirect()->back()->with('error', 'Invalid passkey');
         }
 
         if (now()->greaterThan($time)) {
-            $transaction->delete(null);
+            $transaction->delete();
 
             return redirect()->back()->with('error', 'OTP has expired. Please try again');
         }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\organization2user_trans_otp;
 use App\Models\Organization;
 use App\Models\Organization2userTransaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,7 @@ class Organization2userTransactionController extends Controller
         $existing = Organization2userTransaction::query()->where('status', '!=', 'finished')->get();
 
         foreach ($existing as $transaction) {
-            if (Hash::check($otp, $transaction->otp)) {
+            if (Hash::check((string) $otp, $transaction->otp)) {
                 return $this->organization2user_transaction_OTP_generator();
             }
         }
@@ -42,7 +43,7 @@ class Organization2userTransactionController extends Controller
             return response()->json(['error' => 'Organization not found']);
         }
 
-        if (! Hash::check($data['password'], Auth::user()->password) || Auth::user()->id != $organization->hostID) {
+        if (! Hash::check((string) $data['password'], Auth::user()->password) || Auth::user()->id != $organization->hostID) {
             return response()->json(['error' => 'Invalid password']);
         }
 
@@ -69,7 +70,7 @@ class Organization2userTransactionController extends Controller
 
         $data = $request->all();
         $user = Auth::user();
-        $passkey = $data['passkey'];
+        $passkey = (string) $data['passkey'];
 
         if (! $transaction) {
             return redirect()->route('home')->with('error', 'Invalid transaction');
@@ -96,20 +97,25 @@ class Organization2userTransactionController extends Controller
             return redirect()->route('home')->with('error', 'The transaction has expired. Please create a new transaction');
         }
 
-        if ($user->balance < $transaction->amount) {
-            return redirect()->route('home')->with('error', 'Insufficient balance');
+        if ($organization->balance < $transaction->amount) {
+            return redirect()->route('home')->with('error', 'Organization has insufficient balance');
         }
 
-        $organization->balance += $transaction->amount;
+        $targetUser = User::query()->find($transaction->userID);
+        if (! $targetUser) {
+            return redirect()->route('home')->with('error', 'Recipient user not found');
+        }
+
+        $organization->balance -= $transaction->amount;
         $organization->save();
 
-        $user->balance -= $transaction->amount;
-        $user->save();
+        $targetUser->balance += $transaction->amount;
+        $targetUser->save();
 
         $transaction->status = 'finished';
         $transaction->save();
 
-        return redirect()->route('user2user_bill.view', $id)->with('success', 'Transaction completed successfully');
+        return redirect()->route('organization2user_transaction_history_view', $organization->id)->with('success', 'Transaction completed successfully');
     }
 
     /*
