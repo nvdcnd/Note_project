@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrganizationsMember extends Model
 {
-    protected $table = 'OrganizationsMember';
+    protected $table = 'organizations_member';
 
     //
 }

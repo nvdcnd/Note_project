@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('theme4user_wallets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('userID')->constrained('users')->onDelete('cascade');
-            $table->foreignId('theme4ID')->nullable()->constrained('theme4user')->onDelete('cascade');
+            $table->foreignId('theme4ID')->nullable()->constrained('theme4users')->onDelete('cascade');
             $table->timestamps();
         });
     }

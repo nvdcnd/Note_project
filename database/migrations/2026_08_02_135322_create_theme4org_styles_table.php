@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('theme4org_styles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('theme4ID')->references('id')->on('theme4org')->onDelete('cascade');
+            $table->foreignId('theme4ID')->references('id')->on('theme4orgs')->onDelete('cascade');
             $table->json('homepage_style');
             $table->json('note_page_style');
-            $table->json("dashboard_page_style");
-            $table->json("transaction_page_style");
-            $table->json("transaction_history_style");
-            $table->json("transaction_details_style");
-            $table->json("member_list_page_style");
+            $table->json('dashboard_page_style');
+            $table->json('transaction_page_style');
+            $table->json('transaction_history_style');
+            $table->json('transaction_details_style');
+            $table->json('member_list_page_style');
             $table->timestamps();
         });
     }

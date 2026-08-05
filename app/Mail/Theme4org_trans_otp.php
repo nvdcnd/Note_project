@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
+use App\Models\Theme4orgTransaction;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -14,12 +14,14 @@ class Theme4org_trans_otp extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public Theme4orgTransaction $transaction;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(Theme4orgTransaction $transaction)
     {
-        //
+        $this->transaction = $transaction;
     }
 
     /**
@@ -39,6 +41,9 @@ class Theme4org_trans_otp extends Mailable
     {
         return new Content(
             view: 'view.name',
+            with: [
+                'transaction' => $this->transaction,
+            ],
         );
     }
 
