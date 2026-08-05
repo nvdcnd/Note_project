@@ -18,6 +18,11 @@ class AuthenticationController extends Controller
 {
     public function login(Request $request)
     {
+        $request->validate([
+            "email"=>'required',
+            "password"=>'required',
+            "remember"=>'required',
+        ]);
         $data = $request->all();
         $email = $data['email'];
         $password = $data['password'];
@@ -32,6 +37,11 @@ class AuthenticationController extends Controller
     }
 
     public function signup(Request $request){
+        $request->validate([
+            "email"=>'required',
+            "password"=>'required',
+            "remember"=>'required',
+        ]);
         $name = $request->name;
         $email = $request->email;
         $password = $request->password;
@@ -55,6 +65,11 @@ class AuthenticationController extends Controller
             return redirect('login')->with('error', 'Invalid share id');
         }
         //$data = $request->all();
+        $request->validate([
+            "email"=>'required',
+            "password"=>'required',
+            "remember"=>'required',
+        ]);
         $email = $pivot->shared_with;
         $password = $request->password;
         $name = $request->name;
@@ -78,6 +93,11 @@ class AuthenticationController extends Controller
             return redirect('login')->with('error', 'Invalid share id');
         }
         //$data = $request->all();
+        $request->validate([
+            "email"=>'required',
+            "password"=>'required',
+            "remember"=>'required',
+        ]);
         $email = $pivot->shared_with;
         $password = $request->password;
         $name = $request->name;
@@ -100,6 +120,11 @@ class AuthenticationController extends Controller
         if(!$pivot){
             return redirect('login')->with('error', 'Invalid share id');
         }
+        $request->validate([
+            "email"=>'required',
+            "password"=>'required',
+            "remember"=>'required',
+        ]);
         //$data = $request->all();
         $email = $pivot->email;
         $password = $request->password;

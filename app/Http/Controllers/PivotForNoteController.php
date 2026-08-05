@@ -26,6 +26,9 @@ class PivotForNoteController extends Controller
     }
 
     public function share_note(Request $request, $noteid){
+        $request->validate([
+            "shared_with"=>'required'
+        ]);
         $data = $request->all();
         $sharedwith = $data['shared_with'] ?? [];
         $noteID = Note::find($noteid);

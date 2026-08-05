@@ -24,6 +24,11 @@ class User2userTransactionController extends Controller
 
     public function user2user_transaction_create(Request $request)
     {
+        $request->validate([
+            'password'=>'required',
+            'organizationID'=>'required',
+            'amount'=>'required'
+        ]);
         $data = $request->all();
         $User2userTransaction = new User2userTransaction;
         if (Auth::user()->id == $data['to']) {

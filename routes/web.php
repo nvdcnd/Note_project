@@ -47,7 +47,7 @@ Route::get('/signup', function () {
 
 Route::post('/signup', [AuthenticationController::class, 'signup'])->name('signup');
 
-Route::Middleware(['auth']->group(function(){
+Route::middleware(['auth'])->group(function() {
 
     // Note
     Route::get('/note/{id}', function ($id) {
@@ -68,6 +68,7 @@ Route::Middleware(['auth']->group(function(){
 
 
     // Reply
+    Route::post('/edit/note/{id}', [NoteController::class, 'edit_note'])->name('edit.note');
     Route::post('/reply/note/{id}', [ReplyNoteController::class, 'reply_note'])->name('reply.note');
 
     // Mark as done
@@ -251,5 +252,4 @@ Route::Middleware(['auth']->group(function(){
         }
     })->name('create_theme_request_success_view');
 
-}))
-
+});

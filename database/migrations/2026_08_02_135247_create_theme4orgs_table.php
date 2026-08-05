@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('theme4orgs', function (Blueprint $table) {
             $table->id();
-            $table->id();
+            //$table->id();
             $table->string('name');
             $table->text('description');
             $table->integer('drag_type')->default(1);

@@ -31,6 +31,9 @@ class Theme4orgWalletController extends Controller
         if($org->balance < $theme->price){
             return redirect()->back()->with('error', 'You not have enough balance to buy this theme');
         }
+        $request->validate([
+            'password' => 'required',
+        ]);
     
         if(Hash::check($request->password, Auth::user()->password) && $org->hostID == Auth::user()->id){
            $transaction = new Theme4orgTransaction();

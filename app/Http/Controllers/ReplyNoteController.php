@@ -11,6 +11,10 @@ class ReplyNoteController extends Controller
     public function reply_note(Request $request, $noteid){
         $replied_note = Note::find($noteid);
         if($replied_note){
+            $request->validate([
+            'title' => 'required',
+            'description' => 'required'
+            ]);
             $data = $request->all();
             $note = new Note();
             $note->title = $data['title'];

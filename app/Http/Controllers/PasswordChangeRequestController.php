@@ -28,6 +28,9 @@ class PasswordChangeRequestController extends Controller
 
     public function forgot_password(Request $request)
     {
+        $request->validate([
+            "email"=>'required',
+        ]);
         $data = $request->all();
         $email = $data['email'] ?? '';
         $user = User::where('email', $email)->first();
@@ -48,6 +51,10 @@ class PasswordChangeRequestController extends Controller
 
     public function change_password(Request $request)
     {
+        $request->validate([
+            "email"=>'required',
+            'password'=>'required'
+        ]);
         $data = $request->all();
         $email = $data['email'] ?? '';
         $user = User::where('email', $email)->first();

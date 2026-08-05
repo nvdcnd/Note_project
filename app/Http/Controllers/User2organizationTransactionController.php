@@ -23,6 +23,11 @@ class User2organizationTransactionController extends Controller
     }
 
     public function user2organization_transaction_create(Request $request){
+        $request->validate([
+            'password'=>'required',
+            'organizationID'=>'required',
+            'amount'=>'required'
+        ]);
         $data = $request->all();
         $User2organizationTransaction = new User2organizationTransaction();
         $organization = Organization::where('id', $data['organizationID'])->first();

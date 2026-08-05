@@ -38,7 +38,9 @@ class Theme4userWalletController extends Controller
         if($user->balance < $theme->price){
             return redirect()->back()->with('error', 'You not have enough balance to buy this theme');
         }
-    
+        $request->validate([
+            'password' => 'required',
+        ]);
         if($user->password == Hash::make($request->password)){
            $transaction = new User2theme4Transaction();
             $transaction->userID = $user->id;
