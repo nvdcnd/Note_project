@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description');
-            //$table->json('style');
+            // $table->json('style');
             $table->integer('drag_type')->default(1);
             $table->float('price')->default(0);
             $table->timestamps();

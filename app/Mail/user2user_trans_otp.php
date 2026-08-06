@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
+use App\Models\User2userTransaction;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -14,13 +14,7 @@ class user2user_trans_otp extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(public User2userTransaction $transaction) {}
 
     /**
      * Get the message envelope.

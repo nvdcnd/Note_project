@@ -14,7 +14,7 @@ class OrganizationsMemberController extends Controller
 {
     public function add_member(Request $request, $organizationID)
     {
-        $request->validate(['user_list'=>'required']);
+        $request->validate(['user_list' => 'required']);
         $data = $request->all();
         $user_list = $data['user_list'] ?? [];
         foreach ($user_list as $userID) {

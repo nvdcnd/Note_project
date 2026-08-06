@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('avatar_image_url')->nullable();
             $table->float('balance')->default(0);
             $table->string('banner_url')->nullable();
-            $table->foreignId('theme4_id')->nullable()->references('id')->on('theme4s')->onDelete('cascade');
+            $table->foreignId('theme4_id')->nullable();
             $table->timestamps();
         });
 

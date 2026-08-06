@@ -12,8 +12,8 @@ class OrganizationsController extends Controller
     public function create_organization(Request $request)
     {
         $request->validate([
-            "name"=>'required',
-            'description'=>'required'
+            'name' => 'required',
+            'description' => 'required',
         ]);
         $data = $request->all();
 
@@ -40,8 +40,8 @@ class OrganizationsController extends Controller
             return redirect()->route('home')->with('error', 'You are not authorized to edit this organization');
         }
         $request->validate([
-            "name"=>'required',
-            'description'=>'required'
+            'name' => 'required',
+            'description' => 'required',
         ]);
         $data = $request->all();
         $organization->name = $data['name'];

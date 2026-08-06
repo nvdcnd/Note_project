@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
+use App\Models\User2theme4Transaction;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -14,13 +14,7 @@ class user2theme4_trans_otp extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(public User2theme4Transaction $transaction) {}
 
     /**
      * Get the message envelope.

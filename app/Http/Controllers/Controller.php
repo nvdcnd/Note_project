@@ -1,68 +1,120 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Http\Request;
-//use App\Http\Requests;
-//use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+
 use App\Models\Note;
-use Illuminate\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 abstract class Controller
 {
-    public function user_note_fetch(Request $request){
-        $offset = $request->input('offset');
+    public function user_note_fetch(Request $request)
+    {
+        $offset = intval($request->input('offset', 0));
         $limit = 20;
 
-        $note_list = Note::where('user_id', auth()->user()->id)->where('PivotForNote.shared_with', auth()->user()->id)->orderBy('created_at','desc')->skip($offset)->take($limit)->get();
+        $note_list = Note::query()
+            ->leftJoin('pivot_for_note', 'note.id', '=', 'pivot_for_note.note_id')
+            ->where('note.user_id', '=', Auth::id(), 'and')
+            ->where('pivot_for_note.shared_with', '=', Auth::id(), 'and')
+            ->orderBy('note.created_at', 'desc')
+            ->skip($offset)
+            ->take($limit)
+            ->get(['note.*']);
 
         return response()->json($note_list);
     }
 
-    public function user_mark_as_done_fetch(Request $request){
-        $offset = $request->input('offset');
+    public function user_mark_as_done_fetch(Request $request)
+    {
+        $offset = intval($request->input('offset', 0));
         $limit = 20;
 
-        $note_list = Note::where('user_id', auth()->user()->id)->where('PivotForNote.shared_with', auth()->user()->id)->where('mark_as_done.userID', auth()->user()->id)->orderBy('created_at','desc')->skip($offset)->take($limit)->get();
+        $note_list = Note::query()
+            ->leftJoin('pivot_for_note', 'note.id', '=', 'pivot_for_note.note_id')
+            ->leftJoin('mark_as_dones', 'note.id', '=', 'mark_as_dones.noteID')
+            ->where('note.user_id', '=', Auth::id(), 'and')
+            ->where('pivot_for_note.shared_with', '=', Auth::id(), 'and')
+            ->where('mark_as_dones.userID', '=', Auth::id(), 'and')
+            ->orderBy('note.created_at', 'desc')
+            ->skip($offset)
+            ->take($limit)
+            ->get(['note.*']);
 
         return response()->json($note_list);
     }
 
-    public function user_mark_as_undone_fetch(Request $request){
-        $offset = $request->input('offset');
+    public function user_mark_as_undone_fetch(Request $request)
+    {
+        $offset = intval($request->input('offset', 0));
         $limit = 20;
 
-        $note_list = Note::where('user_id', auth()->user()->id)->where('PivotForNote.shared_with', auth()->user()->id)->where('mark_as_done.userID', null)->orderBy('created_at','desc')->skip($offset)->take($limit)->get();
+        $note_list = Note::query()
+            ->leftJoin('pivot_for_note', 'note.id', '=', 'pivot_for_note.note_id')
+            ->leftJoin('mark_as_dones', 'note.id', '=', 'mark_as_dones.noteID')
+            ->where('note.user_id', '=', Auth::id(), 'and')
+            ->where('pivot_for_note.shared_with', '=', Auth::id(), 'and')
+            ->whereNull('mark_as_dones.userID', 'and', false)
+            ->orderBy('note.created_at', 'desc')
+            ->skip($offset)
+            ->take($limit)
+            ->get(['note.*']);
 
         return response()->json($note_list);
     }
 
-    public function organization_note_fetch(Request $request, $id){
-        $offset = $request->input('offset');
+    public function organization_note_fetch(Request $request, $id)
+    {
+        $offset = intval($request->input('offset', 0));
         $limit = 20;
 
-        $note_list = Note::where('organization_id', $id)->where('OrganizationsMember.memberID', auth()->user()->id)->orderBy('created_at','desc')->skip($offset)->take($limit)->get();
+        $note_list = Note::query()
+            ->leftJoin('organizations_member', 'note.organizationID', '=', 'organizations_member.organizationID')
+            ->where('note.organizationID', '=', $id, 'and')
+            ->where('organizations_member.userID', '=', Auth::id(), 'and')
+            ->orderBy('note.created_at', 'desc')
+            ->skip($offset)
+            ->take($limit)
+            ->get(['note.*']);
 
         return response()->json($note_list);
     }
 
-    public function organization_mark_as_done_fetch(Request $request, $id){
-        $offset = $request->input('offset');
+    public function organization_mark_as_done_fetch(Request $request, $id)
+    {
+        $offset = intval($request->input('offset', 0));
         $limit = 20;
 
-        $note_list = Note::where('organization_id', $id)->where('organization.memberID', auth()->user()->id)->where('mark_as_done.userID', auth()->user()->id)->orderBy('created_at','desc')->skip($offset)->take($limit)->get();
+        $note_list = Note::query()
+            ->leftJoin('organizations_member', 'note.organizationID', '=', 'organizations_member.organizationID')
+            ->leftJoin('mark_as_dones', 'note.id', '=', 'mark_as_dones.noteID')
+            ->where('note.organizationID', '=', $id, 'and')
+            ->where('organizations_member.userID', '=', Auth::id(), 'and')
+            ->where('mark_as_dones.userID', '=', Auth::id(), 'and')
+            ->orderBy('note.created_at', 'desc')
+            ->skip($offset)
+            ->take($limit)
+            ->get(['note.*']);
 
         return response()->json($note_list);
     }
 
-    public function organization_mark_as_undone_fetch(Request $request, $id){
-        $offset = $request->input('offset');
+    public function organization_mark_as_undone_fetch(Request $request, $id)
+    {
+        $offset = intval($request->input('offset', 0));
         $limit = 20;
 
-        $note_list = Note::where('organization_id', $id)->where('organization.memberID', auth()->user()->id)->where('mark_as_done.userID', null)->orderBy('created_at','desc')->skip($offset)->take($limit)->get();
+        $note_list = Note::query()
+            ->leftJoin('organizations_member', 'note.organizationID', '=', 'organizations_member.organizationID')
+            ->leftJoin('mark_as_dones', 'note.id', '=', 'mark_as_dones.noteID')
+            ->where('note.organizationID', '=', $id, 'and')
+            ->where('organizations_member.userID', '=', Auth::id(), 'and')
+            ->whereNull('mark_as_dones.userID', 'and', false)
+            ->orderBy('note.created_at', 'desc')
+            ->skip($offset)
+            ->take($limit)
+            ->get(['note.*']);
 
         return response()->json($note_list);
     }
-
 }

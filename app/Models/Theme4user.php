@@ -4,14 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ThemeRequest extends Model
+class Theme4user extends Model
 {
-    protected $table = 'theme_requests';
+    protected $table = 'theme4users';
 
     protected $fillable = [
         'name',
         'description',
-        'style',
         'drag_type',
         'price',
     ];

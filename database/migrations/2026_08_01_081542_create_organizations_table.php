@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('organizations', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
-            $table->text("description")->nullable();
-            //$table->string("image")->nullable();
+            $table->string('name');
+            $table->text('description')->nullable();
+            // $table->string("image")->nullable();
             $table->string('logo_url')->nullable();
             $table->string('banner_url')->nullable();
             $table->float('balance')->default(0);

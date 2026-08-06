@@ -17,9 +17,9 @@ return new class extends Migration
             $table->json('home_page_style');
             $table->json('note_page_style');
             $table->json('account_page_style');
-            $table->json("transaction_page_style");
-            $table->json("transaction_history_style");
-            $table->json("transaction_details_style");
+            $table->json('transaction_page_style');
+            $table->json('transaction_history_style');
+            $table->json('transaction_details_style');
             $table->timestamps();
         });
     }

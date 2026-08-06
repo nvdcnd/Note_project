@@ -6,6 +6,7 @@ use App\Models\MarkAsDone;
 use App\Models\Note;
 use App\Models\PivotForNote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NoteController extends Controller
 {
@@ -13,7 +14,7 @@ class NoteController extends Controller
     {
         $request->validate([
             'title' => 'required',
-            'description' => 'required'
+            'description' => 'required',
         ]);
         $data = $request->all();
         $note = new Note;
@@ -35,7 +36,7 @@ class NoteController extends Controller
     {
         $request->validate([
             'title' => 'required',
-            'description' => 'required'
+            'description' => 'required',
         ]);
         $data = $request->all();
         $note = new Note;
@@ -54,36 +55,43 @@ class NoteController extends Controller
         return redirect()->route('note', $note->id)->with('success', 'Note created successfully');
     }
 
-
     public function delete_note_request(Request $request, $id)
     {
-        $pivot = PivotForNote::find($id);
+        /** @var PivotForNote|null $pivot */
+        $pivot = PivotForNote::query()->find($id);
         if (! $pivot) {
             return redirect()->route('home')->with('error', 'Note record not found');
         }
-        $note = Note::find($pivot->note_id);
-        $pivot->delete();
+        /** @var Note|null $note */
+        $note = Note::query()->find($pivot->note_id);
+        PivotForNote::destroy($pivot->id);
         if ($note) {
-            $note->delete();
+            Note::destroy($note->id);
         }
 
         return redirect()->route('home')->with('success', 'Note deleted successfully');
     }
 
-    public function edit_note(Request $request, $id){
+    public function edit_note(Request $request, $id)
+    {
         $user = Auth::user();
-        $note = Note::where('id',$id)->where('creatorID',$user->id)->orWhere('pivot_for_note.sharedwith',$userID)->exist();
-        if (!$note) {
-            return redirect()->route('note',$id)->with('error',"you cannot edit this note");
-        } else {
-            $request->validate([
-            'title' => 'required',
-            'description' => 'required'
-        ]);
-            $data = $request->all();
-            $note->title = $data['title'];
-            $note->description = $data['description'];
-            $note::save();
+        $note = Note::query()->find($id);
+        $pivot = PivotForNote::query()->where('note_id', $id)->where('shared_with', $user->id)->first();
+
+        if (! $note || ($note->creater_id != $user->id && ! $pivot)) {
+            return redirect()->route('note', $id)->with('error', 'You cannot edit this note');
         }
+
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+        ]);
+
+        $data = $request->all();
+        $note->title = $data['title'];
+        $note->description = $data['description'];
+        $note->save();
+
+        return redirect()->route('note', $id)->with('success', 'Note updated successfully');
     }
 }
