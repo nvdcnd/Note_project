@@ -1,6 +1,8 @@
 FROM php:8.5.0
 WORKDIR /app
 
+COPY . .
+
 RUN composer install
 RUN php artisan key:generate
 RUN php artisan migrate:fresh
