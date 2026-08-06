@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tạo Organization mới — Paper Pop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="paper_pop.css">
+  <style>
+    .form-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background-color: var(--canvas);
+    }
+
+    .org-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 640px;
+      padding: 32px;
+    }
+
+    .info-banner {
+      background-color: var(--accent-light);
+      border: 1px solid rgba(79, 70, 229, 0.2);
+      border-radius: var(--radius-control);
+      padding: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <div class="form-container">
+    <div style="width: 100%; max-width: 640px; margin-bottom: 16px;">
+      <a href="organization.html" onclick="handleCancelClick(event)" class="btn btn-ghost" style="padding-left: 0;">
+        <i class="ph-bold ph-arrow-left"></i> Quay lại Organization
+      </a>
+    </div>
+
+    <main id="main" class="org-card">
+      <div style="margin-bottom: 24px;">
+        <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">Tạo Organization mới</h1>
+        <p style="color: var(--muted); font-size: 14px;">Tạo không gian làm việc chung để chia sẻ note và cộng tác cùng nhóm</p>
+      </div>
+
+      <div class="info-banner">
+        <i class="ph-bold ph-crown" style="font-size: 24px; color: var(--accent); flex-shrink: 0; margin-top: 2px;"></i>
+        <div>
+          <strong style="font-size: 14px; color: var(--accent); display: block; margin-bottom: 4px;">Bạn sẽ là Host của Organization này</strong>
+          <p style="font-size: 13px; color: #374151; margin: 0;">Với vai trò Host, bạn có toàn quyền quản lý thành viên, phân quyền và điều hành workspace. Giao diện mặc định sử dụng Theme Paper Pop.</p>
+        </div>
+      </div>
+
+      <form action="#" method="POST" onsubmit="handleCreateOrgSubmit(event)">
+        <div class="form-group">
+          <label for="org-name" class="form-label">Tên Organization *</label>
+          <input type="text" id="org-name" name="name" class="form-control" placeholder="VD: UI/UX Design Team" required autofocus oninput="markFormDirty()">
+          <span class="form-hint">Tên hiển thị công khai với tất cả thành viên trong nhóm.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="org-description" class="form-label">Mô tả mục tiêu nhóm *</label>
+          <textarea id="org-description" name="description" class="form-control" rows="4" placeholder="VD: Nhóm chuyên trách thiết kế giao diện và trải nghiệm người dùng..." required oninput="markFormDirty()"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border);">
+          <button type="button" class="btn btn-secondary" onclick="handleCancelClick(event)">Hủy bỏ</button>
+          <button type="submit" id="submit-btn" class="btn btn-primary"><i class="ph-bold ph-plus"></i> Tạo Organization</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <!-- Discard Changes Modal -->
+  <div id="discard-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="discard-modal-title">
+    <div class="modal-panel" style="max-width: 440px;">
+      <div class="modal-header">
+        <h2 id="discard-modal-title" class="modal-title">Bỏ thay đổi?</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('discard-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <p style="font-size: 15px; color: var(--muted); margin-bottom: 24px;">Bạn đã nhập thông tin. Bạn có chắc muốn hủy bỏ không?</p>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('discard-modal')">Tiếp tục sửa</button>
+        <a href="organization.html" class="btn btn-danger">Rời khỏi trang</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="paper_pop.js"></script>
+  <script>
+    let isDirty = false;
+
+    function markFormDirty() {
+      isDirty = true;
+    }
+
+    function handleCancelClick(e) {
+      if (isDirty) {
+        e.preventDefault();
+        openModal('discard-modal');
+      } else {
+        window.location.href = 'organization.html';
+      }
+    }
+
+    function handleCreateOrgSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="ph-bold ph-spinner spinner" style="animation: spin 1s linear infinite;"></i> Đang tạo...`;
+
+      setTimeout(() => {
+        showToast('Đã tạo Organization thành công!');
+        setTimeout(() => window.location.href = 'organization.html', 1000);
+      }, 1200);
+    }
+  </script>
+</body>
+</html>

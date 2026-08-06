@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gửi yêu cầu thiết kế Theme — Paper Pop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="paper_pop.css">
+  <style>
+    .request-layout-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    @media (min-width: 1024px) {
+      .request-layout-grid {
+        display: grid;
+        grid-template-columns: 720px 280px;
+        gap: 32px;
+        align-items: start;
+      }
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tips-aside {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .success-card {
+      display: none;
+      text-align: center;
+      padding: 32px 16px;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <div class="app-shell">
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <a href="theme_store.html" class="btn btn-ghost btn-icon" title="Quay lại Theme Store"><i class="ph-bold ph-arrow-left"></i></a>
+          <h1 style="font-size: 18px; font-weight: 700; margin: 0;">Gửi yêu cầu thiết kế Theme mới</h1>
+        </div>
+      </header>
+
+      <main id="main" class="main-content">
+        <div class="request-layout-grid">
+          
+          <!-- Main Form Card -->
+          <section id="form-card-section" class="form-card">
+            
+            <!-- FORM STATE -->
+            <form id="theme-request-form" onsubmit="handleRequestSubmit(event)">
+              <div style="margin-bottom: 24px;">
+                <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">Theme Request Brief</h1>
+                <p style="color: var(--muted); font-size: 14px;">Mô tả ý tưởng theme cá nhân hoặc team mà bạn muốn đội ngũ Paper Pop phát triển.</p>
+              </div>
+
+              <div class="form-group">
+                <label for="req-name" class="form-label">Tên Theme mong muốn *</label>
+                <input type="text" id="req-name" name="name" class="form-control" placeholder="VD: Vintage Paper Retro" required>
+              </div>
+
+              <div class="form-group">
+                <label for="req-desc" class="form-label">Mô tả tổng quan ý tưởng *</label>
+                <textarea id="req-desc" name="description" class="form-control" rows="3" placeholder="Mô tả cảm hứng thiết kế, màu sắc hoặc không gian ứng dụng..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="req-style" class="form-label">Yêu cầu Style chi tiết *</label>
+                <textarea id="req-style" name="style" class="form-control" rows="4" placeholder="Ví dụ: Nền màu kem cổ điển #F5EBE0, giấy note màu trà nhạt #E3D5CA, font chữ phong cách viết tay..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="req-drag-type" class="form-label">Cơ chế tương tác vuốt (Drag Type) *</label>
+                <select id="req-drag-type" name="drag_type" class="form-select" required>
+                  <option value="swipe">Swipe ngang chuẩn Paper Pop (Trái = Để sau, Phải = Hoàn thành)</option>
+                  <option value="flick">Flick văng nhanh (Lực kéo nhẹ)</option>
+                  <option value="tilt">Tilt nghiêng giấy note</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="req-price" class="form-label">Ngân sách dự kiến (đơn vị xu) *</label>
+                <input type="number" id="req-price" name="price" class="form-control" placeholder="100" min="0" required>
+                <span class="form-hint">Mức credit ngân sách tài trợ cho thiết kế theme này.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="req-catalog-link" class="form-label">Link Catalogue minh họa (không bắt buộc)</label>
+                <input type="url" id="req-catalog-link" name="catalog_link" class="form-control" placeholder="https://dribbble.com/shots/example">
+              </div>
+
+              <div class="form-group">
+                <label for="req-email" class="form-label">Email nhận phản hồi *</label>
+                <input type="email" id="req-email" name="email" class="form-control" value="user@example.com" readonly style="background: var(--canvas);">
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border);">
+                <a href="theme_store.html" class="btn btn-secondary">Hủy bỏ</a>
+                <button type="submit" id="submit-req-btn" class="btn btn-primary"><i class="ph-bold ph-paper-plane-right"></i> Gửi yêu cầu Brief</button>
+              </div>
+            </form>
+
+            <!-- SUCCESS STATE (Inline Crossfade inside same card) -->
+            <div id="request-success-state" class="success-card">
+              <i class="ph-bold ph-check-circle" style="font-size: 64px; color: var(--success); margin-bottom: 16px;"></i>
+              <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">Đã gửi yêu cầu Theme thành công!</h2>
+              <p style="color: var(--muted); font-size: 15px; margin-bottom: 16px;">
+                Cảm ơn bạn đã đóng góp ý tưởng. Đội ngũ thiết kế sẽ phản hồi qua email <strong id="success-email-text">user@example.com</strong>.
+              </p>
+              <p style="font-family: monospace; font-size: 14px; background: var(--canvas); padding: 10px 16px; border-radius: var(--radius-control); display: inline-block; margin-bottom: 32px;">
+                Mã yêu cầu: <strong id="success-req-id">#REQ-88902</strong>
+              </p>
+
+              <div style="display: flex; justify-content: center; gap: 12px;">
+                <a href="theme_store.html" class="btn btn-secondary"><i class="ph-bold ph-storefront"></i> Về Theme Store</a>
+                <button type="button" class="btn btn-primary" onclick="resetRequestForm()"><i class="ph-bold ph-plus"></i> Gửi yêu cầu khác</button>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- Desktop Brief Tips Panel -->
+          <aside class="tips-aside">
+            <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+              <i class="ph-bold ph-lightbulb"></i> Mẹo viết Brief chuẩn
+            </h2>
+            <ul style="padding-left: 20px; font-size: 13px; color: #374151; display: flex; flex-direction: column; gap: 10px;">
+              <li>Mô tả rõ tone màu chính và tone màu phụ (background vs note paper).</li>
+              <li>Đảm bảo tỷ lệ tương phản giữa chữ và giấy note đạt chuẩn WCAG 4.5:1.</li>
+              <li>Gửi kèm link ảnh mẫu minh họa giúp đội ngũ duyệt theme nhanh hơn.</li>
+            </ul>
+          </aside>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="paper_pop.js"></script>
+  <script>
+    function handleRequestSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-req-btn');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="ph-bold ph-spinner spinner" style="animation: spin 1s linear infinite;"></i> Đang gửi yêu cầu...`;
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="ph-bold ph-paper-plane-right"></i> Gửi yêu cầu Brief`;
+
+        document.getElementById('theme-request-form').style.display = 'none';
+        document.getElementById('request-success-state').style.display = 'block';
+        showToast('Đã ghi nhận yêu cầu brief theme!');
+      }, 1200);
+    }
+
+    function resetRequestForm() {
+      document.getElementById('theme-request-form').reset();
+      document.getElementById('theme-request-form').style.display = 'block';
+      document.getElementById('request-success-state').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

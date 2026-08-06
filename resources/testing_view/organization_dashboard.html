@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng điều hành Organization — Paper Pop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="paper_pop.css">
+  <style>
+    .dashboard-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <div class="app-shell">
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <a href="organization.html" class="btn btn-ghost btn-icon" title="Quay lại Organization"><i class="ph-bold ph-arrow-left"></i></a>
+          <h1 style="font-size: 18px; font-weight: 700; margin: 0;">Bảng điều hành — UI/UX Design Team</h1>
+        </div>
+
+        <div class="topbar-right">
+          <span class="scope-badge" style="background: var(--accent-light); color: var(--accent); padding: 6px 12px; font-size: 13px;">Host Dashboard</span>
+        </div>
+      </header>
+
+      <main id="main" class="main-content">
+        <!-- Stat Grid -->
+        <section class="stat-grid">
+          <div class="stat-card">
+            <span class="stat-value">3</span>
+            <span class="stat-label"><i class="ph-bold ph-note-pencil"></i> Note đang mở</span>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-value">0</span>
+            <span class="stat-label"><i class="ph-bold ph-check-circle"></i> Note hoàn thành</span>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-value">2</span>
+            <span class="stat-label"><i class="ph-bold ph-users-three"></i> Thành viên chính thức</span>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-value">1</span>
+            <span class="stat-label"><i class="ph-bold ph-clock"></i> Lời mời đang chờ</span>
+          </div>
+        </section>
+
+        <!-- Progress Panel (Truthful source data note) -->
+        <section class="dashboard-panel">
+          <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+            <i class="ph-bold ph-chart-donut"></i> Tiến độ hoàn thành công việc
+          </h2>
+          <div style="padding: 16px; background: var(--canvas); border-radius: var(--radius-control); border: 1px solid var(--border);">
+            <p style="font-size: 14px; color: var(--muted); margin: 0;">
+              <strong>Chưa có dữ liệu tiến độ:</strong> Hiện tại hệ thống chưa ghi nhận ghi chú hoàn thành trong Organization này. Hãy động viên thành viên vuốt hoàn thành note!
+            </p>
+          </div>
+        </section>
+
+        <!-- Member Management Section with Active / Pending Tabs -->
+        <section class="dashboard-panel">
+          <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Quản lý danh sách thành viên</h2>
+
+          <div class="tabs" role="tablist">
+            <button class="tab-btn" id="dash-tab-active" aria-selected="true" role="tab" onclick="switchMemberTab('active')">Thành viên hiện tại (2)</button>
+            <button class="tab-btn" id="dash-tab-pending" aria-selected="false" role="tab" onclick="switchMemberTab('pending')">Lời mời đang chờ (1)</button>
+          </div>
+
+          <!-- ACTIVE MEMBERS -->
+          <div id="dash-panel-active" role="tabpanel">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="padding: 16px; background: var(--canvas); border-radius: var(--radius-control); display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div class="avatar-btn" style="width: 40px; height: 40px;">NV</div>
+                  <div>
+                    <h3 style="font-size: 15px; font-weight: 700; margin: 0;">Nguyễn Văn A</h3>
+                    <p style="font-size: 13px; color: var(--muted); margin: 0;">user@example.com</p>
+                  </div>
+                </div>
+                <span class="scope-badge" style="background: var(--accent-light); color: var(--accent);">Host</span>
+              </div>
+
+              <div style="padding: 16px; background: var(--canvas); border-radius: var(--radius-control); display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div class="avatar-btn" style="width: 40px; height: 40px; background: #059669;">TB</div>
+                  <div>
+                    <h3 style="font-size: 15px; font-weight: 700; margin: 0;">Trần Thị B</h3>
+                    <p style="font-size: 13px; color: var(--muted); margin: 0;">tranb@example.com</p>
+                  </div>
+                </div>
+                <button class="btn btn-danger btn-sm" style="min-height: 36px; padding: 4px 12px;" onclick="openModal('confirm-remove-modal')"><i class="ph-bold ph-user-minus"></i> Xóa</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PENDING MEMBERS -->
+          <div id="dash-panel-pending" role="tabpanel" style="display: none;">
+            <div style="padding: 16px; background: var(--canvas); border-radius: var(--radius-control); display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="avatar-btn" style="width: 40px; height: 40px; background: #D97706;">LC</div>
+                <div>
+                  <h3 style="font-size: 15px; font-weight: 700; margin: 0;">Lê Văn C</h3>
+                  <p style="font-size: 13px; color: var(--muted); margin: 0;">levanc@example.com • Đã gửi 2 ngày trước</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary btn-sm" style="min-height: 36px;" onclick="showToast('Đã gửi lại email lời mời!')">Gửi lại lời mời</button>
+                <button class="btn btn-danger btn-sm" style="min-height: 36px;" onclick="showToast('Đã hủy lời mời!')">Hủy lời mời</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Confirm Remove Member Modal -->
+  <div id="confirm-remove-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="remove-modal-title">
+    <div class="modal-panel" style="max-width: 440px;">
+      <div class="modal-header">
+        <h2 id="remove-modal-title" class="modal-title" style="color: var(--danger);">Xác nhận xóa thành viên</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('confirm-remove-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <p style="font-size: 15px; color: var(--muted); margin-bottom: 24px;">
+        Bạn có chắc chắn muốn xóa thành viên <strong>Trần Thị B</strong> khỏi Organization này? Người dùng sẽ mất quyền truy cập vào tất cả note team.
+      </p>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('confirm-remove-modal')">Hủy</button>
+        <button type="button" class="btn btn-danger" onclick="handleConfirmRemove()"><i class="ph-bold ph-user-minus"></i> Xác nhận xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="paper_pop.js"></script>
+  <script>
+    function switchMemberTab(tabKey) {
+      document.getElementById('dash-panel-active').style.display = tabKey === 'active' ? 'block' : 'none';
+      document.getElementById('dash-panel-pending').style.display = tabKey === 'pending' ? 'block' : 'none';
+      document.getElementById('dash-tab-active').setAttribute('aria-selected', tabKey === 'active');
+      document.getElementById('dash-tab-pending').setAttribute('aria-selected', tabKey === 'pending');
+    }
+
+    function handleConfirmRemove() {
+      closeModal('confirm-remove-modal');
+      showToast('Đã xóa thành viên khỏi Organization!');
+    }
+  </script>
+</body>
+</html>

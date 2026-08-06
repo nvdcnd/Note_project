@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organization Workspace — Paper Pop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="paper_pop.css">
+  <style>
+    .org-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+
+    .org-banner {
+      height: 160px;
+      background: linear-gradient(135deg, #4F46E5, #9333EA);
+      position: relative;
+    }
+
+    .org-header-body {
+      padding: 24px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .org-header-body {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+    }
+
+    .org-avatar-badge {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 4px solid var(--surface);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: -56px;
+    }
+
+    .member-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .member-table th, .member-table td {
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .member-table th {
+      background: var(--canvas);
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <div class="app-shell">
+    <!-- Navigation Sidebar -->
+    <aside class="sidebar">
+      <a href="home.html" class="brand-logo"><i class="ph-bold ph-note-pencil"></i> <span>Paper Pop</span></a>
+      <nav style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+        <a href="home.html" class="nav-item"><i class="ph-bold ph-house"></i> <span>Note cá nhân</span></a>
+        <a href="organization.html" class="nav-item" aria-current="page"><i class="ph-bold ph-users-three"></i> <span>Organization</span></a>
+        <a href="theme_store.html" class="nav-item"><i class="ph-bold ph-palette"></i> <span>Theme Store</span></a>
+        <a href="wallet.html" class="nav-item"><i class="ph-bold ph-wallet"></i> <span>Ví xu</span></a>
+      </nav>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 style="font-size: 18px; font-weight: 700; margin: 0;">UI/UX Design Team</h1>
+          <span class="scope-badge" style="background: var(--accent-light); color: var(--accent);">Host Workspace</span>
+        </div>
+
+        <div class="topbar-right">
+          <a href="create_organization.html" class="btn btn-secondary" style="font-size: 13px;"><i class="ph-bold ph-plus"></i> Tạo Org mới</a>
+          <a href="organization_dashboard.html" class="btn btn-primary" style="font-size: 13px;"><i class="ph-bold ph-chart-line-up"></i> Bảng điều hành</a>
+        </div>
+      </header>
+
+      <main id="main" class="main-content">
+        <!-- Hero Section -->
+        <section class="org-hero">
+          <div class="org-banner"></div>
+          <div class="org-header-body">
+            <div>
+              <div class="org-avatar-badge">UI</div>
+              <h1 style="font-size: 24px; font-weight: 700; margin-top: 12px; margin-bottom: 4px;">UI/UX Design Team</h1>
+              <p style="color: var(--muted); font-size: 14px; margin: 0;">Không gian làm việc chung dành cho đội ngũ thiết kế sản phẩm Paper Pop</p>
+            </div>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button class="btn btn-primary" onclick="openModal('invite-modal')"><i class="ph-bold ph-user-plus"></i> Mời thành viên</button>
+              <button class="btn btn-secondary" onclick="openModal('manage-org-modal')"><i class="ph-bold ph-gear"></i> Quản trị Org</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Navigation Tabs: Notes / Members -->
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" id="tab-btn-notes" aria-selected="true" role="tab" onclick="switchOrgTab('notes')">Note team (3)</button>
+          <button class="tab-btn" id="tab-btn-members" aria-selected="false" role="tab" onclick="switchOrgTab('members')">Thành viên (4)</button>
+        </div>
+
+        <!-- TAB PANEL 1: NOTES -->
+        <section id="panel-notes" role="tabpanel" aria-labelledby="tab-btn-notes">
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+            <button class="btn btn-primary" onclick="openModal('create-org-note-modal')"><i class="ph-bold ph-plus"></i> Tạo note team</button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+            <!-- Note 1 -->
+            <article class="note-paper">
+              <div class="note-paper__head">
+                <span class="scope-badge" style="background: var(--accent-light); color: var(--accent);">Org Note</span>
+                <span style="font-size: 12px; color: var(--muted);">Tạo bởi Trần B</span>
+              </div>
+              <div class="note-paper__body">
+                <h2 class="note-paper__title">Họp thống nhất màu nền canvas mới</h2>
+                <p class="note-paper__desc">Rà soát token #F8F7F2 và đảm bảo contrast ratio đạt chuẩn WCAG 4.5:1 tối thiểu trên mọi thiết bị.</p>
+              </div>
+              <div class="note-paper__foot">
+                <span style="font-size: 12px; color: var(--muted);">Hạn: 08/08</span>
+                <a href="view_note.html" class="btn btn-secondary btn-sm" style="min-height: 36px; padding: 4px 12px;">Xem note</a>
+              </div>
+              <div class="paper-fold" aria-hidden="true"></div>
+            </article>
+
+            <!-- Note 2 -->
+            <article class="note-paper">
+              <div class="note-paper__head">
+                <span class="scope-badge" style="background: var(--accent-light); color: var(--accent);">Org Note</span>
+                <span style="font-size: 12px; color: var(--muted);">Tạo bởi Nguyễn A</span>
+              </div>
+              <div class="note-paper__body">
+                <h2 class="note-paper__title">Kiểm thử responsive breakpoint 360px</h2>
+                <p class="note-paper__desc">Đảm bảo bottom nav hiển thị đầy đủ và không bị che khuất trên iPhone và Android nhỏ.</p>
+              </div>
+              <div class="note-paper__foot">
+                <span style="font-size: 12px; color: var(--muted);">Hạn: 10/08</span>
+                <a href="view_note.html" class="btn btn-secondary btn-sm" style="min-height: 36px; padding: 4px 12px;">Xem note</a>
+              </div>
+              <div class="paper-fold" aria-hidden="true"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- TAB PANEL 2: MEMBERS -->
+        <section id="panel-members" role="tabpanel" aria-labelledby="tab-btn-members" style="display: none;">
+          <table class="member-table">
+            <thead>
+              <tr>
+                <th>Thành viên</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                  <div class="avatar-btn" style="width: 32px; height: 32px; font-size: 12px;">NV</div> Nguyễn Văn A
+                </td>
+                <td>user@example.com</td>
+                <td><span class="scope-badge" style="background: var(--accent-light); color: var(--accent);">Host</span></td>
+                <td><span class="scope-badge" style="background: var(--success-light); color: var(--success);">Đang hoạt động</span></td>
+                <td><span style="font-size: 13px; color: var(--muted);">— (Chủ nhóm)</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                  <div class="avatar-btn" style="width: 32px; height: 32px; font-size: 12px; background: #059669;">TB</div> Trần Thị B
+                </td>
+                <td>tranb@example.com</td>
+                <td>Thành viên</td>
+                <td><span class="scope-badge" style="background: var(--success-light); color: var(--success);">Đang hoạt động</span></td>
+                <td><button class="btn btn-ghost btn-icon" onclick="showToast('Xóa thành viên')"><i class="ph-bold ph-user-minus"></i></button></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                  <div class="avatar-btn" style="width: 32px; height: 32px; font-size: 12px; background: #D97706;">LC</div> Lê Văn C
+                </td>
+                <td>levanc@example.com</td>
+                <td>Thành viên</td>
+                <td><span class="scope-badge" style="background: var(--warning-light); color: var(--warning);">Đang chờ chấp nhận</span></td>
+                <td><button class="btn btn-ghost btn-icon" onclick="showToast('Đã gửi lại lời mời!')" title="Gửi lại lời mời"><i class="ph-bold ph-paper-plane-tilt"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Invite Member Sheet Modal -->
+  <div id="invite-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="invite-modal-title">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="invite-modal-title" class="modal-title">Mời thành viên vào Org</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('invite-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <form onsubmit="handleSendInvite(event)">
+        <div class="form-group">
+          <label for="invite-email-input" class="form-label">Email thành viên *</label>
+          <input type="email" id="invite-email-input" class="form-control" placeholder="member@example.com" required>
+        </div>
+
+        <p class="form-hint" style="margin-bottom: 20px;">Email lời mời sẽ gửi thông báo gia nhập. Người nhận có thể chấp nhận để vào workspace.</p>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('invite-modal')">Hủy</button>
+          <button type="submit" class="btn btn-primary"><i class="ph-bold ph-paper-plane-right"></i> Gửi lời mời</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Manage Org Sheet Modal -->
+  <div id="manage-org-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="manage-modal-title">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="manage-modal-title" class="modal-title">Quản trị Organization</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('manage-org-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="showToast('Chức năng sửa thông tin Org')">
+          <i class="ph-bold ph-pencil-simple"></i> Chỉnh sửa tên và mô tả Org
+        </button>
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="openModal('transfer-host-modal'); closeModal('manage-org-modal');">
+          <i class="ph-bold ph-crown"></i> Chuyển quyền Quyền Host (Host Transfer)
+        </button>
+        <button class="btn btn-danger" style="justify-content: flex-start;" onclick="showToast('Xác nhận giải tán Org')">
+          <i class="ph-bold ph-trash"></i> Giải tán Organization vĩnh viễn
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transfer Host 2-step Modal -->
+  <div id="transfer-host-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="transfer-modal-title">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="transfer-modal-title" class="modal-title">Chuyển giao quyền Host</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('transfer-host-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <form onsubmit="handleTransferSubmit(event)">
+        <div class="form-group">
+          <label for="transfer-target" class="form-label">Chọn thành viên nhận quyền Host *</label>
+          <select id="transfer-target" class="form-select" required>
+            <option value="">-- Chọn thành viên --</option>
+            <option value="tranb@example.com">Trần Thị B (tranb@example.com)</option>
+            <option value="levanc@example.com">Lê Văn C (levanc@example.com)</option>
+          </select>
+        </div>
+
+        <p style="font-size: 13px; color: var(--danger); margin-bottom: 20px;">
+          Lưu ý: Khi chuyển giao thành công, bạn sẽ thành thành viên thường và không còn quyền quản trị Org này.
+        </p>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('transfer-host-modal')">Hủy</button>
+          <button type="submit" class="btn btn-danger">Xác nhận chuyển Host</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="paper_pop.js"></script>
+  <script>
+    function switchOrgTab(tabKey) {
+      document.getElementById('panel-notes').style.display = tabKey === 'notes' ? 'block' : 'none';
+      document.getElementById('panel-members').style.display = tabKey === 'members' ? 'block' : 'none';
+      document.getElementById('tab-btn-notes').setAttribute('aria-selected', tabKey === 'notes');
+      document.getElementById('tab-btn-members').setAttribute('aria-selected', tabKey === 'members');
+    }
+
+    function handleSendInvite(e) {
+      e.preventDefault();
+      closeModal('invite-modal');
+      showToast('Đã gửi lời mời tới thành viên mới!');
+    }
+
+    function handleTransferSubmit(e) {
+      e.preventDefault();
+      closeModal('transfer-host-modal');
+      showToast('Yêu cầu chuyển quyền Host đã được gửi!');
+    }
+  </script>
+</body>
+</html>

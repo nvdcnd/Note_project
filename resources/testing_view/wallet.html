@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Số dư & Ví credit — Paper Pop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="paper_pop.css">
+  <style>
+    .balance-card {
+      background: linear-gradient(135deg, #1E293B, #0F172A);
+      color: white;
+      border-radius: var(--radius-card);
+      padding: 32px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (min-width: 640px) {
+      .balance-card {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    .tx-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .tx-table th, .tx-table td {
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .tx-table th {
+      background: var(--canvas);
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .step-pane {
+      display: none;
+    }
+    .step-pane.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="home.html" class="brand-logo"><i class="ph-bold ph-note-pencil"></i> <span>Paper Pop</span></a>
+      <nav style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+        <a href="home.html" class="nav-item"><i class="ph-bold ph-house"></i> <span>Note cá nhân</span></a>
+        <a href="organization.html" class="nav-item"><i class="ph-bold ph-users-three"></i> <span>Organization</span></a>
+        <a href="theme_store.html" class="nav-item"><i class="ph-bold ph-palette"></i> <span>Theme Store</span></a>
+        <a href="wallet.html" class="nav-item" aria-current="page"><i class="ph-bold ph-wallet"></i> <span>Ví xu</span></a>
+      </nav>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 style="font-size: 18px; font-weight: 700; margin: 0;">Ví cá nhân & Quản lý Xu</h1>
+        </div>
+
+        <div class="topbar-right">
+          <a href="theme_store.html" class="btn btn-secondary" style="font-size: 13px;"><i class="ph-bold ph-storefront"></i> Dùng xu mua Theme</a>
+        </div>
+      </header>
+
+      <main id="main" class="main-content">
+        <!-- Balance Summary Header Card -->
+        <section class="balance-card">
+          <div>
+            <span style="font-size: 14px; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Số dư khả dụng</span>
+            <div style="font-size: 40px; font-weight: 700; display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+              <span id="user-balance-val">500</span> <span style="font-size: 20px; font-weight: 500; color: #CBD5E1;">xu</span>
+            </div>
+            <span style="font-size: 12px; color: #94A3B8;">Cập nhật lúc 20:30, 06/08/2026</span>
+          </div>
+
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-primary" onclick="openTransferSheet('user2user')"><i class="ph-bold ph-arrows-left-right"></i> Chuyển xu cá nhân</button>
+            <button class="btn btn-secondary" style="background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.2);" onclick="openTransferSheet('user2org')">Chuyển cho Org</button>
+          </div>
+        </section>
+
+        <!-- Transaction History Section -->
+        <section style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 24px; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="font-size: 18px; font-weight: 700; margin: 0;">Lịch sử giao dịch xu</h2>
+            <select class="form-select pill-filter" style="min-height: 36px; padding: 4px 12px;">
+              <option value="all">Tất cả giao dịch</option>
+              <option value="user2user">Cá nhân ↔ Cá nhân</option>
+              <option value="user2org">Cá nhân ↔ Org</option>
+            </select>
+          </div>
+
+          <table class="tx-table">
+            <thead>
+              <tr>
+                <th>Mã giao dịch</th>
+                <th>Loại hình</th>
+                <th>Đối tác</th>
+                <th>Số lượng</th>
+                <th>Thời gian</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 600; font-family: monospace;">#TX-98412</td>
+                <td>Cá nhân → Cá nhân</td>
+                <td>tranb@example.com</td>
+                <td style="font-weight: 700; color: var(--danger);">-50 xu</td>
+                <td>06/08 18:20</td>
+                <td><span class="scope-badge" style="background: var(--success-light); color: var(--success);">Hoàn tất</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600; font-family: monospace;">#TX-98105</td>
+                <td>Nạp thưởng hệ thống</td>
+                <td>Paper Pop Reward</td>
+                <td style="font-weight: 700; color: var(--success);">+100 xu</td>
+                <td>04/08 09:15</td>
+                <td><span class="scope-badge" style="background: var(--success-light); color: var(--success);">Hoàn tất</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Multi-Step Transfer Sheet Modal -->
+  <div id="transfer-sheet-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="transfer-modal-title">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="transfer-modal-title" class="modal-title">Chuyển xu nội bộ</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('transfer-sheet-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <!-- STEP 1: FORM -->
+      <div id="transfer-step-1" class="step-pane active">
+        <form onsubmit="handleStep1Submit(event)">
+          <div class="form-group">
+            <label for="transfer-type-select" class="form-label">Loại hình giao dịch *</label>
+            <select id="transfer-type-select" class="form-select" required>
+              <option value="user2user">Cá nhân → Cá nhân (User to User)</option>
+              <option value="user2org">Cá nhân → Organization (User to Org)</option>
+              <option value="org2user">Organization → Thành viên (Host to User)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="transfer-to-input" class="form-label">Email / ID Người nhận *</label>
+            <input type="email" id="transfer-to-input" class="form-control" placeholder="recipient@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="transfer-amount-input" class="form-label">Số lượng xu chuyển *</label>
+            <input type="number" id="transfer-amount-input" class="form-control" placeholder="100" min="1" max="500" required>
+            <span class="form-hint">Số dư khả dụng: 500 xu.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="transfer-pass-input" class="form-label">Mật khẩu xác nhận tài khoản *</label>
+            <div class="password-input-group">
+              <input type="password" id="transfer-pass-input" class="form-control" placeholder="••••••••" required>
+              <button type="button" class="password-toggle-btn" aria-label="Hiện mật khẩu"><i class="ph-eye"></i></button>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('transfer-sheet-modal')">Hủy</button>
+            <button type="submit" class="btn btn-primary">Tiếp tục gửi mã OTP <i class="ph-bold ph-arrow-right"></i></button>
+          </div>
+        </form>
+      </div>
+
+      <!-- STEP 2: OTP VERIFICATION -->
+      <div id="transfer-step-2" class="step-pane">
+        <div style="padding: 16px; background: var(--canvas); border-radius: var(--radius-control); margin-bottom: 20px;">
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Xác nhận giao dịch</h3>
+          <p style="font-size: 13px; color: var(--muted); margin: 0;" id="otp-recap-text">Chuyển 100 xu tới tranb@example.com</p>
+        </div>
+
+        <form onsubmit="handleStep2Submit(event)">
+          <div class="form-group">
+            <label class="form-label" style="text-align: center; display: block;">Mã xác thực OTP (Passkey 6 số)</label>
+            <div class="otp-group">
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+            </div>
+            <span class="form-hint" style="text-align: center; display: block;">Mã có hiệu lực trong 5 phút. Vui lòng kiểm tra email.</span>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+            <button type="button" class="btn btn-secondary" onclick="showStep(1)">Quay lại</button>
+            <button type="submit" id="otp-verify-btn" class="btn btn-primary"><i class="ph-bold ph-check"></i> Xác nhận chuyển xu</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- STEP 3: RECEIPT -->
+      <div id="transfer-step-3" class="step-pane" style="text-align: center; padding: 16px 0;">
+        <i class="ph-bold ph-check-circle" style="font-size: 64px; color: var(--success); margin-bottom: 12px;"></i>
+        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Giao dịch thành công!</h3>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 20px;" id="receipt-summary-text">Đã chuyển 100 xu thành công tới tranb@example.com</p>
+        <p style="font-family: monospace; font-size: 13px; color: var(--muted); margin-bottom: 24px;">Mã GD: #TX-98560</p>
+
+        <button class="btn btn-primary" onclick="closeModal('transfer-sheet-modal'); showStep(1);">Hoàn tất</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="paper_pop.js"></script>
+  <script>
+    function openTransferSheet(typeKey) {
+      document.getElementById('transfer-type-select').value = typeKey;
+      showStep(1);
+      openModal('transfer-sheet-modal');
+    }
+
+    function showStep(stepNum) {
+      document.querySelectorAll('.step-pane').forEach(el => el.classList.remove('active'));
+      document.getElementById('transfer-step-' + stepNum).classList.add('active');
+    }
+
+    function handleStep1Submit(e) {
+      e.preventDefault();
+      const amount = document.getElementById('transfer-amount-input').value;
+      const to = document.getElementById('transfer-to-input').value;
+      document.getElementById('otp-recap-text').textContent = `Chuyển ${amount} xu tới ${to}`;
+      showStep(2);
+    }
+
+    function handleStep2Submit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('otp-verify-btn');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="ph-bold ph-spinner spinner" style="animation: spin 1s linear infinite;"></i> Đang xác thực...`;
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="ph-bold ph-check"></i> Xác nhận chuyển xu`;
+        
+        // Deduct balance for demo
+        const currentVal = parseInt(document.getElementById('user-balance-val').textContent);
+        const amount = parseInt(document.getElementById('transfer-amount-input').value);
+        document.getElementById('user-balance-val').textContent = Math.max(0, currentVal - amount);
+        
+        document.getElementById('receipt-summary-text').textContent = `Đã chuyển ${amount} xu thành công!`;
+        showStep(3);
+      }, 1200);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang chủ — Paper Pop Note</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="paper_pop.css">
+  <style>
+    .home-workspace-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+    }
+
+    @media (min-width: 1024px) {
+      .home-workspace-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+        gap: 32px;
+      }
+
+      .queue-aside {
+        grid-column: span 2;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 20px;
+        margin-top: 16px;
+      }
+    }
+
+    /* Desktop create paper styling */
+    .create-paper-wrapper {
+      display: none;
+      width: 100%;
+    }
+    @media (min-width: 1024px) {
+      .create-paper-wrapper {
+        display: block;
+      }
+    }
+
+    .pin-menu-dropdown {
+      position: absolute;
+      top: 40px;
+      right: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-control);
+      box-shadow: var(--shadow-md);
+      display: none;
+      flex-direction: column;
+      z-index: 100;
+      min-width: 160px;
+      overflow: hidden;
+    }
+    .pin-menu-dropdown.active {
+      display: flex;
+    }
+    .pin-menu-item {
+      padding: 10px 16px;
+      font-size: 14px;
+      color: var(--ink);
+      background: transparent;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pin-menu-item:hover {
+      background: var(--canvas);
+    }
+
+    .action-row-buttons {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 480px;
+      margin-top: 16px;
+    }
+    .action-row-buttons .btn {
+      flex: 1;
+    }
+
+    /* Account Drawer Styling */
+    .avatar-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4F46E5, #9333EA);
+      color: white;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <div class="app-shell">
+    <!-- Sidebar / Rail -->
+    <aside class="sidebar" aria-label="Điều hướng ứng dụng">
+      <a href="home.html" class="brand-logo">
+        <i class="ph-bold ph-note-pencil"></i> <span>Paper Pop</span>
+      </a>
+
+      <nav style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+        <a href="home.html" class="nav-item" aria-current="page">
+          <i class="ph-bold ph-house"></i> <span>Note cá nhân</span>
+        </a>
+        <a href="organization.html" class="nav-item">
+          <i class="ph-bold ph-users-three"></i> <span>Organization</span>
+        </a>
+        <a href="theme_store.html" class="nav-item">
+          <i class="ph-bold ph-palette"></i> <span>Theme Store</span>
+        </a>
+        <a href="wallet.html" class="nav-item">
+          <i class="ph-bold ph-wallet"></i> <span>Số dư / Ví</span>
+        </a>
+      </nav>
+
+      <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); width: 100%;">
+        <button class="nav-item" onclick="openModal('account-drawer-modal')" style="width: 100%;">
+          <i class="ph-bold ph-user-circle"></i> <span>Tài khoản</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 style="font-size: 18px; font-weight: 700; margin: 0;">Inbox Note</h1>
+
+          <!-- Status Filter Select -->
+          <select id="status-filter" class="form-select pill-filter" style="min-height: 36px; padding: 4px 12px;" onchange="handleFilterChange()">
+            <option value="not_done" selected>Chưa hoàn thành</option>
+            <option value="done">Đã hoàn thành</option>
+            <option value="all">Tất cả note</option>
+          </select>
+
+          <!-- Organization Filter (Desktop/Tablet) -->
+          <select id="org-filter" class="form-select pill-filter" style="min-height: 36px; padding: 4px 12px;" onchange="handleFilterChange()">
+            <option value="all">Tất cả scope</option>
+            <option value="personal">Cá nhân</option>
+            <option value="org_1">Design Team Org</option>
+          </select>
+        </div>
+
+        <div class="topbar-right">
+          <!-- State Preview Controls (For testing Loading/Empty/Error states) -->
+          <select id="state-simulator" class="form-select pill-filter" style="min-height: 36px; padding: 4px 12px; border-color: var(--accent);" onchange="simulateDeckState(this.value)">
+            <option value="normal">Màn hình bình thường</option>
+            <option value="loading">Trạng thái Loading</option>
+            <option value="empty">Trạng thái Empty</option>
+            <option value="error">Trạng thái Error</option>
+          </select>
+
+          <button type="button" class="avatar-btn" onclick="openModal('account-drawer-modal')" aria-label="Mở tài khoản">NV</button>
+        </div>
+      </header>
+
+      <!-- Main Workspace Container -->
+      <main id="main" class="main-content">
+
+        <!-- DECK STATE: NORMAL -->
+        <div id="deck-normal-state" class="home-workspace-grid">
+          
+          <!-- Desktop Paper 1: Create Note Paper (Left) -->
+          <div class="create-paper-wrapper">
+            <form class="note-paper note-paper--create" onsubmit="handleCreateNote(event)">
+              <div class="note-paper__head">
+                <span class="scope-badge"><i class="ph-bold ph-pencil-simple"></i> Tạo note mới</span>
+                <span style="font-size: 12px; color: var(--muted);">Paper Pop Capture</span>
+              </div>
+              <div class="note-paper__body">
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label for="create-note-title" class="form-label">Tiêu đề note *</label>
+                  <input type="text" id="create-note-title" class="form-control" placeholder="Nhập việc cần làm..." required>
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label for="create-note-desc" class="form-label">Nội dung / Ghi chú chi tiết *</label>
+                  <textarea id="create-note-desc" class="form-control" rows="4" placeholder="Mô tả cụ thể công việc cần thực hiện..." required></textarea>
+                </div>
+              </div>
+              <div class="note-paper__foot">
+                <span style="font-size: 13px; color: var(--muted);">Scope: Cá nhân</span>
+                <button type="submit" class="btn btn-primary"><i class="ph-bold ph-plus"></i> Lưu note giấy</button>
+              </div>
+              <div class="paper-fold" aria-hidden="true"></div>
+            </form>
+          </div>
+
+          <!-- Paper 2: Current Note Paper (Center / Right) -->
+          <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <article class="note-paper note-paper--draggable current-note-paper" aria-label="Note giấy hiện tại">
+              
+              <!-- Drag Direction Badges -->
+              <div class="drag-indicator-badge drag-indicator-badge--left">Để sau ⏱️</div>
+              <div class="drag-indicator-badge drag-indicator-badge--right">Hoàn thành 🎉</div>
+
+              <div class="note-paper__head">
+                <span class="scope-badge"><i class="ph-bold ph-user"></i> Note cá nhân</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 12px; color: var(--muted);">Vừa xong</span>
+                  <!-- Pin Menu Button -->
+                  <button type="button" class="btn btn-ghost btn-icon pin-menu" style="width: 32px; height: 32px;" onclick="togglePinMenu(event)" aria-expanded="false" aria-label="Menu quản lý note">
+                    <i class="ph-bold ph-dots-three-vertical"></i>
+                  </button>
+                  <div class="pin-menu-dropdown" id="pin-menu-dropdown">
+                    <a href="view_note.html" class="pin-menu-item"><i class="ph-bold ph-eye"></i> Xem chi tiết</a>
+                    <button type="button" class="pin-menu-item" onclick="triggerCardAction(document.querySelector('.current-note-paper'), 'right', 'Đã chuyển thành Hoàn thành')"><i class="ph-bold ph-check"></i> Đánh dấu xong</button>
+                    <button type="button" class="pin-menu-item" onclick="triggerCardAction(document.querySelector('.current-note-paper'), 'left', 'Đã chuyển thành Để sau')"><i class="ph-bold ph-clock"></i> Đặt để sau</button>
+                    <button type="button" class="pin-menu-item" style="color: var(--danger);" onclick="showToast('Đã xóa note!')"><i class="ph-bold ph-trash"></i> Xóa note</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="note-paper__body">
+                <h2 class="note-paper__title">Chuẩn bị báo cáo thiết kế UI/UX mới cho ứng dụng Paper Pop</h2>
+                <p class="note-paper__desc">Rà soát lại toàn bộ quy tắc thiết kế trong base.md, chuẩn hóa gesture vuốt note 92px và xây dựng đủ các trang demo theo bản đặc tả mới nhất.</p>
+              </div>
+
+              <div class="note-paper__foot">
+                <span style="font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px;">
+                  <i class="ph-bold ph-arrows-left-right"></i> Vuốt trái/phải hoặc dùng phím ←/→
+                </span>
+                <a href="view_note.html" class="btn btn-secondary btn-sm" style="min-height: 36px; padding: 6px 14px; font-size: 13px;">Chi tiết <i class="ph-bold ph-arrow-right"></i></a>
+              </div>
+              <div class="paper-fold" aria-hidden="true"></div>
+            </article>
+
+            <!-- Touch/Mouse Gesture Fallback Action Buttons -->
+            <div class="action-row-buttons">
+              <button type="button" class="btn btn-secondary" onclick="triggerCardAction(document.querySelector('.current-note-paper'), 'left', 'Đã chuyển thành Để sau')">
+                <i class="ph-bold ph-clock"></i> Để sau (←)
+              </button>
+              <button type="button" class="btn btn-primary" onclick="triggerCardAction(document.querySelector('.current-note-paper'), 'right', 'Đã chuyển thành Hoàn thành')">
+                <i class="ph-bold ph-check-circle"></i> Hoàn thành (→)
+              </button>
+            </div>
+          </div>
+
+          <!-- Wide Desktop Queue Aside -->
+          <div class="queue-aside">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+              <i class="ph-bold ph-list-numbers"></i> Danh sách note tiếp theo
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a href="view_note.html" style="padding: 10px 14px; background: var(--canvas); border-radius: var(--radius-control); display: flex; justify-content: space-between; align-items: center; color: var(--ink);">
+                <span style="font-weight: 500; font-size: 14px;">Review lại hệ thống token màu trong CSS</span>
+                <span class="scope-badge">Cá nhân</span>
+              </a>
+              <a href="view_note.html" style="padding: 10px 14px; background: var(--canvas); border-radius: var(--radius-control); display: flex; justify-content: space-between; align-items: center; color: var(--ink);">
+                <span style="font-weight: 500; font-size: 14px;">Họp tiến độ nhóm Organization Design</span>
+                <span class="scope-badge" style="background: var(--accent-light); color: var(--accent);">Org</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- DECK STATE: LOADING -->
+        <div id="deck-loading-state" style="display: none; width: 100%; max-width: 480px; margin: 40px auto; text-align: center;">
+          <div class="note-paper" style="background: var(--surface); opacity: 0.7;">
+            <div class="note-paper__head" style="background: #E2E4E9; height: 44px;"></div>
+            <div class="note-paper__body">
+              <div style="height: 24px; background: #E2E4E9; border-radius: 6px; margin-bottom: 12px;"></div>
+              <div style="height: 16px; background: #E2E4E9; border-radius: 4px; width: 80%; margin-bottom: 8px;"></div>
+              <div style="height: 16px; background: #E2E4E9; border-radius: 4px; width: 60%;"></div>
+            </div>
+          </div>
+          <p style="margin-top: 16px; color: var(--muted); font-size: 14px;">Đang tải danh sách note giấy...</p>
+        </div>
+
+        <!-- DECK STATE: EMPTY -->
+        <div id="deck-empty-state" style="display: none; width: 100%; max-width: 480px; margin: 40px auto; text-align: center; padding: 32px; background: var(--surface); border-radius: var(--radius-card); border: 1px dashed var(--border);">
+          <i class="ph-bold ph-tray" style="font-size: 48px; color: var(--muted); margin-bottom: 12px;"></i>
+          <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Không có note phù hợp</h2>
+          <p style="color: var(--muted); font-size: 14px; margin-bottom: 20px;">Bạn đã xử lý hết tất cả công việc trong bộ lọc này.</p>
+          <button class="btn btn-primary" onclick="openModal('create-note-modal')"><i class="ph-bold ph-plus"></i> Tạo note mới ngay</button>
+        </div>
+
+        <!-- DECK STATE: ERROR -->
+        <div id="deck-error-state" style="display: none; width: 100%; max-width: 480px; margin: 40px auto; text-align: center; padding: 32px; background: var(--surface); border-radius: var(--radius-card); border: 1px solid var(--danger-light);">
+          <i class="ph-bold ph-warning-circle" style="font-size: 48px; color: var(--danger); margin-bottom: 12px;"></i>
+          <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--danger);">Không thể tải danh sách note</h2>
+          <p style="color: var(--muted); font-size: 14px; margin-bottom: 20px;">Kết nối mạng tạm thời gián đoạn hoặc máy chủ chưa phản hồi.</p>
+          <button class="btn btn-secondary" onclick="simulateDeckState('normal')"><i class="ph-bold ph-arrows-clockwise"></i> Thử lại</button>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav" aria-label="Điều hướng chính">
+    <a href="home.html" class="nav-item" aria-current="page">
+      <i class="ph-bold ph-house"></i> <span>Note</span>
+    </a>
+    <a href="organization.html" class="nav-item">
+      <i class="ph-bold ph-users-three"></i> <span>Org</span>
+    </a>
+    <a href="theme_store.html" class="nav-item">
+      <i class="ph-bold ph-palette"></i> <span>Theme</span>
+    </a>
+    <a href="wallet.html" class="nav-item">
+      <i class="ph-bold ph-wallet"></i> <span>Ví xu</span>
+    </a>
+  </nav>
+
+  <!-- Mobile Create Note FAB -->
+  <button type="button" class="fab" onclick="openModal('create-note-modal')" aria-label="Tạo note mới">
+    <i class="ph-bold ph-plus"></i>
+  </button>
+
+  <!-- Create Note Bottom Sheet Modal (Mobile) -->
+  <div id="create-note-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="create-modal-title">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="create-modal-title" class="modal-title">Tạo note giấy mới</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('create-note-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <form onsubmit="handleCreateNote(event)">
+        <div class="form-group">
+          <label for="mb-create-title" class="form-label">Tiêu đề note *</label>
+          <input type="text" id="mb-create-title" class="form-control" placeholder="Nhập tiêu đề..." required>
+        </div>
+
+        <div class="form-group">
+          <label for="mb-create-desc" class="form-label">Nội dung ghi chú *</label>
+          <textarea id="mb-create-desc" class="form-control" rows="4" placeholder="Nhập chi tiết..." required></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('create-note-modal')">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu note mới</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Account Drawer Modal -->
+  <div id="account-drawer-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="account-modal-title">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="account-modal-title" class="modal-title">Tài khoản người dùng</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('account-drawer-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+        <div class="avatar-btn" style="width: 56px; height: 56px; font-size: 20px;">NV</div>
+        <div>
+          <h3 style="font-size: 16px; font-weight: 700; margin: 0;">Nguyễn Văn A</h3>
+          <p style="font-size: 13px; color: var(--muted); margin: 0;">user@example.com</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <span style="padding: 12px; background: var(--canvas); border-radius: var(--radius-control); color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span>Trang cá nhân (Profile)</span> <span class="scope-badge">Sắp có</span>
+        </span>
+        <span style="padding: 12px; background: var(--canvas); border-radius: var(--radius-control); color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span>Cài đặt ứng dụng</span> <span class="scope-badge">Sắp có</span>
+        </span>
+        <a href="authentication.html" class="btn btn-danger" style="margin-top: 16px; justify-content: center;">
+          <i class="ph-bold ph-sign-out"></i> Đăng xuất tài khoản
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="paper_pop.js"></script>
+  <script>
+    function togglePinMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('pin-menu-dropdown');
+      const isExpanded = menu.classList.contains('active');
+      menu.classList.toggle('active');
+      e.currentTarget.setAttribute('aria-expanded', !isExpanded);
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('pin-menu-dropdown');
+      if (menu && !e.target.closest('.pin-menu')) {
+        menu.classList.remove('active');
+      }
+    });
+
+    function handleFilterChange() {
+      showToast('Đã áp dụng bộ lọc mới');
+    }
+
+    function simulateDeckState(state) {
+      document.getElementById('deck-normal-state').style.display = state === 'normal' ? 'grid' : 'none';
+      document.getElementById('deck-loading-state').style.display = state === 'loading' ? 'block' : 'none';
+      document.getElementById('deck-empty-state').style.display = state === 'empty' ? 'block' : 'none';
+      document.getElementById('deck-error-state').style.display = state === 'error' ? 'block' : 'none';
+    }
+
+    function handleCreateNote(e) {
+      e.preventDefault();
+      closeModal('create-note-modal');
+      showToast('Đã tạo note giấy thành công!');
+    }
+  </script>
+</body>
+</html>

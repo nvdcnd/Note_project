@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết Note — Paper Pop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="paper_pop.css">
+  <style>
+    .detail-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .detail-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 32px;
+        align-items: start;
+      }
+    }
+
+    .reply-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .reply-timeline {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .reply-item {
+      padding: 12px 16px;
+      background: var(--canvas);
+      border-radius: var(--radius-control);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .reply-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <div class="app-shell">
+    <!-- Main Header Topbar -->
+    <header class="topbar" style="width: 100%;">
+      <div class="topbar-left">
+        <a href="home.html" class="btn btn-ghost btn-icon" title="Quay lại"><i class="ph-bold ph-arrow-left"></i></a>
+        <nav aria-label="Breadcrumb">
+          <ol style="display: flex; gap: 8px; list-style: none; font-size: 14px; color: var(--muted);">
+            <li><a href="home.html">Note</a></li>
+            <li>/</li>
+            <li aria-current="page" style="color: var(--ink); font-weight: 600;">Chi tiết Note #102</li>
+          </ol>
+        </nav>
+      </div>
+
+      <div class="topbar-right">
+        <button class="btn btn-secondary" onclick="openModal('edit-note-modal')"><i class="ph-bold ph-pencil-simple"></i> Sửa</button>
+        <button class="btn btn-secondary" onclick="openModal('share-note-modal')"><i class="ph-bold ph-share-network"></i> Chia sẻ</button>
+        <button class="btn btn-danger btn-icon" onclick="openModal('delete-note-modal')" title="Xóa note"><i class="ph-bold ph-trash"></i></button>
+      </div>
+    </header>
+
+    <main id="main" class="main-content" style="padding-top: 24px;">
+      <div class="detail-grid">
+        
+        <!-- Left: Full Note Paper -->
+        <article class="note-paper" style="max-width: 100%; min-height: 400px; box-shadow: var(--shadow-md);">
+          <div class="note-paper__head" style="padding: 16px 24px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="scope-badge"><i class="ph-bold ph-user"></i> Note cá nhân</span>
+              <span style="font-size: 13px; color: var(--muted);">Tạo bởi <strong>Nguyễn Văn A</strong> • 06/08/2026 14:30</span>
+            </div>
+            <button class="btn btn-ghost btn-icon" onclick="openModal('edit-note-modal')"><i class="ph-bold ph-dots-three-vertical"></i></button>
+          </div>
+
+          <div class="note-paper__body" style="padding: 32px;">
+            <h1 class="note-paper__title" style="font-size: 28px; margin-bottom: 16px;">Chuẩn bị báo cáo thiết kế UI/UX mới cho ứng dụng Paper Pop</h1>
+            <p class="note-paper__desc" style="font-size: 16px; line-height: 1.8;">
+Nhiệm vụ trọng tâm bao gồm:
+1. Đọc kỹ các báo cáo UI/UX trong folder UI_instruction_design và cập nhật các token màu sắc chuẩn (--canvas, --surface, --note, --ink).
+2. Xây dựng bộ giao diện thuần HTML/CSS/JS với 9 màn hình chức năng.
+3. Đảm bảo hỗ trợ 3 kích thước màn hình kiểm thử: Mobile 360px, Tablet 768px, và Desktop 1280px.
+4. Tích hợp gesture vuốt note 92px đúng contract Paper Pop và toast Undo rollback trong 5 giây.
+            </p>
+          </div>
+
+          <div class="note-paper__foot" style="padding: 20px 32px;">
+            <div style="display: flex; gap: 12px;">
+              <button type="button" id="toggle-done-btn" class="btn btn-primary" onclick="toggleNoteDoneState()">
+                <i class="ph-bold ph-check-circle"></i> <span>Đánh dấu xong</span>
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="showToast('Đã lưu để sau!')">
+                <i class="ph-bold ph-clock"></i> Để sau
+              </button>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="openModal('share-note-modal')">
+              <i class="ph-bold ph-share-network"></i> Chia sẻ
+            </button>
+          </div>
+          <div class="paper-fold" aria-hidden="true"></div>
+        </article>
+
+        <!-- Right: Reply Timeline & Composer -->
+        <aside class="reply-panel">
+          <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="ph-bold ph-chat-circle-dots"></i> Trả lời & Phản hồi
+          </h2>
+
+          <form onsubmit="handleSendReply(event)">
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label for="reply-text" class="form-label">Thêm phản hồi</label>
+              <textarea id="reply-text" class="form-control" rows="3" placeholder="Viết câu hỏi hoặc nhận xét..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="ph-bold ph-paper-plane-right"></i> Gửi phản hồi</button>
+          </form>
+
+          <ol class="reply-timeline" id="reply-list">
+            <li class="reply-item">
+              <div class="reply-meta">
+                <strong style="color: var(--ink);">Trần Thị B</strong>
+                <span>10 phút trước</span>
+              </div>
+              <p style="font-size: 14px; margin: 0; color: #374151;">Bản thiết kế đã cập nhật đúng màu vàng note và hiệu ứng góc gấp chưa bạn?</p>
+            </li>
+
+            <li class="reply-item">
+              <div class="reply-meta">
+                <strong style="color: var(--ink);">Nguyễn Văn A (Bạn)</strong>
+                <span>Vừa xong</span>
+              </div>
+              <p style="font-size: 14px; margin: 0; color: #374151;">Đã cập nhật đúng chuẩn CSS Variables và chạy thử mượt mà trên cả 3 breakpoint nhé!</p>
+            </li>
+          </ol>
+        </aside>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Edit Note Sheet Modal -->
+  <div id="edit-note-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="edit-modal-title">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="edit-modal-title" class="modal-title">Chỉnh sửa note giấy</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('edit-note-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <form onsubmit="handleSaveEdit(event)">
+        <div class="form-group">
+          <label for="edit-title" class="form-label">Tiêu đề *</label>
+          <input type="text" id="edit-title" class="form-control" value="Chuẩn bị báo cáo thiết kế UI/UX mới cho ứng dụng Paper Pop" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-desc" class="form-label">Nội dung chi tiết *</label>
+          <textarea id="edit-desc" class="form-control" rows="6" required>Nhiệm vụ trọng tâm bao gồm:
+1. Đọc kỹ các báo cáo UI/UX trong folder UI_instruction_design.
+2. Xây dựng bộ giao diện thuần HTML/CSS/JS với 9 màn hình.
+3. Hỗ trợ đủ 3 breakpoint test (360px, 768px, 1280px).</textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('edit-note-modal')">Hủy bỏ</button>
+          <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Share Note Sheet Modal -->
+  <div id="share-note-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="share-modal-title">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="share-modal-title" class="modal-title">Chia sẻ note</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('share-note-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <div class="form-group">
+        <label for="share-email" class="form-label">Mời qua Email người nhận</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="email" id="share-email" class="form-control" placeholder="colleague@example.com">
+          <button type="button" class="btn btn-primary" onclick="showToast('Đã gửi lời mời chia sẻ!')">Gửi</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Liên kết truy cập trực tiếp</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" class="form-control" value="http://localhost:8000/note/102" readonly>
+          <button type="button" class="btn btn-secondary" onclick="showToast('Đã sao chép liên kết vào clipboard!')"><i class="ph-bold ph-copy"></i> Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-note-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="delete-modal-title">
+    <div class="modal-panel" style="max-width: 440px;">
+      <div class="modal-header">
+        <h2 id="delete-modal-title" class="modal-title" style="color: var(--danger);">Xác nhận xóa note</h2>
+        <button type="button" class="btn btn-ghost btn-icon" onclick="closeModal('delete-note-modal')"><i class="ph-bold ph-x"></i></button>
+      </div>
+
+      <p style="font-size: 15px; color: var(--muted); margin-bottom: 24px;">Hành động này sẽ xóa vĩnh viễn note giấy này. Bạn có chắc chắn muốn tiếp tục không?</p>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('delete-note-modal')">Hủy</button>
+        <button type="button" class="btn btn-danger" onclick="handleDeleteNote()"><i class="ph-bold ph-trash"></i> Xóa vĩnh viễn</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="paper_pop.js"></script>
+  <script>
+    let isDone = false;
+
+    function toggleNoteDoneState() {
+      isDone = !isDone;
+      const btn = document.getElementById('toggle-done-btn');
+      if (isDone) {
+        btn.classList.replace('btn-primary', 'btn-secondary');
+        btn.querySelector('span').textContent = 'Đã xong (Đổi thành chưa xong)';
+        showToast('Đã đánh dấu hoàn thành note!', 'Undo', () => toggleNoteDoneState());
+      } else {
+        btn.classList.replace('btn-secondary', 'btn-primary');
+        btn.querySelector('span').textContent = 'Đánh dấu xong';
+        showToast('Đã chuyển về trạng thái chưa xong');
+      }
+    }
+
+    function handleSendReply(e) {
+      e.preventDefault();
+      const input = document.getElementById('reply-text');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const list = document.getElementById('reply-list');
+      const li = document.createElement('li');
+      li.className = 'reply-item';
+      li.innerHTML = `
+        <div class="reply-meta">
+          <strong style="color: var(--ink);">Nguyễn Văn A (Bạn)</strong>
+          <span>Vừa xong</span>
+        </div>
+        <p style="font-size: 14px; margin: 0; color: #374151;">${text}</p>
+      `;
+      list.appendChild(li);
+      input.value = '';
+      showToast('Đã gửi phản hồi thành công!');
+    }
+
+    function handleSaveEdit(e) {
+      e.preventDefault();
+      closeModal('edit-note-modal');
+      showToast('Đã cập nhật nội dung note!');
+    }
+
+    function handleDeleteNote() {
+      closeModal('delete-note-modal');
+      showToast('Đã xóa note giấy!');
+      setTimeout(() => window.location.href = 'home.html', 1000);
+    }
+  </script>
+</body>
+</html>

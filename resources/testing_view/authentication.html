@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài khoản — Paper Pop Note</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="paper_pop.css">
+  <style>
+    .auth-page-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background-color: var(--canvas);
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 480px;
+      padding: 32px;
+      transition: all var(--transition-fast);
+    }
+
+    .auth-header {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .auth-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .auth-header p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .alert-error {
+      background-color: var(--danger-light);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 12px 16px;
+      border-radius: var(--radius-control);
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-success {
+      background-color: var(--success-light);
+      border: 1px solid var(--success);
+      color: var(--success);
+      padding: 12px 16px;
+      border-radius: var(--radius-control);
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .state-switcher {
+      display: flex;
+      gap: 4px;
+      background: #F1F5F9;
+      padding: 4px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 24px;
+    }
+    .state-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 8px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .state-btn.active {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .auth-footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    .form-state {
+      display: none;
+    }
+    .form-state.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <div class="auth-page-container">
+    <a href="home.html" class="brand-logo" title="Trang chủ Paper Pop">
+      <i class="ph-bold ph-note-pencil"></i> Paper Pop
+    </a>
+
+    <!-- Demo State Switcher for testing all 4 auth flows -->
+    <div class="state-switcher" role="tablist" aria-label="Các trạng thái xác thực">
+      <button class="state-btn active" onclick="switchAuthState('login')">Đăng nhập</button>
+      <button class="state-btn" onclick="switchAuthState('signup')">Đăng ký</button>
+      <button class="state-btn" onclick="switchAuthState('forgot')">Quên mật khẩu</button>
+      <button class="state-btn" onclick="switchAuthState('reset')">Đặt lại MK</button>
+    </div>
+
+    <main id="main" class="auth-card">
+      
+      <!-- STATE 1: LOGIN -->
+      <section id="state-login" class="form-state active">
+        <div class="auth-header">
+          <h1>Đăng nhập tài khoản</h1>
+          <p>Chào mừng bạn quay trở lại với Paper Pop Sticky Notes</p>
+        </div>
+
+        <form action="#" method="POST" onsubmit="handleAuthSubmit(event, 'Đang đăng nhập...')">
+          <div class="form-group">
+            <label for="login-email" class="form-label">Email</label>
+            <input type="email" id="login-email" name="email" class="form-control" placeholder="name@example.com" required autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label for="login-password" class="form-label">Mật khẩu</label>
+              <a href="#" onclick="switchAuthState('forgot'); return false;" style="font-size: 13px;">Quên mật khẩu?</a>
+            </div>
+            <div class="password-input-group">
+              <input type="password" id="login-password" name="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="password-toggle-btn" aria-label="Hiện mật khẩu"><i class="ph ph-eye"></i></button>
+            </div>
+          </div>
+
+          <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+            <input type="checkbox" id="login-remember" name="remember" value="1">
+            <label for="login-remember" style="font-size: 14px; cursor: pointer;">Ghi nhớ đăng nhập</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Đăng nhập</button>
+        </form>
+
+        <div class="auth-footer">
+          Chưa có tài khoản? <a href="#" onclick="switchAuthState('signup'); return false;">Tạo tài khoản mới</a>
+        </div>
+      </section>
+
+      <!-- STATE 2: SIGNUP -->
+      <section id="state-signup" class="form-state">
+        <div class="auth-header">
+          <h1>Tạo tài khoản mới</h1>
+          <p>Bắt đầu quản lý ghi chú và công việc cá nhân</p>
+        </div>
+
+        <form action="#" method="POST" onsubmit="handleAuthSubmit(event, 'Đang tạo tài khoản...')">
+          <div class="form-group">
+            <label for="signup-name" class="form-label">Họ và tên</label>
+            <input type="text" id="signup-name" name="name" class="form-control" placeholder="Nguyễn Văn A" required autocomplete="name">
+          </div>
+
+          <div class="form-group">
+            <label for="signup-email" class="form-label">Email</label>
+            <input type="email" id="signup-email" name="email" class="form-control" placeholder="name@example.com" required autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label for="signup-password" class="form-label">Mật khẩu</label>
+            <div class="password-input-group">
+              <input type="password" id="signup-password" name="password" class="form-control" placeholder="Ít nhất 8 ký tự" required autocomplete="new-password">
+              <button type="button" class="password-toggle-btn" aria-label="Hiện mật khẩu"><i class="ph ph-eye"></i></button>
+            </div>
+            <span class="form-hint">Mật khẩu cần ít nhất 8 ký tự bao gồm chữ và số.</span>
+          </div>
+
+          <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+            <input type="checkbox" id="signup-remember" name="remember" value="1">
+            <label for="signup-remember" style="font-size: 14px; cursor: pointer;">Ghi nhớ phiên đăng nhập</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Tạo tài khoản</button>
+        </form>
+
+        <div class="auth-footer">
+          Đã có tài khoản? <a href="#" onclick="switchAuthState('login'); return false;">Đăng nhập ngay</a>
+        </div>
+      </section>
+
+      <!-- STATE 3: FORGOT PASSWORD -->
+      <section id="state-forgot" class="form-state">
+        <div class="auth-header">
+          <h1>Quên mật khẩu?</h1>
+          <p>Nhập email của bạn để nhận mã xác minh 6 số</p>
+        </div>
+
+        <form action="#" method="POST" onsubmit="handleForgotSubmit(event)">
+          <div class="form-group">
+            <label for="forgot-email" class="form-label">Email tài khoản</label>
+            <input type="email" id="forgot-email" name="email" class="form-control" placeholder="name@example.com" required autocomplete="email">
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Gửi mã đặt lại</button>
+        </form>
+
+        <div class="auth-footer">
+          Quay lại <a href="#" onclick="switchAuthState('login'); return false;">Đăng nhập</a>
+        </div>
+      </section>
+
+      <!-- STATE 4: RESET PASSWORD WITH OTP -->
+      <section id="state-reset" class="form-state">
+        <div class="auth-header">
+          <h1>Đặt lại mật khẩu</h1>
+          <p>Nhập mã xác minh 6 số đã được gửi tới email của bạn</p>
+        </div>
+
+        <div id="reset-alert" class="alert-success" role="alert">
+          <i class="ph-bold ph-check-circle" style="font-size: 20px;"></i>
+          <span>Nếu email hợp lệ, mã đặt lại đã được gửi. Vui lòng kiểm tra hộp thư.</span>
+        </div>
+
+        <form action="#" method="POST" onsubmit="handleAuthSubmit(event, 'Đang đặt lại mật khẩu...')">
+          <div class="form-group">
+            <label class="form-label" style="text-align: center; display: block;">Mã xác minh (Passkey 6 số)</label>
+            <div class="otp-group">
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" autocomplete="one-time-code" required>
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+              <input type="text" class="otp-cell" maxlength="1" inputmode="numeric" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reset-new-password" class="form-label">Mật khẩu mới</label>
+            <div class="password-input-group">
+              <input type="password" id="reset-new-password" name="password" class="form-control" placeholder="Mật khẩu mới" required autocomplete="new-password">
+              <button type="button" class="password-toggle-btn" aria-label="Hiện mật khẩu"><i class="ph ph-eye"></i></button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reset-confirm-password" class="form-label">Xác nhận mật khẩu mới</label>
+            <div class="password-input-group">
+              <input type="password" id="reset-confirm-password" name="password_confirmation" class="form-control" placeholder="Nhập lại mật khẩu mới" required autocomplete="new-password">
+              <button type="button" class="password-toggle-btn" aria-label="Hiện mật khẩu"><i class="ph ph-eye"></i></button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Cập nhật mật khẩu</button>
+        </form>
+
+        <div class="auth-footer">
+          Chưa nhận được mã? <a href="#" onclick="switchAuthState('forgot'); return false;">Gửi lại mã</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="paper_pop.js"></script>
+  <script>
+    function switchAuthState(stateKey) {
+      document.querySelectorAll('.form-state').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.state-btn').forEach(el => el.classList.remove('active'));
+      
+      const targetState = document.getElementById('state-' + stateKey);
+      if (targetState) targetState.classList.add('active');
+
+      const activeBtn = Array.from(document.querySelectorAll('.state-btn')).find(btn => btn.getAttribute('onclick').includes(stateKey));
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    function handleAuthSubmit(e, loadingText) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i class="ph-bold ph-spinner spinner" style="animation: spin 1s linear infinite;"></i> ${loadingText}`;
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        showToast('Thao tác thành công! Đang chuyển hướng...');
+        setTimeout(() => window.location.href = 'home.html', 1000);
+      }, 1200);
+    }
+
+    function handleForgotSubmit(e) {
+      e.preventDefault();
+      switchAuthState('reset');
+    }
+  </script>
+</body>
+</html>
