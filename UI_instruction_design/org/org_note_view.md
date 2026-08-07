@@ -8,6 +8,7 @@ Trang này là trang '/organization/{id}/note/{note_id}', sử dụng để hi�
 - Kế thừa từ file "org_note_list_view.md" nhưng bỏ dropbox đi
 ### 1.2. Các phần còn lại
  - Kế thừa từ file "../note_view.md"
+ - Tất cả user vào trang này đều sẽ bị chuyển sang theme của Organization
 
 ## 2. Mobile version
 ### 2.1. Navbar

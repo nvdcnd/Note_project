@@ -16,6 +16,8 @@ Trang này là trang '/organization/dashboard/{id}', sử dụng để hiện no
 - Bến dưới sẽ là link để đến với trang view detail to từ card đó
 ### 1.3. Hero section
 - Phần Hero section sẽ là một card chứa tên của organization để người dùng có thể nhận biết đây là organization nào.
+### 1.4. Lưu ý chung
+- Tất cả user vào trang này đều sẽ bị chuyển sang theme của Organization
 
 ## 2. Mobile version
 ### 2.1. Navbar

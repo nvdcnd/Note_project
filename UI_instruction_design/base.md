@@ -60,6 +60,7 @@ Mobile sẽ là màn hình dành cho những thiết bị có width view dưới
 - Nút này sẽ có dạng vòng tròn và bên trong là ảnh đại diện của người dùng (giữa class bên ngoài và avatar có padding vừa phải)
 - Có box shadow hướng xuống dưới với phạm vi và mức độ vừa đủ.
 
+
 #### 4.1.3. Slidebar setting
 - Bình thường slidebar này sẽ ẩn đi và chỉ khi click vào button đã nói ở mục 4.1.2 thì mới trượt vào từ bên phải
 - slidebar sẽ chiếm 1/2 màn hình khi được hiện và một nửa không có slidebar sẽ là làm mờ màn hình hiện tại.
@@ -69,8 +70,22 @@ Mobile sẽ là màn hình dành cho những thiết bị có width view dưới
 ##### 4.1.3.2. Middle
 - Phần middle sẽ là nơi mà các liên kết được thể hiện
 - Các liên kết sẽ được thể hiện với tên rõ ràng và không có gạch chân, không có màu default của link.
-- Các mục ở đây sẽ bao gồm: Profile, Setting, Your theme, Log out.
+- Các mục ở đây sẽ bao gồm: Profile, Setting, Nạp point (gọi pop-up nạp point), Log out.
 - Các element sẽ cách nhau một khoảng vừa đủ
 ##### 4.1.3.3 End
 - Tại chính giữa của phần end sẽ là nút "X" để có thể tắt slidebar
 - Nút này sẽ là hình tròn và có viền trắng
+
+#### 4.1.4. Balance view (chỉ hiện ở giao diện desktop & tablet)
+- Một nút hình viên thuốc (bấm vào gọi pop-up nạp thêm), bên trong thể hiện số dư điểm của người dùng
+- Vị trí đặt bên cạnh (về phía bên trái) của "Setting & Avatar Button"
+
+#### 4.1.5. Pop-up nạp tiền
+- Sử dụng pop-up của bootstrap
+#### 1.3.1. Header
+- Chỉ có nút đóng (chữ "X") tại góc trên bên phải của card pop-up
+#### 1.3.2. Body
+- Title "Nạp point" căn giữa
+- Container flex box với input số point muốn nạp (input width 100%)
+- Bên dưới là text thể hiển convert point ra VND (tỉ lệ 1 pts = 1000 VND)
+- Dưới cùng là nút submit để JS tập hợp thông tin để mở link mailto (có nội dung) để gửi đến email "hoanghunganh9544@gmail.com" để xin nạp point.

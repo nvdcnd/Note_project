@@ -11,6 +11,7 @@ Trang này là trang '/organization/{id}/', sử dụng để hiện tất cả 
 -  Tất cả những phần này sẽ kế thừa từ file "../home.md"
 ### 1.3. Lưu ý chung
 - Không thể scroll ở trang này
+- Tất cả user vào trang này đều sẽ bị chuyển sang theme của Organization
 
 ## 2. Mobile version
 ### 2.1. Navbar

@@ -34,6 +34,8 @@ Trang này là sẽ là view của các trang có thể giúp cho host organizat
 - Bên dưới là list các email đã được thêm vào phiên thêm thành viên này (sử dụng js để thêm và push lên list hiện thị ở đây)
 - Dưới cùng là nút submit để JS gửi tất cả về API
 - Pop-up non-scrollable nhưng list các email có thể scroll.
+### 1.4. Lưu ý chung
+- Tất cả user vào trang này đều sẽ bị chuyển sang theme của Organization
 
 ## 2. Mobile version
 ### 2.1. Navbar
