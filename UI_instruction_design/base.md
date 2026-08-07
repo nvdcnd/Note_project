@@ -27,3 +27,23 @@ Mobile sẽ là màn hình dành cho những thiết bị có width view dưới
 #### 2.1.4. Box menu
 - Box menu sẽ hiện ra/biến mất khi người dùng bấm vào avatar tại phần top của bar
 - Các mục ở đây sẽ bao gồm: Profile, Setting, Your theme, Log out.
+## 3. Theme mặc định
+- Font chữ: Ưu tiên font viết tay dễ nhìn, hiện thị được nhiều loại ngôn ngữ mà không lỗi
+- Màu note: 
+    - Note element: Vàng đất nhạt
+    - Nếp gấp (Vùng tối): Vàng đậm (gần đen)
+    - Nếp gấp (Vùng sáng): Vàng đất nhạt (sáng hơn màu note)
+- Nền: 
+    - TH1: Nền trắng với chấm bi xám
+    - TH2: Nền đen với chấm bi trắng xám
+    - TH3: Nền ảnh giả lập board ghim
+- Navbar & Sidebar & Slidebar:
+    - Màu nền: Tùy chọn sao cho phù hợp với theme
+    - Màu chữ: Tùy chọn sao cho có tương phản với nền
+    - Màu hover & active: 
+        - TH1: Màu nền đậm hơn nền gốc, chữ giữ nguyên màu
+        - TH2: Màu nền thành màu chữ gốc và ngược lại
+- Các element khác & các trang khác:
+    -   Tự phối màu sao cho hợp và thuận mắt người dùng phổ thông nhưng vẫn phải đúng chủ đề của theme
+- Icon:
+    - Bộ icon phải đồng bộ với nhau (trừ khi active ở các bar)
