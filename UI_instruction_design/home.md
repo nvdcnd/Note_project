@@ -1,6 +1,8 @@
-# Index page design
+# Home page design
 
 Tất cả các AI agent được phân công để thiết kế và code front-end cho dự án này đều phải tuân thủ các hướng dẫn trong các file trong thư mục này
+
+Trang này là trang "/" sau khi người dùng đã đăng nhập.
 
 ## 1. Mobile version
 Mobile sẽ là màn hình dành cho những thiết bị có width view dưới 576px.

@@ -37,6 +37,7 @@ class AuthenticationController extends Controller
     {
         $request->validate([
             'email' => 'required',
+            'name' => 'required',
             'password' => 'required',
             'remember' => 'required',
         ]);
@@ -66,6 +67,7 @@ class AuthenticationController extends Controller
         // $data = $request->all();
         $request->validate([
             'email' => 'required',
+            'name' => 'required',
             'password' => 'required',
             'remember' => 'required',
         ]);
@@ -95,6 +97,7 @@ class AuthenticationController extends Controller
         // $data = $request->all();
         $request->validate([
             'email' => 'required',
+            'name'=> 'required',
             'password' => 'required',
             'remember' => 'required',
         ]);
@@ -123,6 +126,7 @@ class AuthenticationController extends Controller
         }
         $request->validate([
             'email' => 'required',
+            'name' => 'required',
             'password' => 'required',
             'remember' => 'required',
         ]);
