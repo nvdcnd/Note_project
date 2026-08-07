@@ -1,4 +1,4 @@
-# Organization note view
+# Organization dashboard view
 Tất cả các AI agent được phân công để thiết kế và code front-end cho dự án này đều phải tuân thủ các hướng dẫn trong các file trong thư mục này.
 
 Trang này là trang '/organization/dashboard/{id}', sử dụng để hiện note {note_id} trong organization có id được chỉ định trong url mà người dùng đã tham gia hoặc host.
