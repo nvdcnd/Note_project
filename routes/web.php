@@ -110,8 +110,8 @@ Route::middleware(['auth'])->group(function () {
             $current_members = OrganizationsMember::query()->where('organizationID', '=', $organization->id, 'and')->where('status', '=', true, 'and')->count('*');
             $pending_member = OrganizationsMember::query()->where('organizationID', '=', $organization->id, 'and')->where('status', '=', false, 'and')->count('*');
             $all_note = Note::query()->where('organizationID', '=', $organization->id, 'and')->count('*');
-            $undone_note = Note::query()->where('organizationID', '=', $organization->id, 'and')->count('*');
-            $done_note = 0;
+            $undone_note = Note::query()->where('organizationID', '=', $organization->id, 'and')->where('org_done','=',false)->count('*');
+            $done_note = Note::query()->where('organizationID', '=', $organization->id, 'and')->where('org_done','=',true)->count('*');
 
             return view('organization.dashboard', compact('organization', 'current_members', 'pending_member', 'all_note', 'undone_note', 'done_note'));
         }
