@@ -5,7 +5,7 @@ Trang này là trang '/organization/{id}/', sử dụng để hiện tất cả 
 
 ## 1. Overview
 ### 1.1. Top bar
-- Gần như tất cả sẽ được thiết kế giống top bar trong file "../home.md"
+- Gần như tất cả sẽ được thiết kế giống top bar trong file "../base.md"
 - Trừ phần nút back, nút back sẽ được thiết kế từ thiết kế trong file "../view_note.md" (nhưng lần này là back về trang org_list_view)
 ### 1.2. Create note & Note element & Pin element & Edit note
 -  Tất cả những phần này sẽ kế thừa từ file "../home.md"

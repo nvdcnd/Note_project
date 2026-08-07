@@ -7,7 +7,7 @@ Trang này là trang '/organization/all/', sử dụng để hiện tất cả c
 - Chia ra làm 2 phần ở chính giữa:
     - Phần 1: Dropbox chọn giữa các organization (Các organization đã join hoặc host bởi user hiện tại) -> khi người dùng bấm vào organization đó -> chuyển đến trang note riêng của organization đó.
     - Phần 2: Thanh search để tìm các organization hiện user đã tham gia hoặc host.
-- Phần sát bên tay phải vẫn là nút avatar để mở slidebar như trong file "../home.md" đã nói
+- Phần sát bên tay phải vẫn là nút avatar để mở slidebar như trong file "../base.md" đã nói
 ### 1.2 Card for org
 #### 1.2.1. Header
 - Là ảnh của tổ chức được bo cong 2 đầu trên và dài đến 1 nửa kích thước của thẻ

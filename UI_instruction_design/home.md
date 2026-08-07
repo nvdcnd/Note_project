@@ -49,19 +49,7 @@ Mobile sẽ là màn hình dành cho những thiết bị có width view dưới
 - Có box shadow hướng xuống dưới với phạm vi và mức độ vừa đủ.
 
 #### 2.2.3. Slidebar setting
-- Bình thường slidebar này sẽ ẩn đi và chỉ khi click vào button đã nói ở mục 2.2.2 thì mới trượt vào từ bên phải
-- slidebar sẽ chiếm 1/2 màn hình khi được hiện và một nửa không có slidebar sẽ là làm mờ màn hình hiện tại.
-##### 2.2.3.1. Top
-- Phần top sẽ có avatar của người dùng ở dạng 50x50 và hình tròn
-- bên cạnh sẽ là username và bên dưới username là email của người dùng
-##### 2.2.3.2. Middle
-- Phần middle sẽ là nơi mà các liên kết được thể hiện
-- Các liên kết sẽ được thể hiện với tên rõ ràng và không có gạch chân, không có màu default của link.
-- Các mục ở đây sẽ bao gồm: Profile, Setting, Your theme, Log out.
-- Các element sẽ cách nhau một khoảng vừa đủ
-##### 2.2.3.3 End
-- Tại chính giữa của phần end sẽ là nút "X" để có thể tắt slidebar
-- Nút này sẽ là hình tròn và có viền trắng
+- Kế thừa từ file "base.md"
 
 ### 2.3. Create note
 - Lúc đầu pop-up này sẽ ẩn đi. Nhưng khi float button được bấm thì nó sẽ làm cho note element hiện tại (sẽ nói ở mục sau) chạy animation bay đi để lộ ra pop-up create note trông giống một tờ note

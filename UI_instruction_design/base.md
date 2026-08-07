@@ -47,3 +47,30 @@ Mobile sẽ là màn hình dành cho những thiết bị có width view dưới
     -   Tự phối màu sao cho hợp và thuận mắt người dùng phổ thông nhưng vẫn phải đúng chủ đề của theme
 - Icon:
     - Bộ icon phải đồng bộ với nhau (trừ khi active ở các bar)
+
+## 4. Element chung
+### 4.1. Topbar
+#### 4.1.1. Dropbox
+- Chính giữa topbar là một dropbox để người dùng chọn giữa các loại note như: đã xong, chưa xong, tất cả
+- Dropbox cần được bo tròn 2 cạnh để trở thành dạng viên thuốc
+- Có box shadow hướng xuống dưới với phạm vi và mức độ vừa đủ.
+
+#### 4.1.2. Setting & avatar button
+- Ở góc bên phải màn hình sẽ là nút để mở ra slidebar setting
+- Nút này sẽ có dạng vòng tròn và bên trong là ảnh đại diện của người dùng (giữa class bên ngoài và avatar có padding vừa phải)
+- Có box shadow hướng xuống dưới với phạm vi và mức độ vừa đủ.
+
+#### 4.1.3. Slidebar setting
+- Bình thường slidebar này sẽ ẩn đi và chỉ khi click vào button đã nói ở mục 4.1.2 thì mới trượt vào từ bên phải
+- slidebar sẽ chiếm 1/2 màn hình khi được hiện và một nửa không có slidebar sẽ là làm mờ màn hình hiện tại.
+##### 4.1.3.1. Top
+- Phần top sẽ có avatar của người dùng ở dạng 50x50 và hình tròn
+- bên cạnh sẽ là username và bên dưới username là email của người dùng
+##### 4.1.3.2. Middle
+- Phần middle sẽ là nơi mà các liên kết được thể hiện
+- Các liên kết sẽ được thể hiện với tên rõ ràng và không có gạch chân, không có màu default của link.
+- Các mục ở đây sẽ bao gồm: Profile, Setting, Your theme, Log out.
+- Các element sẽ cách nhau một khoảng vừa đủ
+##### 4.1.3.3 End
+- Tại chính giữa của phần end sẽ là nút "X" để có thể tắt slidebar
+- Nút này sẽ là hình tròn và có viền trắng

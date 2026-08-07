@@ -7,7 +7,7 @@ View note là trang hiển thị chi tiết một note. Route sẽ là "/note/{i
 ### 1.1. Navbar
 - Giống như đã khai báo trong file "base.md" tại cùng thư mục này.
 ### 1.2. Top bar
-- Giữ nguyên Avatar button, slidebar như file "home.md" tại cùng thư mục này.
+- Giữ nguyên Avatar button, slidebar như file "based.md" tại cùng thư mục này.
 - Loại bỏ dropbox ở chính giữa
 - Góc bên trái sẽ là nút back lại home (đảm bảo khi back lại ra đúng note như trước khi click vào, nếu truy cập link từ ngoài thì trả về home)
 ### 1.3. Note content view
