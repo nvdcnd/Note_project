@@ -37,7 +37,10 @@ class user_accept_organization extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.user_accept_organization',
+            with: [
+                'memberId' => $this->memberId,
+            ],
         );
     }
 

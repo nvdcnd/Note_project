@@ -28,35 +28,66 @@ class PivotForNoteController extends Controller
         $request->validate([
             'shared_with' => 'required',
         ]);
+
         $data = $request->all();
-        $sharedwith = $data['shared_with'] ?? [];
+        $sharedwith = collect($data['shared_with'] ?? [])
+            ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+            ->map(fn ($value) => strtolower(trim($value)))
+            ->unique()
+            ->values()
+            ->all();
         $noteModel = Note::find($noteid);
-        $no_account = [];
+        $newShares = [];
+        $unregisteredEmails = [];
+        $skippedExistingShares = 0;
+
         if (! $noteModel) {
             return redirect()->route('home')->with('error', 'Note not found');
         }
+
         foreach ($sharedwith as $userEmail) {
             $userModel = User::where('email', $userEmail)->first();
+
             if ($userModel) {
-                $pivot = PivotForNote::create([
+                $alreadyShared = PivotForNote::query()
+                    ->where('note_id', $noteModel->id)
+                    ->where('shared_with', $userModel->id)
+                    ->exists();
+
+                if ($alreadyShared) {
+                    $skippedExistingShares++;
+
+                    continue;
+                }
+
+                PivotForNote::create([
                     'note_id' => $noteModel->id,
                     'shared_with' => $userModel->id,
                 ]);
-                // queue email to registered user
-                Mail::to($userModel->email)->queue(new UserEmail($userModel, $noteModel));
+                $newShares[] = $userModel;
             } else {
-                $no_account[] = $userEmail;
+                $unregisteredEmails[] = $userEmail;
             }
         }
 
-        if (count($no_account) > 0) {
-            // queue invitations for unregistered emails
-            $this->mail_for_no_account($no_account, $noteModel);
-
-            return redirect()->route('note', $noteModel->id)->with('success', 'Invitation sent to '.count($no_account).' unregistered users');
+        foreach ($newShares as $userModel) {
+            Mail::to($userModel->email)->queue(new UserEmail($userModel, $noteModel));
         }
 
-        return redirect()->route('note', $noteModel->id)->with('success', 'Note shared successfully');
+        if (count($unregisteredEmails) > 0) {
+            $this->mail_for_no_account($unregisteredEmails, $noteModel);
+        }
+
+        if (count($newShares) === 0 && count($unregisteredEmails) === 0) {
+            return redirect()->route('note', $noteModel->id)->with('warning', 'No valid recipients were provided');
+        }
+
+        $message = 'Note shared successfully';
+        if ($skippedExistingShares > 0) {
+            $message = 'Note shared successfully. Skipped '.$skippedExistingShares.' recipient(s) that were already shared.';
+        }
+
+        return redirect()->route('note', $noteModel->id)->with('success', $message);
     }
 
     public function undo_shared_note(Request $request, $id)

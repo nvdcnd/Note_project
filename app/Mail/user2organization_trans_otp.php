@@ -32,7 +32,10 @@ class user2organization_trans_otp extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.transaction_notification',
+            with: [
+                'transaction' => $this->transaction,
+            ],
         );
     }
 

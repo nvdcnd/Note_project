@@ -17,26 +17,24 @@ class Mail40account extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     // Accept either a User instance or an email string for unregistered users
-    public string|null $recipientEmail = null;
+    public ?string $recipientEmail = null;
+
     public ?User $user = null;
+
     public ?Note $notes = null;
 
-    public function __construct($userOrEmail, $notes)
+    public function __construct(User|string $userOrEmail, Note|int|null $notes)
     {
         if ($userOrEmail instanceof User) {
             $this->user = $userOrEmail;
             $this->recipientEmail = $userOrEmail->email;
         } else {
             // treat as email string
-            $this->recipientEmail = (string) $userOrEmail;
+            $this->recipientEmail = trim((string) $userOrEmail);
             $this->user = null;
         }
 
-        if ($notes instanceof Note) {
-            $this->notes = $notes;
-        } else {
-            $this->notes = Note::find($notes);
-        }
+        $this->notes = $notes instanceof Note ? $notes : Note::find((int) $notes);
     }
 
     /**
@@ -44,8 +42,9 @@ class Mail40account extends Mailable implements ShouldQueue
      */
     public function envelope(): Envelope
     {
-        $fromName = $this->user?->name ?? $this->recipientEmail;
-        $noteId = $this->notes?->id ?? '';
+        $fromName = $this->user ? $this->user->name : $this->recipientEmail;
+        $noteId = $this->notes ? $this->notes->id : '';
+
         return new Envelope(
             subject: 'Note no.'.$noteId.' has been shared with you by '.$fromName,
         );
@@ -57,7 +56,12 @@ class Mail40account extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.Mail40account',
+            view: 'emails.mail40account',
+            with: [
+                'user' => $this->user,
+                'recipientEmail' => $this->recipientEmail,
+                'notes' => $this->notes,
+            ],
         );
     }
 

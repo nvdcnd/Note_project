@@ -16,22 +16,55 @@ class OrganizationsMemberController extends Controller
     {
         $request->validate(['user_list' => 'required']);
         $data = $request->all();
-        $user_list = $data['user_list'] ?? [];
+        $user_list = collect($data['user_list'] ?? [])
+            ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+            ->map(fn ($value) => strtolower(trim($value)))
+            ->unique()
+            ->values()
+            ->all();
+
+        $addedCount = 0;
+        $skippedExisting = 0;
+        $invalidCount = 0;
+
         foreach ($user_list as $userID) {
+            $targetUser = User::where('email', $userID)->first();
+            if (! $targetUser) {
+                $invalidCount++;
+
+                continue;
+            }
+
+            $alreadyMember = OrganizationsMember::query()
+                ->where('organizationID', $organizationID)
+                ->where('userID', $targetUser->id)
+                ->exists();
+
+            if ($alreadyMember) {
+                $skippedExisting++;
+
+                continue;
+            }
+
             $organization_member = new OrganizationsMember;
             $organization_member->organizationID = $organizationID;
-            $targetUser = User::where('email', $userID)->first();
-            if ($targetUser) {
-                $organization_member->userID = $targetUser->id;
-                $organization_member->status = false;
-                $organization_member->save();
-                Mail::to($targetUser->email)->send(new user_accept_organization($organization_member->id));
-            } else {
-                return redirect()->route('organization', $organizationID)->with('error', 'User not found');
-            }
+            $organization_member->userID = $targetUser->id;
+            $organization_member->status = false;
+            $organization_member->save();
+            Mail::to($targetUser->email)->send(new user_accept_organization($organization_member->id));
+            $addedCount++;
         }
 
-        return redirect()->route('organization', $organizationID)->with('success', 'Member added successfully');
+        if ($addedCount === 0) {
+            return redirect()->route('organization', $organizationID)->with('warning', 'No new members were added');
+        }
+
+        $response = redirect()->route('organization', $organizationID)->with('success', 'Member added successfully');
+        if ($invalidCount > 0 || $skippedExisting > 0) {
+            $response->with('warning', 'Some invitations were skipped because they were invalid or already pending.');
+        }
+
+        return $response;
     }
 
     public function accept_member(Request $request, $id)

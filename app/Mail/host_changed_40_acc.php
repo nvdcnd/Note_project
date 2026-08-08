@@ -37,7 +37,10 @@ class host_changed_40_acc extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.host_changed_40_acc',
+            with: [
+                'email' => $this->email,
+            ],
         );
     }
 

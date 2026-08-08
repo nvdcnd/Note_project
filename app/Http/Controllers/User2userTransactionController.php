@@ -8,9 +8,9 @@ use App\Models\User2userTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
 
 class User2userTransactionController extends Controller
 {
@@ -79,26 +79,26 @@ class User2userTransactionController extends Controller
             $time = Carbon::parse($transaction->expires_at);
 
             if (! Hash::check($passkey, $transaction->otp)) {
-                User2userTransaction::destroy($transaction->id);
-
-                return redirect()->route('home')->with('error', 'Invalid passkey');
+                return redirect()->route('user2user_transaction_verify_view', $transaction->id)->with('error', 'Invalid passkey');
             }
 
             if (now()->greaterThan($time)) {
-                User2userTransaction::destroy($transaction->id);
+                $transaction->status = 'expired';
+                $transaction->save();
 
-                return redirect()->route('home')->with('error', 'The transaction has expired. Please create a new transaction');
+                return redirect()->route('user2user_transaction_history_view', $user->id)->with('error', 'The transaction has expired. Please create a new transaction');
             }
 
             $recipient = User::query()->find($transaction->to);
             if (! $recipient) {
-                User2userTransaction::destroy($transaction->id);
+                $transaction->status = 'failed';
+                $transaction->save();
 
-                return redirect()->route('home')->with('error', 'Recipient not found');
+                return redirect()->route('user2user_transaction_verify_view', $transaction->id)->with('error', 'Recipient not found');
             }
 
             if ($user->balance < $transaction->amount) {
-                return redirect()->route('home')->with('error', 'Insufficient balance');
+                return redirect()->route('user2user_transaction_verify_view', $transaction->id)->with('error', 'Insufficient balance');
             }
 
             $recipient->balance += $transaction->amount;

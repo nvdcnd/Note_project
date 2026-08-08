@@ -37,7 +37,10 @@ class Password_change extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.Password_change',
+            view: 'emails.password_change',
+            with: [
+                'passkey' => $this->passkey,
+            ],
         );
     }
 
