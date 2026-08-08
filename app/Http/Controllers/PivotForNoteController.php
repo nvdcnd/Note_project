@@ -17,8 +17,9 @@ class PivotForNoteController extends Controller
 {
     public function mail_for_no_account($users, $noteid)
     {
-        foreach ($users as $user) {
-            Mail::to($user)->send(new Mail40account($user, $noteid));
+        // $users is an array of email strings, $noteid is a Note model
+        foreach ($users as $email) {
+            Mail::to($email)->queue(new Mail40account($email, $noteid));
         }
     }
 
@@ -29,30 +30,33 @@ class PivotForNoteController extends Controller
         ]);
         $data = $request->all();
         $sharedwith = $data['shared_with'] ?? [];
-        $noteID = Note::find($noteid);
+        $noteModel = Note::find($noteid);
         $no_account = [];
-        if (! $noteID) {
+        if (! $noteModel) {
             return redirect()->route('home')->with('error', 'Note not found');
         }
-        foreach ($sharedwith as $user) {
-            $userID = User::where('email', $user)->first();
-            if ($userID) {
-                $note = PivotForNote::create([
-                    'note_id' => $noteID->id,
-                    'shared_with' => $userID->id,
+        foreach ($sharedwith as $userEmail) {
+            $userModel = User::where('email', $userEmail)->first();
+            if ($userModel) {
+                $pivot = PivotForNote::create([
+                    'note_id' => $noteModel->id,
+                    'shared_with' => $userModel->id,
                 ]);
-                Mail::to($userID->email)->send(new UserEmail($userID, $noteID));
+                // queue email to registered user
+                Mail::to($userModel->email)->queue(new UserEmail($userModel, $noteModel));
             } else {
-                $no_account[] = $user;
+                $no_account[] = $userEmail;
             }
         }
-        if (count($no_account) > 0) {
-            $this->mail_for_no_account($no_account, $noteid);
 
-            return redirect()->route('note', $noteID->id)->with('success', 'Invitation sent to '.count($no_account).' unregistered users');
-        } else {
-            return redirect()->route('note', $noteID->id)->with('success', 'Note shared successfully');
+        if (count($no_account) > 0) {
+            // queue invitations for unregistered emails
+            $this->mail_for_no_account($no_account, $noteModel);
+
+            return redirect()->route('note', $noteModel->id)->with('success', 'Invitation sent to '.count($no_account).' unregistered users');
         }
+
+        return redirect()->route('note', $noteModel->id)->with('success', 'Note shared successfully');
     }
 
     public function undo_shared_note(Request $request, $id)

@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class Theme4orgWalletController extends Controller
 {
@@ -70,38 +71,40 @@ class Theme4orgWalletController extends Controller
             return redirect()->back()->with('error', 'Invalid transaction');
         }
 
-        $org = Organization::query()->find($transaction->organizationID);
-        if (! $org) {
-            return redirect()->back()->with('error', 'Organization not found');
-        }
+        return DB::transaction(function () use ($request, $transaction) {
+            $org = Organization::query()->find($transaction->organizationID);
+            if (! $org) {
+                return redirect()->back()->with('error', 'Organization not found');
+            }
 
-        $theme = Theme4org::query()->find($transaction->themeID);
-        if (! $theme) {
-            return redirect()->back()->with('error', 'Theme not found');
-        }
+            $theme = Theme4org::query()->find($transaction->themeID);
+            if (! $theme) {
+                return redirect()->back()->with('error', 'Theme not found');
+            }
 
-        if ($org->balance < $theme->price) {
-            return redirect()->back()->with('error', 'Insufficient balance');
-        }
+            if ($org->balance < $theme->price) {
+                return redirect()->back()->with('error', 'Insufficient balance');
+            }
 
-        $time = Carbon::parse($transaction->expires_at);
+            $time = Carbon::parse($transaction->expires_at);
 
-        if (! Hash::check((string) $request->passkey, $transaction->otp)) {
-            return redirect()->back()->with('error', 'Invalid passkey');
-        }
+            if (! Hash::check((string) $request->passkey, $transaction->otp)) {
+                return redirect()->back()->with('error', 'Invalid passkey');
+            }
 
-        if (now()->greaterThan($time)) {
-            $transaction->delete();
+            if (now()->greaterThan($time)) {
+                $transaction->delete();
 
-            return redirect()->back()->with('error', 'OTP has expired. Please try again');
-        }
+                return redirect()->back()->with('error', 'OTP has expired. Please try again');
+            }
 
-        $org->balance -= $theme->price;
-        $org->save();
+            $org->balance -= $theme->price;
+            $org->save();
 
-        $transaction->status = 'finished';
-        $transaction->save();
+            $transaction->status = 'finished';
+            $transaction->save();
 
-        return redirect()->back()->with('success', 'Theme purchased successfully');
+            return redirect()->back()->with('success', 'Theme purchased successfully');
+        });
     }
 }

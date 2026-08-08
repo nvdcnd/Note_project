@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class Organization2userTransactionController extends Controller
 {
@@ -76,46 +77,48 @@ class Organization2userTransactionController extends Controller
             return redirect()->route('home')->with('error', 'Invalid transaction');
         }
 
-        $organization = Organization::query()->find($transaction->organizationID);
-        if (! $organization) {
-            Organization2userTransaction::destroy($transaction->id);
+        return DB::transaction(function () use ($passkey, $transaction) {
+           $organization = Organization::query()->find($transaction->organizationID);
+            if (! $organization) {
+                Organization2userTransaction::destroy($transaction->id);
 
-            return redirect()->route('home')->with('error', 'Organization not found');
-        }
+                return redirect()->route('home')->with('error', 'Organization not found');
+            }
 
-        $time = Carbon::parse($transaction->expires_at);
+            $time = Carbon::parse($transaction->expires_at);
 
-        if (! Hash::check($passkey, $transaction->otp)) {
-            Organization2userTransaction::destroy($transaction->id);
+            if (! Hash::check($passkey, $transaction->otp)) {
+                Organization2userTransaction::destroy($transaction->id);
 
-            return redirect()->route('home')->with('error', 'Invalid passkey');
-        }
+                return redirect()->route('home')->with('error', 'Invalid passkey');
+            }
 
-        if (now()->greaterThan($time)) {
-            Organization2userTransaction::destroy($transaction->id);
+            if (now()->greaterThan($time)) {
+                Organization2userTransaction::destroy($transaction->id);
 
-            return redirect()->route('home')->with('error', 'The transaction has expired. Please create a new transaction');
-        }
+                return redirect()->route('home')->with('error', 'The transaction has expired. Please create a new transaction');
+            }
 
-        if ($organization->balance < $transaction->amount) {
-            return redirect()->route('home')->with('error', 'Organization has insufficient balance');
-        }
+            if ($organization->balance < $transaction->amount) {
+                return redirect()->route('home')->with('error', 'Organization has insufficient balance');
+            }
 
-        $targetUser = User::query()->find($transaction->userID);
-        if (! $targetUser) {
-            return redirect()->route('home')->with('error', 'Recipient user not found');
-        }
+            $targetUser = User::query()->find($transaction->userID);
+            if (! $targetUser) {
+                return redirect()->route('home')->with('error', 'Recipient user not found');
+            }
 
-        $organization->balance -= $transaction->amount;
-        $organization->save();
+            $organization->balance -= $transaction->amount;
+            $organization->save();
 
-        $targetUser->balance += $transaction->amount;
-        $targetUser->save();
+            $targetUser->balance += $transaction->amount;
+            $targetUser->save();
 
-        $transaction->status = 'finished';
-        $transaction->save();
+            $transaction->status = 'finished';
+            $transaction->save();
 
-        return redirect()->route('organization2user_transaction_history_view', $organization->id)->with('success', 'Transaction completed successfully');
+            return redirect()->route('organization2user_transaction_history_view', $organization->id)->with('success', 'Transaction completed successfully');
+        });
     }
 
     /*

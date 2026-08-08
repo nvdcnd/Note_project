@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class User2userTransactionController extends Controller
 {
@@ -74,41 +75,44 @@ class User2userTransactionController extends Controller
             return redirect()->route('home')->with('error', 'Invalid transaction');
         }
 
-        $time = Carbon::parse($transaction->expires_at);
+        return DB::transaction(function () use ($transaction, $passkey, $user) {
+            $time = Carbon::parse($transaction->expires_at);
 
-        if (! Hash::check($passkey, $transaction->otp)) {
-            User2userTransaction::destroy($transaction->id);
+            if (! Hash::check($passkey, $transaction->otp)) {
+                User2userTransaction::destroy($transaction->id);
 
-            return redirect()->route('home')->with('error', 'Invalid passkey');
-        }
+                return redirect()->route('home')->with('error', 'Invalid passkey');
+            }
 
-        if (now()->greaterThan($time)) {
-            User2userTransaction::destroy($transaction->id);
+            if (now()->greaterThan($time)) {
+                User2userTransaction::destroy($transaction->id);
 
-            return redirect()->route('home')->with('error', 'The transaction has expired. Please create a new transaction');
-        }
+                return redirect()->route('home')->with('error', 'The transaction has expired. Please create a new transaction');
+            }
 
-        $recipient = User::query()->find($transaction->to);
-        if (! $recipient) {
-            User2userTransaction::destroy($transaction->id);
+            $recipient = User::query()->find($transaction->to);
+            if (! $recipient) {
+                User2userTransaction::destroy($transaction->id);
 
-            return redirect()->route('home')->with('error', 'Recipient not found');
-        }
+                return redirect()->route('home')->with('error', 'Recipient not found');
+            }
 
-        if ($user->balance < $transaction->amount) {
-            return redirect()->route('home')->with('error', 'Insufficient balance');
-        }
+            if ($user->balance < $transaction->amount) {
+                return redirect()->route('home')->with('error', 'Insufficient balance');
+            }
 
-        $recipient->balance += $transaction->amount;
-        $recipient->save();
+            $recipient->balance += $transaction->amount;
+            $recipient->save();
 
-        $user->balance -= $transaction->amount;
-        $user->save();
+            $user->balance -= $transaction->amount;
+            $user->save();
 
-        $transaction->status = 'finished';
-        $transaction->save();
+            $transaction->status = 'finished';
+            $transaction->save();
 
-        return redirect()->route('user2user_transaction_history_view', $user->id)->with('success', 'Transaction completed successfully');
+            return redirect()->route('user2user_transaction_history_view', $user->id)->with('success', 'Transaction completed successfully');
+        });
+
     }
 
     /*
