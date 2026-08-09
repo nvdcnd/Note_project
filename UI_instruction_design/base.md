@@ -28,6 +28,7 @@ Mobile sẽ là màn hình dành cho những thiết bị có width view dưới
 - Box menu sẽ hiện ra/biến mất khi người dùng bấm vào avatar tại phần top của bar
 - Các mục ở đây sẽ bao gồm: Profile, Setting, Your theme, Log out.
 ## 3. Theme mặc định
+- Phong cách: Skeumorphism, neumorphism, mô phỏng chính xác với chuyển động vật lý của việc sử dụng note giấy thông thường.
 - Font chữ: Ưu tiên font viết tay dễ nhìn, hiện thị được nhiều loại ngôn ngữ mà không lỗi
 - Màu note: 
     - Note element: Vàng đất nhạt
