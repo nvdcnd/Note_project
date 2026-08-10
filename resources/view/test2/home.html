@@ -13,29 +13,20 @@
         font-family: 'Caveat', cursive;
         width: 100%;
         height: 100vh;
-        /*background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20240613/pngtree-corkboard-or-pinboard-or-bulletin-board-cork-background-in-wide-banner-image_15749733.jpg');
-        background-size: cover;
-        background-position: center;
-        backdrop-filter: blur(2px);
-        --webkit-backdrop-filter: blur(2px);*/
     }
     .sidebar {
-        /*background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsZNyeNEfP6yyYHyRkGwlGoNcD5R0KeEXZpHk4zt4dqux2k1jajMs-ugjG&s=10');*/
+        position: fixed;
         background: #FFE86E;
         background-size: cover;
-        /*background-color: rgba(0, 0, 0, 0.5);*/
         backdrop-filter: blur(12px) brightness(0.8);
-        --webkit-backdrop-filter: blur(12px);/* 3. Viền mảnh bán trong suốt tạo cảm giác mép kính */
+        --webkit-backdrop-filter: blur(12px);
         border-right: 1px solid rgba(255, 255, 255, 0.3);
-
-        /* 4. Đổ bóng nhẹ để tách khỏi nền */
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-        height: 80vh;
+        height: 100vh;
         display: flex;
         flex-direction: column;
         justify-content: center;
         padding: 20px;
-        height: 100vh;
     }
     .sidebar-container {
         position: sticky;
@@ -96,28 +87,28 @@
         color: #000;
     }
     .btn-primary {
-            background-color: #FACC15;
-            border-color: #FACC15;
-            color: #000;
+        background-color: #FACC15;
+        border-color: #FACC15;
+        color: #000;
     }
     .btn-primary:hover {
-            background-color: #EAB308;
-            border-color: #EAB308;
+        background-color: #EAB308;
+        border-color: #EAB308;
     }
     .btn-primary:focus {
-            box-shadow: 0 0 0 0.2rem rgba(250, 204, 21, 0.5);
-            background-color: #EAB308;
-            border-color: #EAB308;
+        box-shadow: 0 0 0 0.2rem rgba(250, 204, 21, 0.5);
+        background-color: #EAB308;
+        border-color: #EAB308;
     }
     .btn-primary:disabled {
-            background-color: #FACC15;
-            border-color: #FACC15;
-            color: #000;
+        background-color: #FACC15;
+        border-color: #FACC15;
+        color: #000;
     }
     .btn-primary:disabled:hover {
-            background-color: #FACC15;
-            border-color: #FACC15;
-            color: #000;
+        background-color: #FACC15;
+        border-color: #FACC15;
+        color: #000;
     }
     .content {
         padding: 20px;
@@ -145,33 +136,21 @@
             border: none;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            width: 350px;
-            height: 350px;
+            width: 380px;
+            min-height: 320px;
+            height: auto;
             font-size: 1.2rem;
         }
-
     }
-    /*
-    @media(min-width: 768px) and (max-width: 1024px) {
-        .mobile-view {
-            display: none;
-        }
-        .card {
-            border: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            width: 350px;
-            height: 350px;
-            font-size: 1.2rem;
-        }
-    }*/
     @media (max-width: 992px) {
         .widescreen-only {
             display: none;
         }
         .card{
-            width: 300px;
-            height: 300px;
+            width: 92vw;
+            max-width: 360px;
+            min-height: 280px;
+            height: auto;
         }
     }
     .bottom-navbar {
@@ -221,7 +200,7 @@
         gap: 20px;
         padding: 20px;
         width: 100%;
-        height:80vh;
+        min-height: 70vh;
     }
     .mobile-view .note-container {
         gap: 16px;
@@ -258,10 +237,58 @@
     .modal-dialog-centered {
         min-height: 100vh;
     }
+
+    /* Shake animation & Form Validation */
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-8px); }
+        40%, 80% { transform: translateX(8px); }
+    }
+    .shake-animation {
+        animation: shake 0.3s ease-in-out;
+        border: 2px solid #ef4444 !important;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+        position: fixed; top: 20px; left: 50%;
+        transform: translateX(-50%); z-index: 3000;
+        pointer-events: none;
+    }
+    .custom-toast {
+        background: rgba(15, 23, 42, 0.92); color: white;
+        padding: 0.65rem 1.25rem; border-radius: 30px;
+        font-size: 0.95rem; font-weight: 600;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+        display: flex; align-items: center; gap: 8px;
+        opacity: 0; transform: translateY(-20px);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .custom-toast.show { opacity: 1; transform: translateY(0); }
+
+    /* FAB Add Button & Active Close Rotation */
+    .fab-add-btn {
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.25s, box-shadow 0.25s !important;
+    }
+    .fab-add-btn.active-close {
+        background-color: #ef4444 !important;
+        border-color: #ef4444 !important;
+        box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45) !important;
+        transform: rotate(135deg) !important;
+    }
+    .style-scroll::-webkit-scrollbar {
+        width: 4px;
+    }
+    .style-scroll::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2);
+        border-radius: 4px;
+    }
+
     /* Note drag & menu styles */
     .note-card {
         position: relative;
-        touch-action: none;
+        touch-action: none !important;
         -webkit-user-select: none;
         user-select: none;
         transition: transform 200ms ease, opacity 200ms ease;
@@ -273,11 +300,30 @@
         border: 1px solid rgba(250, 204, 21, 0.35);
         max-width: 420px;
         margin: 0 auto;
+        cursor: grab;
     }
+    .note-card:active { cursor: grabbing; }
     .note-card.dragging {
         transition: none;
         box-shadow: 0 24px 64px rgba(15, 23, 42, 0.22);
         z-index: 2000;
+    }
+    .note-card .card-title,
+    .note-card .card-text,
+    .note-card .note-header p {
+        pointer-events: none;
+    }
+    .note-card input,
+    .note-card textarea,
+    .note-card select,
+    .note-card button,
+    .note-card a,
+    .note-card .pin-btn,
+    .note-card .note-menu {
+        pointer-events: auto !important;
+        touch-action: auto !important;
+        user-select: text !important;
+        -webkit-user-select: text !important;
     }
     .note-card .note-header {
         background: rgba(250, 204, 21, 0.24);
@@ -296,7 +342,9 @@
     }
     .note-card .card-body {
         background: transparent;
-        padding: 24px 20px 28px;
+        padding: 16px 18px 20px;
+        overflow-y: auto;
+        max-height: 65vh;
     }
     .note-card .card-title {
         font-size: 1.85rem;
@@ -382,16 +430,17 @@
     .content .col { display: flex; justify-content: center; }
     .view { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
     .mobile-view .note-container { width: 100%; max-width: 420px; }
-    /*#note{
-        cursor:grab;
-        user-select:none;
-    }
-    #note:active{
-        cursor:grabbing;
-    }*/
 </style>
 </head>
 <body>
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container">
+        <div class="custom-toast" id="toast">
+            <i class="fas fa-info-circle"></i>
+            <span id="toastMsg">Notification</span>
+        </div>
+    </div>
+
     <section class="widescreen-only">
         <div class="row">
         <div class="col-2">
@@ -446,8 +495,8 @@
                 <div class="container">
                     <div class="row">
                         <div class="col">
-                            <div class="card note-card">
-                                 <div class="card-header" style="background-color: #FACC15;padding: 7px;display: flex;justify-content: center;align-items: center;">
+                            <div class="card note-card" data-card-mode="CREATE">
+                                 <div class="card-header note-header" style="background-color: #FACC15;padding: 7px;display: flex;justify-content: center;align-items: center;">
                                     <p>Create Note</p>
                                 </div>
                                 <div class="card-body rounded" style="background-color: #FFE86E;padding: 20px;">
@@ -463,18 +512,21 @@
                                         <button type="submit" class="btn btn-primary w-100">Create Note</button>
                                     </form>
                                 </div>
+                                <div class="note-overlay" aria-hidden="true">
+                                    <div class="overlay-box">Create Note</div>
+                                </div>
                             </div>
                         </div>
                         <div class="col">
-                            <div class="card note-card">
+                            <div class="card note-card" data-card-mode="VIEW">
                                     <div class="card-header note-header" style="position: relative;">
                                         <p>Created at: 2023-10-01 06:50:00</p>
                                         <button class="pin-btn" aria-label="More">📌</button>
                                         <div class="note-menu" role="menu">
-                                            <button data-bs-toggle="modal" data-bs-target="#sharedModal">Share</button>
-                                            <button data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
-                                            <button href="/delete">Delete</button>
-                                            <button data-bs-toggle="modal" data-bs-target="#replyModal">Reply</button>
+                                            <button data-action="share">Share</button>
+                                            <button data-action="edit">Edit</button>
+                                            <button data-action="delete">Delete</button>
+                                            <button data-action="reply">Reply</button>
                                         </div>
                                     </div>
                                 <div class="card-body rounded" style="background-color: #FFE86E;padding: 20px;">
@@ -513,9 +565,6 @@
                     </div>
                 </div>
                 <div class="topbar-right" style="display: flex; align-items: center;">
-                    <!--<button class="btn btn-primary rounded-pill" style="margin-right: 10px; padding: 10px 20px; font-size: 1.2rem;font-weight: bold;" disabled>
-                        $300
-                    </button>-->
                     <button class="btn btn-primary rounded-circle" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center;">
                         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZjYeTW5dVKQpVxWLdjUqQTgjkSBVfVzONaCzFqnpig&s" style="width: 40px; height: 40px;" alt="Profile" class="rounded-circle" />
                     </button>
@@ -524,15 +573,15 @@
             </section>
         <div class="view">
             <div class="note-container">
-                <div class="card note-card">
+                <div class="card note-card" data-card-mode="VIEW">
                     <div class="card-header note-header" style="position:relative;">
                         <p>Created at: 2023-10-01 06:50:00</p>
                         <button class="pin-btn" aria-label="More">📌</button>
                         <div class="note-menu" role="menu">
-                            <button data-bs-toggle="modal" data-bs-target="#sharedModal">Share</button>
-                            <button data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
-                            <button href="/delete">Delete</button>
-                            <button data-bs-toggle="modal" data-bs-target="#replyModal">Reply</button>
+                            <button data-action="share">Share</button>
+                            <button data-action="edit">Edit</button>
+                            <button data-action="delete">Delete</button>
+                            <button data-action="reply">Reply</button>
                         </div>
                     </div>
                     <div class="card-body rounded" style="background-color: #FFE86E;padding: 20px;">
@@ -545,7 +594,8 @@
                     </div>
                 </div>
             </div>
-            <button data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-primary rounded-circle" style="margin-right: 10px; padding: 10px 20px; font-size: 1.2rem;font-weight: bold; position: fixed; bottom: 100px; right: 20px;width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+            <!-- FAB Add Button WITH FLIP CARD SWAP INSTEAD OF CLUNKY BOOTSTRAP MODAL -->
+            <button class="fab-add-btn btn btn-primary rounded-circle" id="fabBtn" onclick="toggleMobileCardSwap()" title="Tạo Note Mới" style="margin-right: 10px; padding: 10px 20px; font-size: 1.2rem;font-weight: bold; position: fixed; bottom: 100px; right: 20px;width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; z-index: 2000;">
                 <i class="fas fa-plus"></i>
             </button>
         </div>
@@ -559,382 +609,486 @@
             </div>
         </div>
     </section>
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body rounded">
-                <h2 class="text-center">Create Note</h2>
-                <form action="/create/note" method="POST">
-                    <div class="mb-3">
-                        <label for="noteTitle" class="form-label">Note Title</label>
-                        <input type="text" class="form-control" id="noteTitle" name="noteTitle" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="noteContent" class="form-label">Note Content</label>
-                        <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2.5" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Create Note</button>
-                </form>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>-->
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body rounded">
-                <h2 class="text-center">Edit Note</h2>
-                <form action="/edit/note/{id}" method="POST">
-                    <div class="mb-3">
-                        <label for="noteTitle" class="form-label">Note Title</label>
-                        <input type="text" class="form-control" id="noteTitle" name="noteTitle" value="Example" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="noteContent" class="form-label">Note Content</label>
-                        <textarea class="form-control bigform" id="noteContent" name="noteContent" value="Hello" rows="2.5" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Edit Note</button>
-                </form>
-            </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body rounded">
-                <h2 class="text-center">Reply Note to note.{id}</h2>
-                <form action="/reply/note/{id}" method="POST">
-                    <div class="mb-3">
-                        <label for="noteContent" class="form-label">Content</label>
-                        <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2.5" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Create Reply Note</button>
-                </form>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>-->
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="sharedModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body rounded">
-                <h2 class="text-center">Share Note</h2>
-                <div class="input-group mb-3">
-                    <input class="form-control" id="Link_to_copy" value="https://example.com" />
-                    <button class="btn btn-secondary" id="copy_shared_link">Copy</button>
-                </div>
-                <div class="input-group mb-3">
-                    <input class="form-control" id="Email_shared_input" type="email" />
-                    <button class="btn btn-secondary" id="addShareEmail">Add</button>
-                </div>
-                <div class="mb-3">
-                    <table class="table">
-                        <thead>
-                            <th>ID</th>
-                            <th>Email</th>
-                        </thead>
-                        <tbody>
-                            <tr id="Shared_Body">
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <button class="btn btn-primary" id="Submit_shared">Shared</button>
-            </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>-->
-            </div>
-        </div>
-    </div>
+
+    <!-- JAVASCRIPT GESTURE & CARD SWAP ENGINE -->
     <script>
         (function(){
-            const NOTE_REMOVAL_THRESHOLD = 220; // px to perform action downward
-            const NOTE_SKIP_THRESHOLD = -220; // px to perform action upward
-            const OVERLAY_THRESHOLD = 100; // px to show overlay hint
-            let pre_noteID = 0; // to track which note is being acted upon
+            // --- Toast Notification Engine ---
+            function showToast(message, isError = false) {
+                const toast = document.getElementById('toast');
+                const toastMsg = document.getElementById('toastMsg');
+                if (!toast || !toastMsg) return;
+                toastMsg.innerText = message;
+                toast.style.background = isError ? 'rgba(225, 29, 72, 0.95)' : 'rgba(15, 23, 42, 0.92)';
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2200);
+            }
 
+            // --- Helper Functions ---
             function valid_email(email) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 return emailRegex.test(email);
             }
 
             function copyToClipboard(text) {
+                if (!text) return;
                 navigator.clipboard.writeText(text).then(() => {
-                    alert('Link copied to clipboard!');
+                    showToast('📋 Link copied to clipboard!');
                 }).catch(err => {
                     console.error('Failed to copy: ', err);
+                    showToast('⚠️ Failed to copy link', true);
                 });
             }
 
-
-            document.getElementById('copy_shared_link').addEventListener('click', copyToClipboard(document.getElementById("Link_to_copy").value));
-
-            function add_to_list(email, emailListContainer){
-                const email_list = document.getElementById("Shared_Body");
-                const new_id = document.createElement('td')
-                const new_email = document.createElement('td')
-                new_id.textContent = String(emailListContainer.length);
-                new_email.textContent = email;
-                email_list.appendChild(new_id);
-                email_list.appendChild(new_email);
+            // --- Shake & Card Exit Animations ---
+            function playShakeAnimation(element) {
+                element.style.transition = 'transform 0.2s';
+                element.style.transform = 'none';
+                element.classList.add('shake-animation');
+                setTimeout(() => element.classList.remove('shake-animation'), 350);
             }
 
-            //function Emailadded()
+            function triggerCardExit(element, targetY, callback) {
+                element.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                element.style.transform = `translateY(${targetY}px) rotate(${targetY * 0.05}deg)`;
+                element.style.opacity = '0';
 
-                document.getElementById("addShareEmail").addEventListener("click", function() {
-                    alert("Hello");
-                    const emailInput = document.getElementById("Email_shared_input");
-                    const email = emailInput.value.trim();
-                    if (valid_email(email)) {
-                        // Add the email to the list
-                        const emailListContainer = []
-                        emailListContainer.push(email)
-                        add_to_list(email,emailListContainer);
-                        emailInput.value = ''; // Clear input
-                    } else {
-                        alert("Please enter a valid email address.");
-                    }
-                });
+                setTimeout(() => {
+                    callback();
+                    element.style.transition = 'none';
+                    element.style.transform = 'none';
+                    element.style.opacity = '1';
+                    element.style.zIndex = '';
+                }, 280);
+            }
 
-            async function send_share_to_api(emailListContainer){
-                try{
-                    const url = "https://";
-                    const send = await fetch(url, {
-                        method: "POST",
-                        body: JSON.stringify({"email_list": emailListContainer})
-                    });
-                    if (send.status == 200){
-                        return alert("Chia se thanh cong")
-                    }
-                } catch {
-                    return alert("Error")
+            // --- INLINE CARD SWAP ENGINE (EDIT, SHARE, REPLY, CREATE) ---
+            function swapCardMode(card, mode) {
+                if (!card) return;
+
+                // Save original view HTML if not stored yet
+                if (!card.dataset.originalBodyHtml) {
+                    const bodyEl = card.querySelector('.card-body');
+                    if (bodyEl) card.dataset.originalBodyHtml = bodyEl.innerHTML;
+                    const headerTitleEl = card.querySelector('.note-header p');
+                    if (headerTitleEl) card.dataset.originalHeaderHtml = headerTitleEl.innerHTML;
                 }
-            }
 
-            document.getElementById("Shared_Body").addEventListener('click', send_share_to_api);
+                const cardBody = card.querySelector('.card-body');
+                const headerTitle = card.querySelector('.note-header p');
+                if (!cardBody) return;
 
-            /*function show_shared_emails_list(shared_emails){
-                const emailListContainer = document.getElementById('sharedEmailsList');
-                emailListContainer.innerHTML = ''; // Clear previous list
-                shared_emails.forEach(email => {
-                    const li = document.createElement('li');
-                    li.textContent = email;
-                    emailListContainer.appendChild(li);
-                });
-            }*/
-
-            function performAction(card, dir){
-                // dir: 'down' -> mark done, 'up' -> skip
-                const out = dir === 'down' ? 'translateY(120vh)' : 'translateY(-120vh)';
-                card.style.transition = 'transform 320ms cubic-bezier(.2,.9,.2,1), opacity 240ms ease';
-                card.style.transform = out;
+                // Out transition
+                card.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+                card.style.transform = 'translateY(-120px) rotate(-6deg)';
                 card.style.opacity = '0';
-                const ov = card.querySelector('.note-overlay'); if(ov) ov.classList.remove('show');
-                setTimeout(()=> card.remove(), 340);
-            }
 
-            function initNoteCard(card){
-                if(!card) return;
-                const pin = card.querySelector('.pin-btn');
-                const menu = card.querySelector('.note-menu');
-                const overlay = card.querySelector('.note-overlay');
-                const overlayBox = overlay && overlay.querySelector('.overlay-box');
+                setTimeout(() => {
+                    card.dataset.cardMode = mode;
 
-                // Menu toggle
-                pin && pin.addEventListener('click', (ev)=>{
-                    ev.stopPropagation();
-                    menu && menu.classList.toggle('show');
-                });
-                document.addEventListener('click', (e)=>{ if(menu && !card.contains(e.target)) menu.classList.remove('show'); });
+                    if (mode === 'VIEW') {
+                        cardBody.innerHTML = card.dataset.originalBodyHtml;
+                        if (headerTitle && card.dataset.originalHeaderHtml) {
+                            headerTitle.innerHTML = card.dataset.originalHeaderHtml;
+                        }
+                    } else if (mode === 'EDIT') {
+                        const currentTitle = card.querySelector('.card-title')?.textContent.trim() || '';
+                        const currentText = card.querySelector('.card-text')?.textContent.trim() || '';
+                        if (headerTitle) headerTitle.innerHTML = '✏️ Edit Note';
 
-                // Menu actions
-                if(menu){
-                    menu.addEventListener('click', (e)=>{
-                        const action = e.target.getAttribute('data-action');
-                        if(!action) return;
-                        e.stopPropagation();
-                        if(action==='delete') performAction(card,'down');
-                        else showNoteActionModal(action, card);
-                        menu.classList.remove('show');
-                    });
-                }
+                        cardBody.innerHTML = `
+                            <form onsubmit="return false;">
+                                <div class="mb-2">
+                                    <label class="form-label" style="font-weight: bold;">Note Title</label>
+                                    <input type="text" class="form-control edit-title-input" value="${currentTitle}" required />
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label" style="font-weight: bold;">Note Content</label>
+                                    <textarea class="form-control bigform edit-content-input" rows="2" required>${currentText}</textarea>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-secondary w-50 btn-cancel-swap">Cancel</button>
+                                    <button type="button" class="btn btn-primary w-50 btn-save-edit">Save Edit</button>
+                                </div>
+                            </form>
+                        `;
 
-                // Drag handling
-                let dragging = false, startY = 0, currentY = 0, pointerId = null, actionPerformed = false;
+                        cardBody.querySelector('.btn-cancel-swap')?.addEventListener('click', () => {
+                            swapCardMode(card, 'VIEW');
+                        });
+                        cardBody.querySelector('.btn-save-edit')?.addEventListener('click', () => {
+                            const newTitle = cardBody.querySelector('.edit-title-input')?.value.trim();
+                            const newContent = cardBody.querySelector('.edit-content-input')?.value.trim();
+                            if (!newTitle && !newContent) {
+                                showToast("⚠️ Title or content cannot be empty!", true);
+                                playShakeAnimation(card);
+                                return;
+                            }
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = card.dataset.originalBodyHtml;
+                            const t = tempDiv.querySelector('.card-title');
+                            const c = tempDiv.querySelector('.card-text');
+                            if (t) t.textContent = newTitle;
+                            if (c) c.textContent = newContent;
+                            card.dataset.originalBodyHtml = tempDiv.innerHTML;
 
-                function showOverlay(state){ // 'down' | 'up' | null
-                    if(!overlay) return;
-                    if(state === 'down'){
-                        overlay.classList.add('show','down'); overlay.classList.remove('up');
-                        overlayBox && (overlayBox.textContent = 'Release to mark as done');
-                    } else if(state === 'up'){
-                        overlay.classList.add('show','up'); overlay.classList.remove('down');
-                        overlayBox && (overlayBox.textContent = 'Release to skip');
-                    } else {
-                        overlay.classList.remove('show','up','down');
-                    }
-                }
+                            showToast("🎉 Edit saved successfully!");
+                            swapCardMode(card, 'VIEW');
+                        });
 
-                function onPointerDown(e){
-                    if(e.target.closest('.pin-btn') || e.target.closest('.note-menu')) return;
-                    dragging = true; pointerId = e.pointerId; startY = e.clientY; currentY = 0; actionPerformed = false;
-                    card.classList.add('dragging'); try{ document.body.style.overflow='hidden'; }catch(e){}
-                    card.setPointerCapture && card.setPointerCapture(pointerId); card.style.transition='none';
-                }
+                    } else if (mode === 'SHARE') {
+                        if (headerTitle) headerTitle.innerHTML = '🔗 Share Note';
+                        const noteTitle = card.querySelector('.card-title')?.textContent.trim() || 'note';
+                        const shareUrl = `https://example.com/note/${encodeURIComponent(noteTitle.toLowerCase().replace(/\s+/g, '-'))}`;
+                        let inlineEmails = [];
 
-                function onPointerMove(e){
-                    if(!dragging) return;
-                    currentY = e.clientY - startY;
-                    // apply transform
-                    const scale = Math.max(0.98, 1 - Math.abs(currentY)/2000);
-                    card.style.transform = `translateY(${currentY}px) scale(${scale})`;
-
-                    // overlay logic
-                    if(currentY >= OVERLAY_THRESHOLD){ showOverlay('down'); }
-                    else if(currentY <= -OVERLAY_THRESHOLD){ showOverlay('up'); }
-                    else { showOverlay(null); }
-
-                    // if crosses action threshold, perform immediately
-                    if(currentY >= NOTE_REMOVAL_THRESHOLD && !actionPerformed){ actionPerformed = true; performAction(card,'down'); }
-                    if(currentY <= NOTE_SKIP_THRESHOLD && !actionPerformed){ actionPerformed = true; performAction(card,'up'); }
-                }
-
-                function endDrag(){
-                    if(!dragging) return;
-                    dragging = false; card.classList.remove('dragging'); card.style.transition='transform 300ms ease, opacity 240ms ease';
-                    try{ document.body.style.overflow=''; }catch(e){}
-                    // if action already performed, nothing else
-                    if(actionPerformed) return;
-                    // if user released while within overlay zone (but not action threshold), revert
-                    if(currentY >= OVERLAY_THRESHOLD && currentY < NOTE_REMOVAL_THRESHOLD){ showOverlay(null); card.style.transform='none'; return; }
-                    if(currentY <= -OVERLAY_THRESHOLD && currentY > NOTE_SKIP_THRESHOLD){ showOverlay(null); card.style.transform='none'; return; }
-
-                    // otherwise check final position
-                    if(currentY >= NOTE_REMOVAL_THRESHOLD){ performAction(card,'down'); }
-                    else if(currentY <= NOTE_SKIP_THRESHOLD){ performAction(card,'up'); }
-                    else { showOverlay(null); card.style.transform='none'; card.style.opacity='1'; }
-                }
-
-                card.addEventListener('pointerdown', onPointerDown);
-                card.addEventListener('pointermove', onPointerMove);
-                card.addEventListener('pointerup', (e)=>{ card.releasePointerCapture && card.releasePointerCapture(e.pointerId); endDrag(); });
-                card.addEventListener('pointercancel', endDrag);
-
-                // touch fallback
-                card.addEventListener('touchstart', function(ev){ if(ev.touches.length>1) return; const t=ev.touches[0]; dragging=true; startY=t.clientY; currentY=0; actionPerformed=false; card.classList.add('dragging'); try{ document.body.style.overflow='hidden'; }catch(e){} card.style.transition='none'; }, {passive:true});
-                card.addEventListener('touchmove', function(ev){ if(!dragging) return; ev.preventDefault(); const t=ev.touches[0]; currentY = t.clientY - startY; const scale = Math.max(0.98, 1 - Math.abs(currentY)/2000); card.style.transform = `translateY(${currentY}px) scale(${scale})`; if(currentY >= OVERLAY_THRESHOLD) showOverlay('down'); else if(currentY <= -OVERLAY_THRESHOLD) showOverlay('up'); else showOverlay(null); if(currentY >= NOTE_REMOVAL_THRESHOLD && !actionPerformed){ actionPerformed=true; performAction(card,'down'); } if(currentY <= NOTE_SKIP_THRESHOLD && !actionPerformed){ actionPerformed=true; performAction(card,'up'); } }, {passive:false});
-                card.addEventListener('touchend', function(ev){ if(dragging){ endDrag(); } });
-            }
-
-            /*function showNoteActionModal(action, card) {
-                const modalElement = document.getElementById('noteActionModal');
-                const modalTitle = modalElement.querySelector('.modal-title');
-                const modalBody = modalElement.querySelector('#noteActionModalBody');
-                //const modalFooter = modalElement.querySelector('#noteActionModalFooter');
-                const noteTitle = card.querySelector('.card-title')?.textContent || 'Untitled note';
-                const noteText = card.querySelector('.card-text')?.textContent || '';
-                const author = card.querySelector('.card-text.text-secondary')?.textContent || '';
-                //modalFooter.innerHTML = '';
-                if(action === 'edit') {
-                    modalTitle.textContent = 'Edit Note';
-                    modalBody.innerHTML = `
-                        <form id="noteEditForm">
-                            <div class="mb-3">
-                                <label class="form-label" for="editNoteTitle">Note Title</label>
-                                <input type="text" class="form-control" id="editNoteTitle" value="${noteTitle}" />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" for="editNoteContent">Note Content</label>
-                                <textarea class="form-control bigform" id="editNoteContent" rows="4">${noteText}</textarea>
-                            </div>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveNoteEdit">Save</button>
-                        </form>
-                    `;
-                    // modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveNoteEdit">Save</button>`;
-                } else if(action === 'share') {
-                    modalTitle.textContent = 'Share Note';
-                    var note_shared_list = []
-
-                    const shareUrl = `https://example.com/note/${encodeURIComponent(noteTitle.toLowerCase().replace(/\s+/g,'-'))}`;
-                    modalBody.innerHTML = `
-                        <div class="mb-3">
-                            <p class="mb-2">Share the note with others.</p>
-                            <div class="input-group mb-3">
-                                <input type="text" readonly class="form-control" value="${shareUrl}" id="shareNoteUrl" />
-                                <button class="btn btn-outline-secondary" onclick="copyShareUrl()" type="button" id="copyShareUrl">Copy</button>
-                            </div>
-                        </div>
-                        </div>
-                        <div class="mb-3">
-                                <label class="form-label" for="shareEmail">Share via email</label>
-                                <div class="input-group mb-3">
-                                    <input type="email" class="form-control" id="Email_shared_input" placeholder="Enter email to share..." />
-                                    <button class="btn btn-outline-secondary" type="button" id="addShareEmail">Add</button>
+                        cardBody.innerHTML = `
+                            <div class="mb-2">
+                                <label class="form-label" style="font-weight: bold;">Share Link</label>
+                                <div class="input-group mb-1">
+                                    <input type="text" readonly class="form-control share-url-input" value="${shareUrl}" />
+                                    <button class="btn btn-secondary btn-copy-share" type="button">Copy</button>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <ul id="sharedEmailsList"></ul>
-                        </div>
-                    `;
-                    //modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-primary" id="copyShareUrl">Copy Link</button>`;
-                } else if(action === 'reply') {
-                    modalTitle.textContent = 'Reply to Note';
-                    modalBody.innerHTML = `
-                        <div class="mb-3">
-                            <label class="form-label" for="replyNoteText">Reply message</label>
-                            <textarea class="form-control bigform" id="replyNoteText" rows="4" placeholder="Type your reply..."></textarea>
-                        </div>
-                    `;
-                    //modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="sendReply">Send</button>`;
+                            <div class="mb-2">
+                                <label class="form-label" style="font-weight: bold;">Share via Email</label>
+                                <div class="input-group mb-1">
+                                    <input type="email" class="form-control inline-email-input" placeholder="Enter email..." />
+                                    <button class="btn btn-secondary btn-add-email" type="button">Add</button>
+                                </div>
+                                <div class="table-responsive style-scroll" style="max-height: 70px; overflow-y: auto;">
+                                    <table class="table table-sm mb-0">
+                                        <thead><tr><th>#</th><th>Email</th></tr></thead>
+                                        <tbody class="inline-email-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-secondary w-50 btn-cancel-swap">Back</button>
+                                <button type="button" class="btn btn-primary w-50 btn-submit-share">Share</button>
+                            </div>
+                        `;
+
+                        cardBody.querySelector('.btn-copy-share')?.addEventListener('click', () => {
+                            copyToClipboard(shareUrl);
+                        });
+
+                        const addEmailBtn = cardBody.querySelector('.btn-add-email');
+                        const emailInput = cardBody.querySelector('.inline-email-input');
+                        const tbody = cardBody.querySelector('.inline-email-tbody');
+
+                        addEmailBtn?.addEventListener('click', () => {
+                            const em = emailInput?.value.trim();
+                            if (valid_email(em)) {
+                                if (inlineEmails.includes(em)) {
+                                    showToast("⚠️ Email already in list!", true);
+                                    return;
+                                }
+                                inlineEmails.push(em);
+                                tbody.innerHTML = inlineEmails.map((e, idx) => `<tr><td>${idx + 1}</td><td>${e}</td></tr>`).join('');
+                                emailInput.value = '';
+                                showToast("✉️ Added email to share list!");
+                            } else {
+                                showToast("⚠️ Please enter a valid email!", true);
+                            }
+                        });
+
+                        cardBody.querySelector('.btn-cancel-swap')?.addEventListener('click', () => {
+                            swapCardMode(card, 'VIEW');
+                        });
+
+                        cardBody.querySelector('.btn-submit-share')?.addEventListener('click', () => {
+                            if (inlineEmails.length === 0) {
+                                showToast("⚠️ Share list is empty!", true);
+                                return;
+                            }
+                            showToast("🎉 Shared note successfully!");
+                            swapCardMode(card, 'VIEW');
+                        });
+
+                    } else if (mode === 'REPLY') {
+                        if (headerTitle) headerTitle.innerHTML = '💬 Reply Note';
+
+                        cardBody.innerHTML = `
+                            <form onsubmit="return false;">
+                                <div class="mb-2">
+                                    <label class="form-label" style="font-weight: bold;">Reply Message</label>
+                                    <textarea class="form-control bigform reply-text-input" rows="3" placeholder="Type your reply..." required></textarea>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-secondary w-50 btn-cancel-swap">Cancel</button>
+                                    <button type="button" class="btn btn-primary w-50 btn-send-reply">Send Reply</button>
+                                </div>
+                            </form>
+                        `;
+
+                        cardBody.querySelector('.btn-cancel-swap')?.addEventListener('click', () => {
+                            swapCardMode(card, 'VIEW');
+                        });
+
+                        cardBody.querySelector('.btn-send-reply')?.addEventListener('click', () => {
+                            const replyText = cardBody.querySelector('.reply-text-input')?.value.trim();
+                            if (!replyText) {
+                                showToast("⚠️ Reply message cannot be empty!", true);
+                                playShakeAnimation(card);
+                                return;
+                            }
+                            showToast("🎉 Reply sent successfully!");
+                            swapCardMode(card, 'VIEW');
+                        });
+                    } else if (mode === 'CREATE') {
+                        if (headerTitle) headerTitle.innerHTML = '✏️ Create Note';
+                        cardBody.innerHTML = `
+                            <form action="/create/note" method="POST">
+                                <div class="mb-2">
+                                    <label for="noteTitle" class="form-label" style="font-weight: bold;">Note Title</label>
+                                    <input type="text" class="form-control" id="noteTitle" name="noteTitle" placeholder="Title..." required>
+                                </div>
+                                <div class="mb-2">
+                                    <label for="noteContent" class="form-label" style="font-weight: bold;">Note Content</label>
+                                    <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2" placeholder="Write content..." required></textarea>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-secondary w-50 btn-cancel-swap">Cancel</button>
+                                    <button type="submit" class="btn btn-primary w-50">Create Note</button>
+                                </div>
+                            </form>
+                        `;
+                        cardBody.querySelector('.btn-cancel-swap')?.addEventListener('click', () => {
+                            swapCardMode(card, 'VIEW');
+                            const fab = document.getElementById('fabBtn');
+                            if (fab) fab.classList.remove('active-close');
+                        });
+                    }
+
+                    // Re-bind pin button & dropdown menu listeners
+                    bindCardMenuEvents(card);
+
+                    // In transition
+                    card.style.transition = 'none';
+                    card.style.transform = 'translateY(80px) rotate(5deg)';
+                    requestAnimationFrame(() => {
+                        card.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s';
+                        card.style.transform = 'translateY(0) rotate(0deg)';
+                        card.style.opacity = '1';
+                    });
+                }, 220);
+            }
+
+            // --- FAB MOBILE CARD SWAP ---
+            window.toggleMobileCardSwap = function() {
+                const mobileContainer = document.querySelector('.mobile-view .note-container');
+                if (!mobileContainer) return;
+                const card = mobileContainer.querySelector('.note-card');
+                const fab = document.getElementById('fabBtn');
+                if (!card) return;
+
+                const currentMode = card.dataset.cardMode || 'VIEW';
+                if (currentMode === 'VIEW') {
+                    if (fab) fab.classList.add('active-close');
+                    swapCardMode(card, 'CREATE');
+                } else {
+                    if (fab) fab.classList.remove('active-close');
+                    swapCardMode(card, 'VIEW');
+                }
+            };
+
+            function bindCardMenuEvents(card) {
+                const pin = card.querySelector('.pin-btn');
+                const menu = card.querySelector('.note-menu');
+                if (pin && menu) {
+                    pin.onclick = (ev) => {
+                        ev.stopPropagation();
+                        menu.classList.toggle('show');
+                    };
+                }
+            }
+
+            // --- Gesture Engine for Draggable Cards ---
+            function initNoteCard(card) {
+                if (!card) return;
+                const menu = card.querySelector('.note-menu');
+
+                bindCardMenuEvents(card);
+
+                document.addEventListener('click', (e) => {
+                    if (menu && !card.contains(e.target)) menu.classList.remove('show');
+                });
+
+                if (menu) {
+                    menu.addEventListener('click', (e) => {
+                        const targetBtn = e.target.closest('button');
+                        if (!targetBtn) return;
+                        const action = targetBtn.getAttribute('data-action') || targetBtn.textContent.trim().toLowerCase();
+                        e.stopPropagation();
+                        menu.classList.remove('show');
+
+                        if (action === 'delete') {
+                            triggerCardExit(card, 380, () => {
+                                card.remove();
+                                showToast("🗑️ Note deleted!");
+                            });
+                        } else if (action === 'edit') {
+                            swapCardMode(card, 'EDIT');
+                        } else if (action === 'share') {
+                            swapCardMode(card, 'SHARE');
+                        } else if (action === 'reply') {
+                            swapCardMode(card, 'REPLY');
+                        }
+                    });
                 }
 
-                const bootstrapModal = new bootstrap.Modal(modalElement);
-                bootstrapModal.show();
+                // Drag state
+                let isDragging = false;
+                let startY = 0;
+                let currentY = 0;
 
-                modalFooter.querySelector('#saveNoteEdit')?.addEventListener('click', () => {
-                    alert('Note saved.');
-                    bootstrapModal.hide();
+                function showOverlay(state) { // 'down' | 'up' | null
+                    const overlay = card.querySelector('.note-overlay');
+                    const overlayBox = overlay && overlay.querySelector('.overlay-box');
+                    if (!overlay || !overlayBox) return;
+
+                    const mode = card.dataset.cardMode || 'VIEW';
+
+                    if (state === 'down') {
+                        overlay.classList.add('show', 'down');
+                        overlay.classList.remove('up');
+                        if (mode === 'CREATE') overlayBox.textContent = '🧹 Release to Reset Form';
+                        else if (mode === 'EDIT') overlayBox.textContent = '🧹 Release to Cancel Edit';
+                        else if (mode === 'SHARE') overlayBox.textContent = '➔ Release to Go Back';
+                        else if (mode === 'REPLY') overlayBox.textContent = '🧹 Release to Cancel Reply';
+                        else overlayBox.textContent = '✓ Release to Mark as Done';
+                    } else if (state === 'up') {
+                        overlay.classList.add('show', 'up');
+                        overlay.classList.remove('down');
+                        if (mode === 'CREATE') overlayBox.textContent = '➕ Release to Save Note';
+                        else if (mode === 'EDIT') overlayBox.textContent = '➕ Release to Save Edit';
+                        else if (mode === 'SHARE') overlayBox.textContent = '🎉 Release to Share Note';
+                        else if (mode === 'REPLY') overlayBox.textContent = '💬 Release to Send Reply';
+                        else overlayBox.textContent = '➔ Release to Skip Note';
+                    } else {
+                        overlay.classList.remove('show', 'up', 'down');
+                    }
+                }
+
+                card.addEventListener('pointerdown', (e) => {
+                    if (e.button !== 0 && e.pointerType === 'mouse') return;
+
+                    // Exclude interactive elements inside card
+                    if (e.target.closest('input, textarea, button, select, a, label, .pin-btn, .note-menu')) {
+                        return;
+                    }
+
+                    if (e.cancelable) e.preventDefault();
+
+                    isDragging = true;
+                    startY = e.clientY;
+                    currentY = 0;
+
+                    try {
+                        card.setPointerCapture(e.pointerId);
+                    } catch (err) {}
+
+                    card.style.transition = 'none';
+                    card.classList.add('dragging');
                 });
-                modalFooter.querySelector('#copyShareUrl')?.addEventListener('click', () => {
-                    const input = modalBody.querySelector('#shareNoteUrl');
-                    input.select();
-                    document.execCommand('copy');
-                    alert('Link copied.');
+
+                card.addEventListener('pointermove', (e) => {
+                    if (!isDragging) return;
+                    if (e.cancelable) e.preventDefault();
+
+                    currentY = e.clientY - startY;
+                    const rotate = currentY * 0.04;
+                    const scale = Math.max(0.98, 1 - Math.abs(currentY) / 2000);
+                    card.style.transform = `translateY(${currentY}px) rotate(${rotate}deg) scale(${scale})`;
+
+                    if (currentY <= -35) {
+                        showOverlay('up');
+                    } else if (currentY >= 35) {
+                        showOverlay('down');
+                    } else {
+                        showOverlay(null);
+                    }
                 });
-                modalFooter.querySelector('#sendReply')?.addEventListener('click', () => {
-                    alert('Reply sent.');
-                    bootstrapModal.hide();
-                });
-            }*/
+
+                function handlePointerUpOrCancel(e) {
+                    if (!isDragging) return;
+                    isDragging = false;
+
+                    try {
+                        card.releasePointerCapture(e.pointerId);
+                    } catch (err) {}
+
+                    card.classList.remove('dragging');
+                    showOverlay(null);
+
+                    const mode = card.dataset.cardMode || 'VIEW';
+
+                    if (currentY < -120) {
+                        // Swipe UP action
+                        if (mode === 'CREATE') {
+                            const form = card.querySelector('form');
+                            const titleInput = form ? form.querySelector('#noteTitle, [name="noteTitle"]') : null;
+                            const contentInput = form ? form.querySelector('#noteContent, [name="noteContent"]') : null;
+                            const title = titleInput ? titleInput.value.trim() : '';
+                            const content = contentInput ? contentInput.value.trim() : '';
+
+                            if (!title && !content) {
+                                showToast("⚠️ Title or content cannot be empty!", true);
+                                playShakeAnimation(card);
+                                card.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                                card.style.transform = 'none';
+                            } else {
+                                triggerCardExit(card, -380, () => {
+                                    showToast("🎉 Note saved!");
+                                    if (form) form.submit();
+                                });
+                            }
+                        } else if (mode === 'EDIT') {
+                            const saveBtn = card.querySelector('.btn-save-edit');
+                            if (saveBtn) saveBtn.click();
+                        } else if (mode === 'SHARE') {
+                            const shareBtn = card.querySelector('.btn-submit-share');
+                            if (shareBtn) shareBtn.click();
+                        } else if (mode === 'REPLY') {
+                            const sendReplyBtn = card.querySelector('.btn-send-reply');
+                            if (sendReplyBtn) sendReplyBtn.click();
+                        } else {
+                            triggerCardExit(card, -380, () => {
+                                showToast("➔ Skipped to next note");
+                            });
+                        }
+                    } else if (currentY > 120) {
+                        // Swipe DOWN action
+                        if (mode !== 'VIEW') {
+                            triggerCardExit(card, 380, () => {
+                                swapCardMode(card, 'VIEW');
+                                showToast("🧹 Form cancelled / reset");
+                            });
+                        } else {
+                            triggerCardExit(card, 380, () => {
+                                showToast("✓ Mark as Done!");
+                                card.style.display = 'none';
+                            });
+                        }
+                    } else {
+                        // Elastic spring bounce back
+                        card.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                        card.style.transform = 'none';
+                    }
+
+                    currentY = 0;
+                }
+
+                card.addEventListener('pointerup', handlePointerUpOrCancel);
+                card.addEventListener('pointercancel', handlePointerUpOrCancel);
+            }
 
             document.querySelectorAll('.note-card').forEach(initNoteCard);
         })();
     </script>
 
-     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
 </body>
 </html>

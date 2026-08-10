@@ -20,6 +20,7 @@
         --webkit-backdrop-filter: blur(2px);*/
     }
     .sidebar {
+        position: fixed;
         /*background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsZNyeNEfP6yyYHyRkGwlGoNcD5R0KeEXZpHk4zt4dqux2k1jajMs-ugjG&s=10');*/
         background: #FFE86E;
         background-size: cover;
@@ -72,7 +73,7 @@
         background-color: #FFC0CB;
         clip-path: polygon(0% 0%, 85% 0%, 100% 50%, 85% 100%, 0% 100%);
         border-radius: 5px;
-        width: 200px;
+        width: 150px;
         color: #000;
     }
     .topbar {
@@ -121,9 +122,6 @@
     }
     .content {
         padding: 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
         height: 80vh;
     }
     .card:hover {
@@ -377,9 +375,9 @@
     }
     .note-overlay.up .overlay-box { background: linear-gradient(135deg, #fb7185 0%, #dc2626 100%); color: #fff; }
     .note-overlay.down .overlay-box { background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); color: #fff; }
-    .content .container { justify-content: center; }
+    /*.content .container { justify-content: center; }
     .content .row { justify-content: center; }
-    .content .col { display: flex; justify-content: center; }
+    .content .col { display: flex; justify-content: center; }*/
     .view { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
     .mobile-view .note-container { width: 100%; max-width: 420px; }
     /*#note{
@@ -420,7 +418,8 @@
                     <!-- Left side content -->
                 </div>
                 <div class="topbar-container">
-                    <div class="dropdown">
+                    <h2 class="text-center">Dashboard - Org ID.1</h3>
+                    <!--<div class="dropdown">
                         <a class="btn drop dropdown-toggle rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Dropdown link
                         </a>
@@ -430,7 +429,7 @@
                             <li><a class="dropdown-item" href="#">Another action</a></li>
                             <li><a class="dropdown-item" href="#">Something else here</a></li>
                         </ul>
-                    </div>
+                    </div>-->
                 </div>
                 <div class="topbar-right" style="display: flex; align-items: center;">
                     <button class="btn btn-primary rounded-pill" style="margin-right: 10px; padding: 10px 20px; font-size: 1.2rem;font-weight: bold;" disabled>
@@ -443,40 +442,117 @@
             </div>
             </section>
             <section class="content">
+                <h3>1. Notes</h3>
                 <div class="row">
                     <div class="col">
-                        <div class="card" style="width: 18rem;height: auto;">
-                        <img src="https://dummyimage.com/600x400/000/fff" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <a href="/org/{id}" style="color: #000;"><h5 class="card-title">Org. 1 - Hello</h5></a>
-                            <p class="card-text"><small class="text-body-secondary">Host: @User</small></p>
-                            <a href="" class="btn btn-primary">Admin dashboard</a>
+                        <div class="card text-center" style="height: 200px;width: 100%;">
+                            <div class="card-header">
+                                Undone Note
+                            </div>
+                            <div class="card-body">
+                            <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">100 note</h5>
+                            <button class="btn btn-primary">View more</button>
+                        </div>
+                        <div class="card-footer text-body-secondary">
+                            Org.1
                         </div>
                         </div>
                     </div>
                     <div class="col">
-                        <div class="card" style="width: 18rem;height: auto;">
-                        <img src="https://dummyimage.com/600x400/000/fff" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <a href="/org/{id}" style="color: #000;"><h5 class="card-title">Org. 1 - Hello</h5></a>
-                            <p class="card-text"><small class="text-body-secondary">Host: @User</small></p>
-                            <a href="" class="btn btn-primary">Admin dashboard</a>
-                        </div>
+                        <div class="card text-center" style="height: 200px;width: 100%;">
+                            <div class="card-header">
+                                Done note
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">50 note</h5>
+                                <button class="btn btn-primary">View more</button>
+                            </div>
+                            <div class="card-footer text-body-secondary">
+                                Org.1
+                            </div>
                         </div>
                     </div>
                     <div class="col">
-                        <div class="card" style="width: 18rem;height: auto;">
-                        <img src="https://dummyimage.com/600x400/000/fff" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <a href="/org/{id}" style="color: #000;"><h5 class="card-title">Org. 1 - Hello</h5></a>
-                            <p class="card-text"><small class="text-body-secondary">Host: @User</small></p>
-                            <a href="" class="btn btn-primary">Admin dashboard</a>
+                        <div class="card text-center" style="height: 200px;width: 100%;">
+                            <div class="card-header">
+                                All note
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 note</h5>
+                                <button class="btn btn-primary">View more</button>
+                            </div>
+                            <div class="card-footer text-body-secondary">
+                                Org.1
+                            </div>
                         </div>
+                    </div>
+                </div>
+                <br>
+                <h3>2. Members</h3>
+                <div class="row">
+                    <div class="col">
+                         <div class="card text-center" style="height: 200px;width: 100%;">
+                            <div class="card-header">
+                                Request sent
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 People</h5>
+                                <button class="btn btn-primary">View more</button>
+                            </div>
+                            <div class="card-footer text-body-secondary">
+                                Org.1
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                         <div class="card text-center" style="height: 200px;width: 100%;">
+                            <div class="card-header">
+                                All Members
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 people</h5>
+                                <button class="btn btn-primary">View more</button>
+                            </div>
+                            <div class="card-footer text-body-secondary">
+                                Org.1
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <h3>3. Others</h3>
+                <div class="row">
+                    <div class="col">
+                        <div class="card text-center" style="height: 200px;width: 100%;">
+                            <div class="card-header">
+                                Themes
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">Basic (Current)</h5>
+                                <button class="btn btn-primary">View more</button>
+                            </div>
+                            <div class="card-footer text-body-secondary">
+                                Org.1
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card text-center" style="height: 200px;width: 100%;">
+                            <div class="card-header">
+                                Balance
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 points</h5>
+                                <button class="btn btn-primary">View more</button>
+                            </div>
+                            <div class="card-footer text-body-secondary">
+                                Org.1
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
-            <section style="display: flex;justify-content: center;align-items: center;">
+            <!--<section style="display: flex;justify-content: center;align-items: center;">
                 <nav aria-label="...">
                 <ul class="pagination">
                     <li class="page-item"><a href="#" class="page-link">Previous</a></li>
@@ -486,7 +562,7 @@
                     <li class="page-item"><a class="page-link" href="#">Next</a></li>
                 </ul>
             </nav>
-            </section>
+            </section>-->
         </div>
     </div>
     </section>
@@ -520,30 +596,9 @@
             </div>
             </section>
         <div class="view">
-            <div class="card mb-3" style="max-width: 540px;height: auto;">
-            <div class="row g-0">
-                <div class="col-md-4">
-                <img src="https://dummyimage.com/600x400/000/fff" class="img-fluid rounded-start" alt="...">
-                </div>
-                <div class="col-md-8">
-                <div class="card-body">
-                    <a href="/org/{id}" style="color: #000;"><h5 class="card-title">Org. 1 - Hello</h5></a>
-                    <p class="card-text"><small class="text-body-secondary">Host: @User</small></p>
-                    <a href="" class="btn btn-primary">Admin dashboard</a>
-                </div>
-                </div>
-            </div>
-            </div>
-            <nav aria-label="...">
-                <ul class="pagination">
-                    <li class="page-item"><a href="#" class="page-link">Previous</a></li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#" aria-current="page">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                </ul>
-            </nav>
+
         </div>
+
         <div class="bottom-navbar">
             <div class="bottom-navbar-content">
                 <a href="#"><i class="fas fa-home"></i></a>
