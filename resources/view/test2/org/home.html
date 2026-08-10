@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css" integrity="sha512-ApSLB1Pd3/bZN8fWB/RG9YhN/7bd9Hkf3AGaE2mPfebjrxagjuBtx2GcgdqIlJkUzwylBo61r9Xa9NmgBI0swA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+<title>Document</title> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<style>
+    body {
+        font-family: 'Caveat', cursive;
+        width: 100%;
+        height: 100vh;
+        /*background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20240613/pngtree-corkboard-or-pinboard-or-bulletin-board-cork-background-in-wide-banner-image_15749733.jpg');
+        background-size: cover;
+        background-position: center;
+        backdrop-filter: blur(2px);
+        --webkit-backdrop-filter: blur(2px);*/
+    }
+    .sidebar {
+        /*background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsZNyeNEfP6yyYHyRkGwlGoNcD5R0KeEXZpHk4zt4dqux2k1jajMs-ugjG&s=10');*/
+        background: #FFE86E;
+        background-size: cover;
+        /*background-color: rgba(0, 0, 0, 0.5);*/
+        backdrop-filter: blur(12px) brightness(0.8);
+        --webkit-backdrop-filter: blur(12px);/* 3. Viền mảnh bán trong suốt tạo cảm giác mép kính */
+        border-right: 1px solid rgba(255, 255, 255, 0.3);
+
+        /* 4. Đổ bóng nhẹ để tách khỏi nền */
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        height: 80vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 20px;
+        height: 100vh;
+    }
+    .sidebar-container {
+        position: sticky;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding:20px;
+        top: 0;
+    }
+    .sidebar ul {
+        list-style-type: none;
+        padding: 10px;
+        color: #fff;
+    }
+    .sidebar ul li i{
+        display:block;
+        margin-right: 10px;
+    }
+    .sidebar ul li {
+        margin-bottom: 30px;
+    }
+    .sidebar ul li a {
+        text-decoration: none;
+        color: #000;
+        font-family: 'Caveat', cursive;
+        font-size: 1.2rem;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 10px;
+    }
+    .sidebar ul li a:hover {
+        background-color: #FFC0CB;
+        clip-path: polygon(0% 0%, 85% 0%, 100% 50%, 85% 100%, 0% 100%);
+        border-radius: 5px;
+        width: 200px;
+        color: #000;
+    }
+    .topbar {
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .drop{
+        border: 3px solid #FACC15;
+        width: 200px;
+        font-size: 1.2rem;
+        background: rgba(255, 255, 255, 0.35);
+    }
+    .drop:hover{
+        background-color: #FACC15;
+        color: #000;
+    }
+    .drop:focus{
+        background-color: #FACC15;
+        color: #000;
+    }
+    .btn-primary {
+            background-color: #FACC15;
+            border-color: #FACC15;
+            color: #000;
+    }
+    .btn-primary:hover {
+            background-color: #EAB308;
+            border-color: #EAB308;
+    }
+    .btn-primary:focus {
+            box-shadow: 0 0 0 0.2rem rgba(250, 204, 21, 0.5);
+            background-color: #EAB308;
+            border-color: #EAB308;
+    }
+    .btn-primary:disabled {
+            background-color: #FACC15;
+            border-color: #FACC15;
+            color: #000;
+    }
+    .btn-primary:disabled:hover {
+            background-color: #FACC15;
+            border-color: #FACC15;
+            color: #000;
+    }
+    .content {
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .content .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+    @media (min-width: 992px) {
+        .mobile-view {
+            display: none;
+            user-select: none;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 350px;
+            height: 350px;
+            font-size: 1.2rem;
+        }
+
+    }
+    /*
+    @media(min-width: 768px) and (max-width: 1024px) {
+        .mobile-view {
+            display: none;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 350px;
+            height: 350px;
+            font-size: 1.2rem;
+        }
+    }*/
+    @media (max-width: 992px) {
+        .widescreen-only {
+            display: none;
+        }
+        .card{
+            width: 300px;
+            height: 300px;
+        }
+    }
+    .bottom-navbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        background-color: #FACC15;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 0;
+    }
+    .bottom-navbar-content {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        max-width: 500px;
+    }
+    .bottom-navbar-content a {
+        color: #000;
+        font-size: 1.5rem;
+        text-decoration: none;
+    }
+    .bigform {
+        resize: none;
+    }
+    .form-control {
+        background-color: transparent;
+        border:none;
+        border-bottom: 2px solid #000;
+        outline: none;
+    }
+    .form-control:focus {
+        background-color: transparent;
+        outline: none;
+    }
+    .form-label {
+        font-size: 1.2rem;
+    }
+    .note-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        padding: 20px;
+        width: 100%;
+        height:80vh;
+    }
+    .mobile-view .note-container {
+        gap: 16px;
+        padding-bottom: 100px;
+    }
+    .view {
+        padding-bottom: 120px;
+    }
+    .modal-body {
+        background-color: #FFE86E;
+        font-size: 1.2rem;
+    }
+    .modal-header {
+        background-color: #FACC15;
+    }
+    .modal{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        min-height: 100vh;
+        z-index: 1055;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal.show {
+        display: flex;
+    }
+    .modal-dialog {
+        max-width: 420px;
+        width: 100%;
+        margin: auto;
+    }
+    .modal-dialog-centered {
+        min-height: 100vh;
+    }
+    /* Note drag & menu styles */
+    .note-card {
+        position: relative;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+        transition: transform 200ms ease, opacity 200ms ease;
+        will-change: transform, opacity;
+        border-radius: 24px;
+        overflow: hidden;
+        background: linear-gradient(180deg, #fff9d8 0%, #fff2a4 100%);
+        box-shadow: 0 22px 52px rgba(15, 23, 42, 0.12);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        max-width: 420px;
+        margin: 0 auto;
+    }
+    .note-card.dragging {
+        transition: none;
+        box-shadow: 0 24px 64px rgba(15, 23, 42, 0.22);
+        z-index: 2000;
+    }
+    .note-card .note-header {
+        background: rgba(250, 204, 21, 0.24);
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 14px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+    .note-card .note-header p {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #111827;
+        font-weight: 700;
+    }
+    .note-card .card-body {
+        background: transparent;
+        padding: 24px 20px 28px;
+    }
+    .note-card .card-title {
+        font-size: 1.85rem;
+        line-height: 1.1;
+        margin-bottom: 10px;
+        color: #111827;
+    }
+    .note-card .card-text {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #475569;
+        margin-bottom: 0.75rem;
+    }
+    .note-card .card-text.text-secondary {
+        margin-top: 0.75rem;
+        color: #64748b;
+    }
+    .pin-btn {
+        position: relative;
+        top: 0;
+        right: 0;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #ffffff;
+        display:flex;align-items:center;justify-content:center;
+        border: 1px solid rgba(250, 204, 21, 0.8);
+        cursor: pointer;
+        z-index: 2010;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+    }
+    .note-menu {
+        position: absolute;
+        top: 52px;
+        right: 14px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16);
+        padding: 8px 0;
+        min-width: 150px;
+        display: none;
+        flex-direction: column;
+        z-index: 2020;
+    }
+    .note-menu.show { display: flex; }
+    .note-menu button {
+        background: transparent; border: none; text-align: left; padding: 8px 12px; width:100%;
+        font-family: 'Caveat', cursive; cursor: pointer;
+    }
+    .note-menu button:hover { background: rgba(0,0,0,0.04); }
+    .note-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 180ms ease, transform 180ms ease;
+        transform: translateY(0);
+        z-index: 2005;
+        background: radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 70%);
+    }
+    .note-overlay.show {
+        opacity: 1;
+        pointer-events: none;
+    }
+    .note-overlay .overlay-box {
+        background: rgba(255,255,255,0.9);
+        color: #111827;
+        padding: 14px 18px;
+        border-radius: 16px;
+        font-family: 'Caveat', cursive;
+        font-size: 1.05rem;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+        min-width: 180px;
+        text-align: center;
+    }
+    .note-overlay.up .overlay-box { background: linear-gradient(135deg, #fb7185 0%, #dc2626 100%); color: #fff; }
+    .note-overlay.down .overlay-box { background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); color: #fff; }
+    .content .container { justify-content: center; }
+    .content .row { justify-content: center; }
+    .content .col { display: flex; justify-content: center; }
+    .view { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+    .mobile-view .note-container { width: 100%; max-width: 420px; }
+    /*#note{
+        cursor:grab;
+        user-select:none;
+    }
+    #note:active{
+        cursor:grabbing;
+    }*/
+</style>
+</head>
+<body>
+    <section class="widescreen-only">
+        <div class="row">
+        <div class="col-2">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                        <h2 class="text-center" style="color: #000;font-family: 'Caveat', cursive;font-size: 2rem;font-weight: bold;">Noteket</h2>
+                    </div>
+                <div class="sidebar-container">
+                    <ul>
+                        <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
+                        <li><a href="#"><i class="fas fa-info-circle"></i> Teams</a></li>
+                        <li><a href="#"><i class="fas fa-cogs"></i> Theme</a></li>
+                        <li><a href="#"><i class="fas fa-envelope"></i> Balanced</a></li>
+                        <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                    </ul>
+                    <div class="sidebar-footer">
+                        <p class="text-center" style="color: #000;font-family: 'Caveat', cursive;">&copy; 2026 Noteket</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <section class="top">
+                <div class="topbar">
+                <div class="topbar-left">
+                    <!-- Left side content -->
+                </div>
+                <div class="topbar-container">
+                    <div class="dropdown">
+                        <a class="btn drop dropdown-toggle rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Dropdown link
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Action</a></li>
+                            <li><a class="dropdown-item" href="#">Another action</a></li>
+                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        </ul>
+                    </div>
+                    <h3 class="text-center" style="margin-top: 20px;">Org ID.3</h3>
+                </div>
+                <div class="topbar-right" style="display: flex; align-items: center;">
+                    <button class="btn btn-primary rounded-pill" style="margin-right: 10px; padding: 10px 20px; font-size: 1.2rem;font-weight: bold;" disabled>
+                        $300
+                    </button>
+                    <button class="btn btn-primary rounded-circle" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZjYeTW5dVKQpVxWLdjUqQTgjkSBVfVzONaCzFqnpig&s" style="width: 40px; height: 40px;" alt="Profile" class="rounded-circle" />
+                    </button>
+                </div>
+            </div>
+            </section>
+            <section class="content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <div class="card note-card">
+                                 <div class="card-header" style="background-color: #FACC15;padding: 7px;display: flex;justify-content: center;align-items: center;">
+                                    <p>Create Note</p>
+                                </div>
+                                <div class="card-body rounded" style="background-color: #FFE86E;padding: 20px;">
+                                    <form action="/create/note" method="POST">
+                                        <div class="mb-3">
+                                            <label for="noteTitle" class="form-label">Note Title</label>
+                                            <input type="text" class="form-control" id="noteTitle" name="noteTitle" required />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="noteContent" class="form-label">Note Content</label>
+                                            <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2.5" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Create Note</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card note-card">
+                                    <div class="card-header note-header" style="position: relative;">
+                                        <p>Created at: 2023-10-01 06:50:00</p>
+                                        <button class="pin-btn" aria-label="More">📌</button>
+                                        <div class="note-menu" role="menu">
+                                            <button data-bs-toggle="modal" data-bs-target="#sharedModal">Share</button>
+                                            <button data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
+                                            <button href="/delete">Delete</button>
+                                            <button data-bs-toggle="modal" data-bs-target="#replyModal">Reply</button>
+                                        </div>
+                                    </div>
+                                <div class="card-body rounded" style="background-color: #FFE86E;padding: 20px;">
+                                    <h3 class="card-title">Note title</h3>
+                                    <p class="card-text">This is the card body content.</p>
+                                    <p class="card-text text-secondary">By: John Doe</p>
+                                </div>
+                                <div class="note-overlay" aria-hidden="true">
+                                    <div class="overlay-box">Mark as done</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    </section>
+    <section class="mobile-view">
+        <section class="top">
+                <div class="topbar">
+                <div class="topbar-left">
+                    <!-- Left side content -->
+                </div>
+                <div class="topbar-container">
+                    <div class="dropdown" style="margin-left:50px;">
+                        <a class="btn drop dropdown-toggle rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            All note
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Undone</a></li>
+                            <li><a class="dropdown-item" href="#">Done</a></li>
+                            <li><a class="dropdown-item" href="#">Created by me</a></li>
+                        </ul>
+                    </div>
+                    <h3>Org ID.3</h3>
+                </div>
+                <div class="topbar-right" style="display: flex; align-items: center;">
+                    <!--<button class="btn btn-primary rounded-pill" style="margin-right: 10px; padding: 10px 20px; font-size: 1.2rem;font-weight: bold;" disabled>
+                        $300
+                    </button>-->
+                    <button class="btn btn-primary rounded-circle" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZjYeTW5dVKQpVxWLdjUqQTgjkSBVfVzONaCzFqnpig&s" style="width: 40px; height: 40px;" alt="Profile" class="rounded-circle" />
+                    </button>
+                </div>
+            </div>
+            </section>
+        <div class="view">
+            <div class="note-container">
+                <div class="card note-card">
+                    <div class="card-header note-header" style="position:relative;">
+                        <p>Created at: 2023-10-01 06:50:00</p>
+                        <button class="pin-btn" aria-label="More">📌</button>
+                        <div class="note-menu" role="menu">
+                            <button data-bs-toggle="modal" data-bs-target="#sharedModal">Share</button>
+                            <button data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
+                            <button href="/delete">Delete</button>
+                            <button data-bs-toggle="modal" data-bs-target="#replyModal">Reply</button>
+                        </div>
+                    </div>
+                    <div class="card-body rounded" style="background-color: #FFE86E;padding: 20px;">
+                        <h3 class="card-title">Note title</h3>
+                        <p class="card-text">This is the card body content.</p>
+                        <p class="card-text text-secondary">By: John Doe</p>
+                    </div>
+                    <div class="note-overlay" aria-hidden="true">
+                        <div class="overlay-box">Mark as done</div>
+                    </div>
+                </div>
+            </div>
+            <button data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-primary rounded-circle" style="margin-right: 10px; padding: 10px 20px; font-size: 1.2rem;font-weight: bold; position: fixed; bottom: 100px; right: 20px;width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <div class="bottom-navbar">
+            <div class="bottom-navbar-content">
+                <a href="#"><i class="fas fa-home"></i></a>
+                <a href="#"><i class="fas fa-info-circle"></i></a>
+                <a href="#"><i class="fas fa-cogs"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+                <a href="#"><i class="fas fa-cog"></i></a>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body rounded">
+                <h2 class="text-center">Create Note</h2>
+                <form action="/create/note" method="POST">
+                    <div class="mb-3">
+                        <label for="noteTitle" class="form-label">Note Title</label>
+                        <input type="text" class="form-control" id="noteTitle" name="noteTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteContent" class="form-label">Note Content</label>
+                        <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2.5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Create Note</button>
+                </form>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>-->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body rounded">
+                <h2 class="text-center">Edit Note</h2>
+                <form action="/edit/note/{id}" method="POST">
+                    <div class="mb-3">
+                        <label for="noteTitle" class="form-label">Note Title</label>
+                        <input type="text" class="form-control" id="noteTitle" name="noteTitle" value="Example" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteContent" class="form-label">Note Content</label>
+                        <textarea class="form-control bigform" id="noteContent" name="noteContent" value="Hello" rows="2.5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Edit Note</button>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body rounded">
+                <h2 class="text-center">Reply Note to note.{id}</h2>
+                <form action="/reply/note/{id}" method="POST">
+                    <div class="mb-3">
+                        <label for="noteContent" class="form-label">Content</label>
+                        <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2.5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Create Reply Note</button>
+                </form>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>-->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="sharedModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body rounded">
+                <h2 class="text-center">Share Note</h2>
+                <div class="input-group mb-3">
+                    <input class="form-control" id="Link_to_copy" value="https://example.com" />
+                    <button class="btn btn-secondary" id="copy_shared_link">Copy</button>
+                </div>
+                <div class="input-group mb-3">
+                    <input class="form-control" id="Email_shared_input" type="email" />
+                    <button class="btn btn-secondary" id="addShareEmail">Add</button>
+                </div>
+                <div class="mb-3">
+                    <table class="table">
+                        <thead>
+                            <th>ID</th>
+                            <th>Email</th>
+                        </thead>
+                        <tbody>
+                            <tr id="Shared_Body">
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn btn-primary" id="Submit_shared">Shared</button>
+            </div>
+            <!--<div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>-->
+            </div>
+        </div>
+    </div>
+    <script>
+        (function(){
+            const NOTE_REMOVAL_THRESHOLD = 220; // px to perform action downward
+            const NOTE_SKIP_THRESHOLD = -220; // px to perform action upward
+            const OVERLAY_THRESHOLD = 100; // px to show overlay hint
+            let pre_noteID = 0; // to track which note is being acted upon
+
+            function valid_email(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Link copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            }
+
+
+            document.getElementById('copy_shared_link').addEventListener('click', copyToClipboard(document.getElementById("Link_to_copy").value));
+
+            function add_to_list(email, emailListContainer){
+                const email_list = document.getElementById("Shared_Body");
+                const new_id = document.createElement('td')
+                const new_email = document.createElement('td')
+                new_id.textContent = String(emailListContainer.length);
+                new_email.textContent = email;
+                email_list.appendChild(new_id);
+                email_list.appendChild(new_email);
+            }
+
+            //function Emailadded()
+
+                document.getElementById("addShareEmail").addEventListener("click", function() {
+                    alert("Hello");
+                    const emailInput = document.getElementById("Email_shared_input");
+                    const email = emailInput.value.trim();
+                    if (valid_email(email)) {
+                        // Add the email to the list
+                        const emailListContainer = []
+                        emailListContainer.push(email)
+                        add_to_list(email,emailListContainer);
+                        emailInput.value = ''; // Clear input
+                    } else {
+                        alert("Please enter a valid email address.");
+                    }
+                });
+
+            async function send_share_to_api(emailListContainer){
+                try{
+                    const url = "https://";
+                    const send = await fetch(url, {
+                        method: "POST",
+                        body: JSON.stringify({"email_list": emailListContainer})
+                    });
+                    if (send.status == 200){
+                        return alert("Chia se thanh cong")
+                    }
+                } catch {
+                    return alert("Error")
+                }
+            }
+
+            document.getElementById("Shared_Body").addEventListener('click', send_share_to_api);
+
+            /*function show_shared_emails_list(shared_emails){
+                const emailListContainer = document.getElementById('sharedEmailsList');
+                emailListContainer.innerHTML = ''; // Clear previous list
+                shared_emails.forEach(email => {
+                    const li = document.createElement('li');
+                    li.textContent = email;
+                    emailListContainer.appendChild(li);
+                });
+            }*/
+
+            function performAction(card, dir){
+                // dir: 'down' -> mark done, 'up' -> skip
+                const out = dir === 'down' ? 'translateY(120vh)' : 'translateY(-120vh)';
+                card.style.transition = 'transform 320ms cubic-bezier(.2,.9,.2,1), opacity 240ms ease';
+                card.style.transform = out;
+                card.style.opacity = '0';
+                const ov = card.querySelector('.note-overlay'); if(ov) ov.classList.remove('show');
+                setTimeout(()=> card.remove(), 340);
+            }
+
+            function initNoteCard(card){
+                if(!card) return;
+                const pin = card.querySelector('.pin-btn');
+                const menu = card.querySelector('.note-menu');
+                const overlay = card.querySelector('.note-overlay');
+                const overlayBox = overlay && overlay.querySelector('.overlay-box');
+
+                // Menu toggle
+                pin && pin.addEventListener('click', (ev)=>{
+                    ev.stopPropagation();
+                    menu && menu.classList.toggle('show');
+                });
+                document.addEventListener('click', (e)=>{ if(menu && !card.contains(e.target)) menu.classList.remove('show'); });
+
+                // Menu actions
+                if(menu){
+                    menu.addEventListener('click', (e)=>{
+                        const action = e.target.getAttribute('data-action');
+                        if(!action) return;
+                        e.stopPropagation();
+                        if(action==='delete') performAction(card,'down');
+                        else showNoteActionModal(action, card);
+                        menu.classList.remove('show');
+                    });
+                }
+
+                // Drag handling
+                let dragging = false, startY = 0, currentY = 0, pointerId = null, actionPerformed = false;
+
+                function showOverlay(state){ // 'down' | 'up' | null
+                    if(!overlay) return;
+                    if(state === 'down'){
+                        overlay.classList.add('show','down'); overlay.classList.remove('up');
+                        overlayBox && (overlayBox.textContent = 'Release to mark as done');
+                    } else if(state === 'up'){
+                        overlay.classList.add('show','up'); overlay.classList.remove('down');
+                        overlayBox && (overlayBox.textContent = 'Release to skip');
+                    } else {
+                        overlay.classList.remove('show','up','down');
+                    }
+                }
+
+                function onPointerDown(e){
+                    if(e.target.closest('.pin-btn') || e.target.closest('.note-menu')) return;
+                    dragging = true; pointerId = e.pointerId; startY = e.clientY; currentY = 0; actionPerformed = false;
+                    card.classList.add('dragging'); try{ document.body.style.overflow='hidden'; }catch(e){}
+                    card.setPointerCapture && card.setPointerCapture(pointerId); card.style.transition='none';
+                }
+
+                function onPointerMove(e){
+                    if(!dragging) return;
+                    currentY = e.clientY - startY;
+                    // apply transform
+                    const scale = Math.max(0.98, 1 - Math.abs(currentY)/2000);
+                    card.style.transform = `translateY(${currentY}px) scale(${scale})`;
+
+                    // overlay logic
+                    if(currentY >= OVERLAY_THRESHOLD){ showOverlay('down'); }
+                    else if(currentY <= -OVERLAY_THRESHOLD){ showOverlay('up'); }
+                    else { showOverlay(null); }
+
+                    // if crosses action threshold, perform immediately
+                    if(currentY >= NOTE_REMOVAL_THRESHOLD && !actionPerformed){ actionPerformed = true; performAction(card,'down'); }
+                    if(currentY <= NOTE_SKIP_THRESHOLD && !actionPerformed){ actionPerformed = true; performAction(card,'up'); }
+                }
+
+                function endDrag(){
+                    if(!dragging) return;
+                    dragging = false; card.classList.remove('dragging'); card.style.transition='transform 300ms ease, opacity 240ms ease';
+                    try{ document.body.style.overflow=''; }catch(e){}
+                    // if action already performed, nothing else
+                    if(actionPerformed) return;
+                    // if user released while within overlay zone (but not action threshold), revert
+                    if(currentY >= OVERLAY_THRESHOLD && currentY < NOTE_REMOVAL_THRESHOLD){ showOverlay(null); card.style.transform='none'; return; }
+                    if(currentY <= -OVERLAY_THRESHOLD && currentY > NOTE_SKIP_THRESHOLD){ showOverlay(null); card.style.transform='none'; return; }
+
+                    // otherwise check final position
+                    if(currentY >= NOTE_REMOVAL_THRESHOLD){ performAction(card,'down'); }
+                    else if(currentY <= NOTE_SKIP_THRESHOLD){ performAction(card,'up'); }
+                    else { showOverlay(null); card.style.transform='none'; card.style.opacity='1'; }
+                }
+
+                card.addEventListener('pointerdown', onPointerDown);
+                card.addEventListener('pointermove', onPointerMove);
+                card.addEventListener('pointerup', (e)=>{ card.releasePointerCapture && card.releasePointerCapture(e.pointerId); endDrag(); });
+                card.addEventListener('pointercancel', endDrag);
+
+                // touch fallback
+                card.addEventListener('touchstart', function(ev){ if(ev.touches.length>1) return; const t=ev.touches[0]; dragging=true; startY=t.clientY; currentY=0; actionPerformed=false; card.classList.add('dragging'); try{ document.body.style.overflow='hidden'; }catch(e){} card.style.transition='none'; }, {passive:true});
+                card.addEventListener('touchmove', function(ev){ if(!dragging) return; ev.preventDefault(); const t=ev.touches[0]; currentY = t.clientY - startY; const scale = Math.max(0.98, 1 - Math.abs(currentY)/2000); card.style.transform = `translateY(${currentY}px) scale(${scale})`; if(currentY >= OVERLAY_THRESHOLD) showOverlay('down'); else if(currentY <= -OVERLAY_THRESHOLD) showOverlay('up'); else showOverlay(null); if(currentY >= NOTE_REMOVAL_THRESHOLD && !actionPerformed){ actionPerformed=true; performAction(card,'down'); } if(currentY <= NOTE_SKIP_THRESHOLD && !actionPerformed){ actionPerformed=true; performAction(card,'up'); } }, {passive:false});
+                card.addEventListener('touchend', function(ev){ if(dragging){ endDrag(); } });
+            }
+
+            /*function showNoteActionModal(action, card) {
+                const modalElement = document.getElementById('noteActionModal');
+                const modalTitle = modalElement.querySelector('.modal-title');
+                const modalBody = modalElement.querySelector('#noteActionModalBody');
+                //const modalFooter = modalElement.querySelector('#noteActionModalFooter');
+                const noteTitle = card.querySelector('.card-title')?.textContent || 'Untitled note';
+                const noteText = card.querySelector('.card-text')?.textContent || '';
+                const author = card.querySelector('.card-text.text-secondary')?.textContent || '';
+                //modalFooter.innerHTML = '';
+                if(action === 'edit') {
+                    modalTitle.textContent = 'Edit Note';
+                    modalBody.innerHTML = `
+                        <form id="noteEditForm">
+                            <div class="mb-3">
+                                <label class="form-label" for="editNoteTitle">Note Title</label>
+                                <input type="text" class="form-control" id="editNoteTitle" value="${noteTitle}" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="editNoteContent">Note Content</label>
+                                <textarea class="form-control bigform" id="editNoteContent" rows="4">${noteText}</textarea>
+                            </div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveNoteEdit">Save</button>
+                        </form>
+                    `;
+                    // modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveNoteEdit">Save</button>`;
+                } else if(action === 'share') {
+                    modalTitle.textContent = 'Share Note';
+                    var note_shared_list = []
+
+                    const shareUrl = `https://example.com/note/${encodeURIComponent(noteTitle.toLowerCase().replace(/\s+/g,'-'))}`;
+                    modalBody.innerHTML = `
+                        <div class="mb-3">
+                            <p class="mb-2">Share the note with others.</p>
+                            <div class="input-group mb-3">
+                                <input type="text" readonly class="form-control" value="${shareUrl}" id="shareNoteUrl" />
+                                <button class="btn btn-outline-secondary" onclick="copyShareUrl()" type="button" id="copyShareUrl">Copy</button>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="mb-3">
+                                <label class="form-label" for="shareEmail">Share via email</label>
+                                <div class="input-group mb-3">
+                                    <input type="email" class="form-control" id="Email_shared_input" placeholder="Enter email to share..." />
+                                    <button class="btn btn-outline-secondary" type="button" id="addShareEmail">Add</button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <ul id="sharedEmailsList"></ul>
+                        </div>
+                    `;
+                    //modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-primary" id="copyShareUrl">Copy Link</button>`;
+                } else if(action === 'reply') {
+                    modalTitle.textContent = 'Reply to Note';
+                    modalBody.innerHTML = `
+                        <div class="mb-3">
+                            <label class="form-label" for="replyNoteText">Reply message</label>
+                            <textarea class="form-control bigform" id="replyNoteText" rows="4" placeholder="Type your reply..."></textarea>
+                        </div>
+                    `;
+                    //modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="sendReply">Send</button>`;
+                }
+
+                const bootstrapModal = new bootstrap.Modal(modalElement);
+                bootstrapModal.show();
+
+                modalFooter.querySelector('#saveNoteEdit')?.addEventListener('click', () => {
+                    alert('Note saved.');
+                    bootstrapModal.hide();
+                });
+                modalFooter.querySelector('#copyShareUrl')?.addEventListener('click', () => {
+                    const input = modalBody.querySelector('#shareNoteUrl');
+                    input.select();
+                    document.execCommand('copy');
+                    alert('Link copied.');
+                });
+                modalFooter.querySelector('#sendReply')?.addEventListener('click', () => {
+                    alert('Reply sent.');
+                    bootstrapModal.hide();
+                });
+            }*/
+
+            document.querySelectorAll('.note-card').forEach(initNoteCard);
+        })();
+    </script>
+
+     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+</body>
+</html>
