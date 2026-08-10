@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Mail40account;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Mail\UserEmail;
 use App\Models\Note;
 use App\Models\PivotForNote;
 use App\Models\User;
-use Illuminate\Http\Request;
+//use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
@@ -87,7 +89,8 @@ class PivotForNoteController extends Controller
             $message = 'Note shared successfully. Skipped '.$skippedExistingShares.' recipient(s) that were already shared.';
         }
 
-        return redirect()->route('note', $noteModel->id)->with('success', $message);
+        //return redirect()->route('note', $noteModel->id)->with('success', $message);
+        return response()->json(['message'=> $message],200);
     }
 
     public function undo_shared_note(Request $request, $id)

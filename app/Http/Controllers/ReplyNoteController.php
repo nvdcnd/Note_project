@@ -2,49 +2,45 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MarkAsDone;
-use App\Models\Note;
+//use App\Models\Replynote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\Replynote;
+use App\Models\Note;
 
-class ReplyNoteController extends Controller
+class ReplynoteController extends Controller
 {
-    public function reply_note(Request $request, $noteid)
-    {
-        $replied_note = Note::find($noteid);
-        if ($replied_note) {
-            $request->validate([
-                'title' => 'required',
-                'description' => 'required',
-            ]);
-            $data = $request->all();
-            $note = new Note;
-            $note->title = $data['title'];
-            $note->description = $data['description'];
-            $note->creater_id = Auth::user()->id;
-            $note->replied_note_id = $replied_note->id;
-            $note->save();
-
-            $mark_as_done = new MarkAsDone;
-            $mark_as_done->noteID = $note->id;
-            $mark_as_done->userID = Auth::user()->id;
-            $mark_as_done->status = false;
-            $mark_as_done->save();
-
-            return redirect()->route('note', $replied_note->id)->with('success', 'Note replied successfully');
+    public function replynote(Request $request, $id){
+        //$replynote = Replynote::find($id);
+        $note = Note::find($id);
+        $request->validate([
+            "description" => 'required',
+        ]);
+        $data = $request->all();
+        if($note){
+            $reply = Replynote::create(
+                [
+                    'description'=> $data['description'],
+                    'noteID' => $note->id,
+                    'userID'=> Auth->user()->id,
+                ]
+            );
+            $reply->save();
+            return response()->json(['hello'=>'hello'], 200);
         } else {
-            return redirect()->route('home')->with('error', 'Note not replied');
+            return response()->json(['note'=> 'not found'],404);
         }
+
     }
 
-    public function unreply_note(Request $request, $id)
-    {
-        $note = Note::find($id);
-        if (! $note || $note->creater_id != Auth::user()->id) {
-            return redirect()->route('home')->with('error', 'You are not authorized to delete this note');
+    public function deleteReplynote(Request $request, $id){
+        $replynote = Replynote::find($id);
+        if($replynote && $replynote->userID == Auth::user()->id){
+            $replynote->delete();
+            return response()->json(['delete'=> 'success'],200);
+        } else {
+            return response()->json(['no'=> 'no'],404);
         }
-        $note->delete();
-
-        return redirect()->route('home')->with('success', 'Note deleted successfully');
     }
 }
