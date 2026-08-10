@@ -390,6 +390,11 @@
     #note:active{
         cursor:grabbing;
     }*/
+    .pagination-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 </style>
 </head>
 <body>
@@ -445,115 +450,39 @@
             </div>
             </section>
             <section class="content">
-                <h3>1. Notes</h3>
-                <div class="row">
-                    <div class="col">
-                        <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                Undone Note
-                            </div>
-                            <div class="card-body">
-                            <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">100 note</h5>
-                            <button class="btn btn-primary">View more</button>
-                        </div>
-                        <div class="card-footer text-body-secondary">
-                            Org.1
-                        </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                Done note
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">50 note</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                All note
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 note</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
+                <h2 class="text-center">Member view</h2>
+                <table class="table">
+                    <thead>
+                        <th>No.</th>
+                        <th>Tên</th>
+                        <th>Status</th>
+                        <th>Setting</th>
+                        <th>Action</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Basic</td>
+                            <td>Đang dùng</td>
+                            <td><a href="" class="btn btn-primary w-100">Set theme</a></td>
+                            <td><a href="" class="btn btn-danger w-100">Delete</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="pagination-container">
+                    <nav aria-label="...">
+                    <ul class="pagination">
+                        <li class="page-item"><a href="#" class="page-link">Previous</a></li>
+                        <li class="page-item"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#" aria-current="page">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+                </nav>
                 </div>
-                <br>
-                <h3>2. Members</h3>
-                <div class="row">
-                    <div class="col">
-                         <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                Request sent
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 People</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                         <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                All Members
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 people</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <br>
-                <h3>3. Others</h3>
-                <div class="row">
-                    <div class="col">
-                        <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                Themes
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">Basic (Current)</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                Balance
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 points</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <a href="" class="fab-add-btn btn btn-primary rounded-pill" title="Tạo Note Mới" style="margin-right: 10px; padding: 10px 20px; font-size: 1.2rem;font-weight: bold; position: fixed; bottom: 20px; right: 20px;width: 200px; height: 50px; display: flex; align-items: center; justify-content: center; z-index: 2000;">
+                Mua thêm theme
+            </a>
             </section>
             <!--<section style="display: flex;justify-content: center;align-items: center;">
                 <nav aria-label="...">
@@ -593,122 +522,45 @@
                     <!--<button class="btn btn-primary rounded-pill" style="margin-right: 10px; padding: 10px 20px; font-size: 1.2rem;font-weight: bold;" disabled>
                         $300
                     </button>-->
-                    <button class="btn btn-primary rounded-circle" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <!--<button class="btn btn-primary rounded-circle" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center;">
                         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZjYeTW5dVKQpVxWLdjUqQTgjkSBVfVzONaCzFqnpig&s" style="width: 40px; height: 40px;" alt="Profile" class="rounded-circle" />
-                    </button>
+                    </button>-->
                 </div>
             </div>
             </section>
         <div class="view">
-            <h3>1. Notes</h3>
-                <div class="row">
-                    <div class="col-lg">
-                        <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                Undone Note
-                            </div>
-                            <div class="card-body">
-                            <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">100 note</h5>
-                            <button class="btn btn-primary">View more</button>
-                        </div>
-                        <div class="card-footer text-body-secondary">
-                            Org.1
-                        </div>
-                        </div>
-                    </div>
-                    <div class="col-lg">
-                        <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                Done note
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">50 note</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg">
-                        <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                All note
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 note</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
+            <table class="table">
+                    <thead>
+                        <th>No.</th>
+                        <th>Tên</th>
+                        <th>Status</th>
+                        <th>Setting</th>
+                        <th>Action</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Basic</td>
+                            <td>Đang dùng</td>
+                            <td><a href="" class="btn btn-primary w-100">Set theme</a></td>
+                            <td><a href="" class="btn btn-danger w-100">Delete</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="pagination-container">
+                    <nav aria-label="...">
+                    <ul class="pagination">
+                        <li class="page-item"><a href="#" class="page-link">Previous</a></li>
+                        <li class="page-item"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#" aria-current="page">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+                </nav>
                 </div>
-                <br>
-                <h3>2. Members</h3>
-                <div class="row">
-                    <div class="col-lg">
-                         <div class="card text-center" style="height: 200px;width: auto;">
-                            <div class="card-header">
-                                Request sent
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 People</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg">
-                         <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                All Members
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 people</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <br>
-                <h3>3. Others</h3>
-                <div class="row">
-                    <div class="col-lg">
-                        <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                Themes
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">Basic (Current)</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg">
-                        <div class="card text-center" style="height: 200px;width: 100%;">
-                            <div class="card-header">
-                                Balance
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" style="font-weight: bold;font-size: 2rem;">200 points</h5>
-                                <button class="btn btn-primary">View more</button>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                Org.1
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <a href="" class="fab-add-btn btn btn-primary rounded-pill" title="Tạo Note Mới" style="margin-right: 10px; padding: 10px 20px; font-size: 1.2rem;font-weight: bold; position: fixed; bottom: 100px; right: 20px;width: 200px; height: 50px; display: flex; align-items: center; justify-content: center; z-index: 2000;">
+                Mua thêm theme
+            </a>
         </div>
 
         <div class="bottom-navbar">
@@ -721,7 +573,7 @@
             </div>
         </div>
     </section>
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <!--<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
             <div class="modal-header">
@@ -748,7 +600,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <!--<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
             <div class="modal-header">
@@ -790,10 +642,10 @@
             <!--<div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary">Save changes</button>
-            </div>-->
+            </div>
             </div>
         </div>
-    </div>
+    </div>-->
     <div class="modal fade" id="sharedModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -801,11 +653,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body rounded">
-                <h2 class="text-center">Share Note</h2>
-                <div class="input-group mb-3">
-                    <input class="form-control" id="Link_to_copy" value="https://example.com" />
-                    <button class="btn btn-secondary" id="copy_shared_link">Copy</button>
-                </div>
+                <h2 class="text-center">Add member</h2>
                 <div class="input-group mb-3">
                     <input class="form-control" id="Email_shared_input" type="email" />
                     <button class="btn btn-secondary" id="addShareEmail">Add</button>
@@ -822,7 +670,7 @@
                         </tbody>
                     </table>
                 </div>
-                <button class="btn btn-primary" id="Submit_shared">Shared</button>
+                <button class="btn btn-primary w-100" id="Submit_shared">Shared</button>
             </div>
             <!--<div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -831,6 +679,53 @@
             </div>
         </div>
     </div>
+    <script>
+        var email_list = [];
+
+        function valid_email(email){
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function add_to_list(email, emailListContainer){
+                const email_list = document.getElementById("Shared_Body");
+                const new_id = document.createElement('td')
+                const new_email = document.createElement('td')
+                new_id.textContent = String(emailListContainer.length);
+                new_email.textContent = email;
+                email_list.appendChild(new_id);
+                email_list.appendChild(new_email);
+        }
+
+        function addemail(list){
+            const email = document.getElementById("Email_shared_input").value
+            if (valid_email(email)){
+                list.push();
+                add_to_list(email,list);
+                email.value = '';
+            } else {
+                alert("Error, check the email again");
+            }
+        }
+
+        document.getElementById("addShareEmail").addEventListener('click',addemail);
+
+        async function api_call(){
+            try{
+                const url = "https://example.com";
+                const send = await fetch(url, {
+                        method: "POST",
+                        body: JSON.stringify({"email_list": emailListContainer})
+                });
+                if (send.status == 200){
+                    return alert("Chia se thanh cong")
+                }
+
+            } catch {
+                alert("Error the API is down")
+            }
+        }
+    </script>
     <!--<script>
         (function(){
             const NOTE_REMOVAL_THRESHOLD = 220; // px to perform action downward
