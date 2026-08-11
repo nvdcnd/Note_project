@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Mail\Theme4org_trans_otp;
 use App\Models\Organization;
-use App\Models\OrganizationsMember;
 use App\Models\Theme4org;
 use App\Models\Theme4orgTransaction;
 use App\Models\Theme4orgWallet;
@@ -130,7 +129,8 @@ class Theme4orgWalletController extends Controller
             }
 
             if (! Hash::check((string) $request->passkey, $transaction->otp)) {
-                $transaction->increment('attempts');
+                Theme4orgTransaction::whereKey($transaction->id)->increment('attempts');
+                $transaction->refresh();
 
                 return redirect()->back()
                     ->with('error', 'Invalid passkey. '.($transaction->attempts).' failed attempt(s) out of '.self::MAX_ATTEMPTS);
@@ -152,7 +152,7 @@ class Theme4orgWalletController extends Controller
                 ]);
             }
 
-            $org->decrement('balance', $theme->price);
+            Organization::whereKey($org->id)->decrement('balance', $theme->price);
             $transaction->update(['status' => Theme4orgTransaction::STATUS_FINISHED]);
 
             return redirect()->back()->with('success', 'Theme purchased successfully');

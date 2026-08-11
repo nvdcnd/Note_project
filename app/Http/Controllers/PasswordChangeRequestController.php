@@ -103,7 +103,8 @@ class PasswordChangeRequestController extends Controller
 
         if (! Hash::check($validated['passkey'], $change_password_request->token)) {
             // Keep the request alive so the user can retry (BE-26 / E18).
-            $change_password_request->increment('attempts');
+            PasswordChangeRequest::whereKey($change_password_request->id)->increment('attempts');
+            $change_password_request->refresh();
 
             return redirect()->route('password.reset.view', $change_password_request->id)
                 ->with('error', 'Invalid OTP. '.($change_password_request->attempts).' failed attempt(s).');

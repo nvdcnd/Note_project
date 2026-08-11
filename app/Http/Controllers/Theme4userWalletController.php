@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\user2theme4_trans_otp;
 use App\Models\Theme4user;
 use App\Models\Theme4userWallet;
+use App\Models\User;
 use App\Models\User2theme4Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -120,13 +121,14 @@ class Theme4userWalletController extends Controller
             }
 
             if (! Hash::check((string) $request->passkey, $transaction->otp)) {
-                $transaction->increment('attempts');
+                User2theme4Transaction::whereKey($transaction->id)->increment('attempts');
+                $transaction->refresh();
 
                 return redirect()->back()
                     ->with('error', 'Invalid passkey. '.($transaction->attempts).' failed attempt(s) out of '.self::MAX_ATTEMPTS);
             }
 
-            $lockedUser = \App\Models\User::query()->lockForUpdate()->find($user->id);
+            $lockedUser = User::query()->lockForUpdate()->find($user->id);
 
             if ($lockedUser->balance < $theme->price) {
                 return redirect()->back()->with('error', 'Insufficient balance');
@@ -144,7 +146,7 @@ class Theme4userWalletController extends Controller
                 ]);
             }
 
-            $lockedUser->decrement('balance', $theme->price);
+            User::whereKey($lockedUser->id)->decrement('balance', $theme->price);
             $transaction->update(['status' => User2theme4Transaction::STATUS_FINISHED]);
 
             return redirect()->back()->with('success', 'Theme purchased successfully');

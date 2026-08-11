@@ -20,7 +20,7 @@ return new class extends Migration
             'theme4org_transactions',
             'password_change_requests',
         ] as $table) {
-            Schema::table($table, function (Blueprint $blueprint) use ($table) {
+            Schema::table($table, function (Blueprint $blueprint) {
                 $blueprint->unsignedTinyInteger('attempts')->default(0);
             });
         }
@@ -36,7 +36,7 @@ return new class extends Migration
             'theme4org_transactions',
             'password_change_requests',
         ] as $table) {
-            Schema::table($table, function (Blueprint $blueprint) use ($table) {
+            Schema::table($table, function (Blueprint $blueprint) {
                 $blueprint->dropColumn('attempts');
             });
         }

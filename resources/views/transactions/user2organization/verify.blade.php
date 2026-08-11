@@ -13,7 +13,7 @@
                     <div class="mb-3">
                         <p>Chuyển <strong>{{ number_format($transaction->amount, 0, ',', '.') }} điểm</strong> đến tổ chức #{{ $transaction->organizationID }}</p>
                         <p class="text-muted">Mã OTP đã được gửi tới email của bạn và hết hạn sau 10 phút.</p>
-                        <p class="text-muted">Số lần thử còn lại: {{ max(0, 5 - $transaction->attempts) }}</p>
+                        <p class="text-muted">Số lần thử còn lại: {{ max(0, \App\Http\Controllers\User2organizationTransactionController::MAX_ATTEMPTS - $transaction->attempts) }}</p>
                     </div>
                     <form action="{{ route('user2organization_transaction_verify', $transaction->id) }}" method="POST">
                         @csrf

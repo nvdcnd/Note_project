@@ -1,6 +1,7 @@
 <?php
 
-use App\Mail\Password_change;
+use App\Http\Controllers\User2userTransactionController;
+use App\Mail\UserEmail;
 use App\Models\MarkAsDone;
 use App\Models\Note;
 use App\Models\Organization;
@@ -10,6 +11,7 @@ use App\Models\PivotForNote;
 use App\Models\User;
 use App\Models\User2userTransaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -164,7 +166,7 @@ it('only the creator can share a note', function () {
         ->assertRedirect(route('note', $note->id));
 
     expect(PivotForNote::count())->toBe(1);
-    Mail::assertQueued(\App\Mail\UserEmail::class, 1);
+    Mail::assertQueued(UserEmail::class, 1);
 });
 
 // ---------------------------------------------------------------------------
@@ -272,8 +274,8 @@ it('executes a user2user transaction with a valid OTP and updates balances', fun
 
     expect($response->isRedirect())->toBeTrue();
     expect($transaction->fresh()->status)->toBe('finished');
-    expect($sender->fresh()->balance)->toBe(900.0);
-    expect($recipient->fresh()->balance)->toBe(100.0);
+    expect((float) $sender->fresh()->balance)->toBe(900.0);
+    expect((float) $recipient->fresh()->balance)->toBe(100.0);
 });
 
 it('locks the transaction after too many failed OTP attempts', function () {
@@ -317,8 +319,8 @@ it('does not deduct balance when the sender has insufficient funds', function ()
     $response = app(User2userTransactionController::class)->user2user_transaction_verify(new Request(['passkey' => '123456']), $transaction->id);
 
     expect($transaction->fresh()->status)->toBe('pending');
-    expect($sender->fresh()->balance)->toBe(10.0);
-    expect($recipient->fresh()->balance)->toBe(0.0);
+    expect((float) $sender->fresh()->balance)->toBe(10.0);
+    expect((float) $recipient->fresh()->balance)->toBe(0.0);
 });
 
 // ---------------------------------------------------------------------------

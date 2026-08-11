@@ -84,6 +84,6 @@ it('keeps a pending transaction alive when the passkey is wrong so the user can 
     expect($response->isRedirect())->toBeTrue();
     expect($transaction->fresh()->status)->toBe('pending');
     expect($transaction->fresh()->attempts)->toBe(1);
-    expect($sender->fresh()->balance)->toBe(1000.0);
-    expect($recipient->fresh()->balance)->toBe(0.0);
+    expect((float) $sender->fresh()->balance)->toBe(1000.0);
+    expect((float) $recipient->fresh()->balance)->toBe(0.0);
 });

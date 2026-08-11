@@ -150,7 +150,8 @@ class User2userTransactionController extends Controller
             }
 
             if (! Hash::check($passkey, $transaction->otp)) {
-                $transaction->increment('attempts');
+                User2userTransaction::whereKey($transaction->id)->increment('attempts');
+                $transaction->refresh();
 
                 return redirect()->route('user2user_transaction_verify_view', $transaction->id)
                     ->with('error', 'Invalid passkey. '.($transaction->attempts).' failed attempt(s) out of '.self::MAX_ATTEMPTS);
@@ -160,8 +161,8 @@ class User2userTransactionController extends Controller
                 return redirect()->route('user2user_transaction_verify_view', $transaction->id)->with('error', 'Insufficient balance');
             }
 
-            $lockedRecipient->increment('balance', $transaction->amount);
-            $lockedSender->decrement('balance', $transaction->amount);
+            User::whereKey($lockedRecipient->id)->increment('balance', $transaction->amount);
+            User::whereKey($lockedSender->id)->decrement('balance', $transaction->amount);
 
             $transaction->update(['status' => User2userTransaction::STATUS_FINISHED]);
 

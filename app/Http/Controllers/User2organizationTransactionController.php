@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\user2organization_trans_otp;
 use App\Models\Organization;
+use App\Models\User;
 use App\Models\User2organizationTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -119,7 +120,7 @@ class User2organizationTransactionController extends Controller
 
         return DB::transaction(function () use ($user, $passkey, $transaction) {
             $organization = Organization::query()->lockForUpdate()->find($transaction->organizationID);
-            $lockedSender = \App\Models\User::query()->lockForUpdate()->find($transaction->from);
+            $lockedSender = User::query()->lockForUpdate()->find($transaction->from);
 
             if (! $organization) {
                 $transaction->update(['status' => User2organizationTransaction::STATUS_FAILED]);
@@ -140,7 +141,8 @@ class User2organizationTransactionController extends Controller
             }
 
             if (! Hash::check($passkey, $transaction->otp)) {
-                $transaction->increment('attempts');
+                User2organizationTransaction::whereKey($transaction->id)->increment('attempts');
+                $transaction->refresh();
 
                 return redirect()->route('user2organization_transaction_verify_view', $transaction->id)
                     ->with('error', 'Invalid passkey. '.($transaction->attempts).' failed attempt(s) out of '.self::MAX_ATTEMPTS);
@@ -150,8 +152,8 @@ class User2organizationTransactionController extends Controller
                 return redirect()->route('organization', $organization->id)->with('error', 'Insufficient balance');
             }
 
-            $organization->increment('balance', $transaction->amount);
-            $lockedSender->decrement('balance', $transaction->amount);
+            Organization::whereKey($organization->id)->increment('balance', $transaction->amount);
+            User::whereKey($lockedSender->id)->decrement('balance', $transaction->amount);
 
             $transaction->update(['status' => User2organizationTransaction::STATUS_FINISHED]);
 

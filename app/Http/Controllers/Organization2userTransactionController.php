@@ -37,22 +37,32 @@ class Organization2userTransactionController extends Controller
             return redirect()->route('home')->with('error', 'Invalid transaction');
         }
 
+        if (Auth::id() !== $transaction->current_hostID) {
+            return redirect()->route('home')->with('error', 'You are not authorized to verify this transaction');
+        }
+
         return view('transactions.organization2user.verify', compact('transaction'));
     }
 
     public function history_view($id)
     {
         $userId = Auth::id();
+        $organization = Organization::query()->find($id);
+
+        // The route parameter is the organization id; fall back to the user id
+        // when the caller only has their own (user-scoped) history view.
+        $organizationId = $organization ? $organization->id : $userId;
+
         $allTransactions = Organization2userTransaction::query()
-            ->where(function ($q) use ($userId) {
-                $q->where('organizationID', $userId)->orWhere('userID', $userId);
+            ->where(function ($q) use ($userId, $organizationId) {
+                $q->where('organizationID', $organizationId)->orWhere('userID', $userId);
             })
             ->latest()
             ->get();
-        $fromTransactions = Organization2userTransaction::query()->where('organizationID', $userId)->latest()->get();
+        $fromTransactions = Organization2userTransaction::query()->where('organizationID', $organizationId)->latest()->get();
         $toTransactions = Organization2userTransaction::query()->where('userID', $userId)->latest()->get();
 
-        return view('transactions.organization2user.history', compact('allTransactions', 'fromTransactions', 'toTransactions'));
+        return view('transactions.organization2user.history', compact('allTransactions', 'fromTransactions', 'toTransactions', 'organization'));
     }
 
     public function organization2user_transaction_OTP_generator()
@@ -129,10 +139,13 @@ class Organization2userTransactionController extends Controller
             return redirect()->route('home')->with('error', 'Invalid transaction');
         }
 
-        $user = Auth::user();
+        if (Auth::id() !== $transaction->current_hostID) {
+            return redirect()->route('home')->with('error', 'You are not authorized to verify this transaction');
+        }
+
         $passkey = $validated['passkey'];
 
-        return DB::transaction(function () use ($passkey, $transaction, $user) {
+        return DB::transaction(function () use ($passkey, $transaction) {
             $organization = Organization::query()->lockForUpdate()->find($transaction->organizationID);
             $targetUser = User::query()->lockForUpdate()->find($transaction->userID);
 
@@ -161,7 +174,8 @@ class Organization2userTransactionController extends Controller
             }
 
             if (! Hash::check($passkey, $transaction->otp)) {
-                $transaction->increment('attempts');
+                Organization2userTransaction::whereKey($transaction->id)->increment('attempts');
+                $transaction->refresh();
 
                 return redirect()->route('organization2user_transaction_verify_view', $transaction->id)
                     ->with('error', 'Invalid passkey. '.($transaction->attempts).' failed attempt(s) out of '.self::MAX_ATTEMPTS);
@@ -171,8 +185,8 @@ class Organization2userTransactionController extends Controller
                 return redirect()->route('organization', $organization->id)->with('error', 'Organization has insufficient balance');
             }
 
-            $organization->decrement('balance', $transaction->amount);
-            $targetUser->increment('balance', $transaction->amount);
+            Organization::whereKey($organization->id)->decrement('balance', $transaction->amount);
+            User::whereKey($targetUser->id)->increment('balance', $transaction->amount);
 
             $transaction->update(['status' => Organization2userTransaction::STATUS_FINISHED]);
 

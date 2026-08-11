@@ -1,58 +1,270 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# 📝 Noteket
 
-## About Laravel
+**A collaborative notes & team workspace with built-in balances and OTP-verified transactions.**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+</div>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Noteket combines personal note-taking with lightweight organization management, a **wallet/transaction system** (user ↔ user, user ↔ organization, organization ↔ user) secured by **email-OTP confirmation**, and a **theme marketplace** where users and organizations can buy visual themes for their workspaces.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## ✨ Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Area | Highlights |
+| --- | --- |
+| **Notes** | Create, edit, delete, mark-as-done / undo, share with other users (invite by email), and reply to notes |
+| **Organizations** | Create & manage orgs, invite members (accept/decline via email links), remove members, host handover with OTP confirmation |
+| **Transactions** | Send money between users/orgs with decimal balances, 6-digit email OTP (10-minute expiry, 5 attempts max), full transaction history, cancel flow |
+| **Themes** | Marketplace of themes for personal and organization use, purchased via OTP-verified wallet transactions |
+| **Auth & Accounts** | Signup/login/logout, password reset with OTP, profile & avatar settings, "accept invitation" signup flows |
+| **Quality** | Pest test suite, PHPStan static analysis (0 errors), Laravel Pint code style, Laravel Boost (MCP) for AI-assisted development |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🧱 Tech Stack
 
-## Agentic Development
+- **Laravel 13** on **PHP 8.3+** (8.5 recommended — matches CI and Dockerfile)
+- **SQLite** by default; MySQL / MariaDB / PostgreSQL supported via `.env`
+- **Blade** templates + **Tailwind CSS 4** bundled with **Vite**
+- **Pest** (tests), **PHPStan** (static analysis), **Pint** (code style)
+- **Laravel Boost / MCP**, **Pail** (local log tailing)
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
+
+## 📋 Requirements
+
+| Tool | Version |
+| --- | --- |
+| PHP | ≥ 8.3 (extensions: `pdo_sqlite` or `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `curl`, `zip`, `fileinfo`, `bcmath`) |
+| Composer | 2.x |
+| Node.js | 20+ (with npm) |
+| Database server | **Not required** — SQLite is the default |
+
+---
+
+## 🚀 Installation
+
+### Quick start (one command)
+
+The project ships a `setup` Composer script that does everything:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer run setup
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+This runs `composer install`, copies `.env.example` → `.env`, generates an app key, runs migrations, installs npm dependencies, and builds frontend assets.
 
-## Contributing
+### Manual setup
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+# 1. Install PHP dependencies
+composer install
 
-## Code of Conduct
+# 2. Create environment file & app key
+cp .env.example .env
+php artisan key:generate
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 3. Create the SQLite database (default connection)
+touch database/database.sqlite
 
-## Security Vulnerabilities
+# 4. Run migrations (+ optional seeders)
+php artisan migrate
+php artisan db:seed        # optional demo data
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 5. Install & build frontend assets
+npm install
+npm run build              # or: npm run dev (watching)
+```
 
-## License
+> **Docker:** a `Dockerfile` is included for containerized setups (PHP 8.5 + MySQL). It runs migrations and `composer run dev` inside the container.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## ⚙️ Environment Configuration
+
+Copy `.env.example` to `.env` and adjust the following:
+
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `APP_NAME` | `Laravel` | Set to `Noteket` |
+| `APP_ENV` | `local` | `production` in deployed environments |
+| `APP_KEY` | — | Generated by `php artisan key:generate` |
+| `APP_DEBUG` | `true` | Set `false` in production |
+| `APP_URL` | `http://localhost` | Must match the domain the app is served on (used in emails/redirects) |
+| `DB_CONNECTION` | `sqlite` | Or `mysql` / `pgsql` |
+| `DB_DATABASE` | — | For SQLite: `database/database.sqlite`; for MySQL: database name |
+| `DB_HOST` / `DB_PORT` / `DB_USERNAME` / `DB_PASSWORD` | — | Only needed for MySQL/PostgreSQL |
+| `SESSION_DRIVER` | `database` | `database` requires the sessions table (created by migrations) |
+| `CACHE_STORE` | `database` | |
+| `QUEUE_CONNECTION` | `database` | Requires the `jobs` table (created by migrations) — see [Queue worker](#-queue-worker) |
+| `MAIL_MAILER` | `log` | See [Mail configuration](#-mail-configuration) |
+
+---
+
+## ✉️ Mail Configuration
+
+The application sends transactional emails (OTP codes, invitations, password resets) with the **synchronous** `Mail::to(...)->send()` API, so **no queue worker is required for emails** to be delivered.
+
+### Local development (default: `log`)
+
+```dotenv
+MAIL_MAILER=log
+```
+
+Emails are written to `storage/logs/laravel.log` instead of being sent. Perfect for local testing of OTP flows.
+
+### Real email via SMTP
+
+```dotenv
+MAIL_MAILER=smtp
+MAIL_SCHEME=smtp                  # or "smtps" for implicit TLS
+MAIL_HOST=smtp.gmail.com          # e.g. Gmail, Mailtrap, Mailpit, Brevo, etc.
+MAIL_PORT=587                     # 587 (STARTTLS) or 465 (SSL)
+MAIL_USERNAME=your-account
+MAIL_PASSWORD=your-app-password   # Gmail: use an App Password
+MAIL_FROM_ADDRESS="noreply@yourdomain.com"
+MAIL_FROM_NAME="Noteket"
+```
+
+Other supported mailers (see `config/mail.php`): `ses`, `postmark`, `resend`, `mailgun`, `sendmail`, `failover`.
+
+> **Tip:** For local testing with a real inbox, run [Mailpit](https://mailpit.aeroxis.com/) and set `MAIL_HOST=127.0.0.1` / `MAIL_PORT=1025`.
+
+---
+
+## 🔄 Queue Worker
+
+`QUEUE_CONNECTION=database` is the default, and the `jobs` / `job_batches` / `failed_jobs` tables are created by migrations. Start a worker whenever you run queued work (e.g. if you switch emails to `ShouldQueue` or dispatch jobs):
+
+```bash
+php artisan queue:work                 # process jobs continuously (recommended)
+php artisan queue:listen               # dev-friendly alternative (restarts on code changes)
+php artisan queue:work --tries=3       # limit retries
+```
+
+### Everything at once (local dev)
+
+```bash
+composer run dev
+```
+
+Starts three processes concurrently (the `dev` script):
+
+```bash
+npx concurrently \
+  "php artisan serve" \
+  "php artisan queue:listen --tries=1 --timeout=0" \
+  "npm run dev"
+```
+
+### Production (Supervisor)
+
+For deployed environments, keep a worker running with a process supervisor:
+
+```ini
+[program:noteket-queue]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/noteket/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=2
+redirect_stderr=true
+stdout_logfile=/var/www/noteket/storage/logs/worker.log
+stopwaitsecs=3600
+```
+
+```bash
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl status
+```
+
+---
+
+## 🖥️ Frontend Assets
+
+The app uses **Vite + Tailwind CSS 4**:
+
+```bash
+npm install
+npm run build          # production bundle (deploy-time)
+npm run dev            # hot-reload dev server
+```
+
+> If you see `Unable to locate file in Vite manifest`, run `npm run build` (or `npm run dev`) once.
+
+---
+
+## 🧪 Testing & Quality
+
+```bash
+php artisan test                    # full Pest suite
+php artisan test --filter=Note      # filter by name
+composer phpstan                    # PHPStan static analysis (target: 0 errors)
+vendor/bin/pint                     # fix code style (Laravel Pint)
+```
+
+> The test suite targets **34 passing tests / 115+ assertions** (auth, notes, sharing, OTP transactions, password reset, and page smoke tests). `phpunit.xml` pins the `testing` environment for tests regardless of shell-exported variables.
+
+---
+
+## 🌿 Branch Workflow
+
+### Branches
+
+| Branch | Purpose |
+| --- | --- |
+| `main` | Stable, deployable. **CI runs on every push/PR** (see `.github/workflows/laravel.yml`: install → key → sqlite → `php artisan test`). |
+| `fix/*` | Bug fixes and refactors — e.g. the current `fix/audit-and-refactor`. Merge back into `main` after validation. |
+| `feature/*` | New features (follow the same pattern). |
+
+### Recommended flow
+
+1. **Always branch from `main`**: `git checkout -b fix/your-fix main`
+2. **Checkpoint before risky work** — the repo keeps rollback checkpoints, e.g. commit `6f3a276` (`checkpoint: pre-audit-fix state`). Create your own before large refactors so you can `git reset --hard <checkpoint>` if needed.
+3. **Validate before merging** — run the full gate locally:
+
+```bash
+php artisan test && composer phpstan && vendor/bin/pint --dirty
+```
+
+4. **Push and open a PR** to `main`; the GitHub Actions workflow runs the test suite automatically:
+
+```bash
+git push origin fix/your-fix
+```
+
+### Remote
+
+```bash
+git remote -v
+# origin  https://github.com/nvdcnd/Note_project.git
+```
+
+---
+
+## 📁 Project Structure (key areas)
+
+```
+app/
+├── Http/Controllers/     # Feature controllers (auth, notes, orgs, transactions, themes)
+├── Mail/                 # Transactional mailables (OTP, invitations, password reset)
+├── Models/               # Eloquent models (User, Note, Organization, transactions, wallets…)
+database/
+├── migrations/           # Schema (users, notes, orgs, wallets, transactions, otp attempts…)
+└── factories/            # Test factories
+resources/views/          # Blade views (layouts, notes, organizations, transactions, themes…)
+routes/web.php            # All web routes (75)
+tests/                    # Pest feature tests
+```
+
+---
+
+## 📄 License
+
+MIT (this is a Laravel-based project skeleton, extended for Noteket).

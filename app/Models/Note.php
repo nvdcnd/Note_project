@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Database\Factories\NoteFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Note extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<NoteFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $table = 'note';
 
