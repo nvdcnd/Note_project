@@ -96,3 +96,55 @@
         </div>
     </div>
 @endsection
+
+@section('content-mobile')
+    <div class="card w-100 mb-3">
+        <div class="card-header" style="background-color: #FACC15;">
+            <h4 style="margin: 0; font-size: 1.3rem;">Thông tin tổ chức</h4>
+        </div>
+        <div class="card-body" style="background-color: #FFE86E;">
+            <form action="{{ route('edit.organization', $organization->id) }}" method="POST">
+                @csrf
+                <div class="mb-3">
+                    <label for="nameOrgM" class="form-label">Tên tổ chức</label>
+                    <input type="text" class="form-control" id="nameOrgM" name="name" value="{{ $organization->name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="descriptionOrgM" class="form-label">Mô tả</label>
+                    <textarea class="form-control bigform" id="descriptionOrgM" name="description" rows="3" required>{{ $organization->description }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Lưu thay đổi</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card w-100 mb-3">
+        <div class="card-header" style="background-color: #FACC15;">
+            <h4 style="margin: 0; font-size: 1.3rem;">Đổi chủ sở hữu</h4>
+        </div>
+        <div class="card-body" style="background-color: #FFE86E;">
+            <form action="{{ route('organization.change_host', $organization->id) }}" method="POST">
+                @csrf
+                <p class="text-muted">Tạo yêu cầu chuyển quyền chủ sở hữu cho thành viên khác.</p>
+                <button type="submit" class="btn btn-outline-primary w-100">Tạo yêu cầu đổi chủ</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card w-100">
+        <div class="card-header" style="background-color: #ef4444; color: #fff;">
+            <h4 style="margin: 0; font-size: 1.3rem;">Vùng nguy hiểm</h4>
+        </div>
+        <div class="card-body" style="background-color: #FFE86E;">
+            <form action="{{ route('leave.organization', $organization->id) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-outline-warning w-100 mb-2">Rời tổ chức</button>
+            </form>
+            <form action="{{ route('delete.organization', $organization->id) }}" method="POST" onsubmit="return confirm('Xóa vĩnh viễn tổ chức này cùng tất cả dữ liệu?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger w-100">Xóa tổ chức</button>
+            </form>
+        </div>
+    </div>
+@endsection

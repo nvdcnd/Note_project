@@ -153,3 +153,15 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Do NOT delete tests without approval.
 
 </laravel-boost-guidelines>
+
+## Noteket project-specific context
+
+- **Reports source of truth:** `report/11-08-26-Bao-Cao-Toan-Dien-Du-An.md` describes the codebase BEFORE the 11-08 refactor commits `2c36a23`/`1b4660f` and is outdated — read `report/11-08-26-Bao-Cao-Toan-Dien-Du-An-Sau-Refactor.md` first. `phpstan-report.json` is a stale UTF-16 dump from another machine (pre-refactor) — ignore it.
+- **Signup-invite flow is not wired:** `AuthenticationController::signup40acc_note|host_org|member_org` have NO routes despite the README's "accept invitation signup" claim. Note `pivot_for_note.shared_with` is a FK to `users.id` (an ID, not an email) yet those methods treat it as email — wiring them will break. Invite emails (`Mail40account`, `user_accept_organization`, host-change) contain no action links; org invites are only actionable via the pending UI in `organizations/index`.
+- **Legacy JSON fetchers:** base `Controller.php` has 6 unrouted `*_fetch()` methods querying non-existent `note.user_id` — dead code; do not route them without fixing the query.
+- **Money-locking caveat:** `lockForUpdate()` is a no-op on SQLite (default dev DB), so the race protection only works on MySQL/Postgres. A deadlock cycle is only possible between two opposite-direction user2user transfers.
+- **Edit-from-card truncates notes:** `noteket.js` EDIT mode pre-fills the description from `Str::limit(..., 200)` rendered on home/org cards, so saving overwrites and truncates the real content — pre-fill from full text instead.
+- **DB column naming is mixed:** camelCase (`hostID`, `userID`, `noteID`, `organizationID`, `theme4ID`, `current_hostID`) alongside snake_case (`creater_id`, `note_id`, `shared_with`, `org_done`) — check the migration before writing queries/relations.
+- **Two views dirs:** `resources/view/` (singular) holds static prototypes (`test/test1/testing/test2`); real Blade lives in `resources/views/`. If artisan fails with "Failed to open stream: .../vendor/autoload.php", run `composer install` first (this checkout can lack `vendor/`).
+- **User preference:** audits/report work is read-only — do not modify code without explicit approval.
+- **Preview/webview quirk:** in the Freebuff preview pane, IntersectionObserver callbacks may never fire (webview not composited) — avoid IO-gated visibility/animations; use CSS-only animations that always end visible. Screenshots can fail with "no frames" while snapshot/evaluate still work.

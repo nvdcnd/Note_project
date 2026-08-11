@@ -7,6 +7,7 @@ use App\Models\Note;
 use App\Models\Organization;
 use App\Models\Organization2userTransaction;
 use App\Models\OrganizationsMember;
+use App\Models\PivotChangeHostOrganization;
 use App\Models\PivotForNote;
 use App\Models\Replynote;
 use App\Models\Theme4orgWallet;
@@ -61,7 +62,7 @@ class OrganizationsController extends Controller
 
         $notes = Note::query()
             ->where('organizationID', $organization->id)
-            ->latest()
+            ->oldest()
             ->take(20)
             ->get();
 
@@ -176,7 +177,7 @@ class OrganizationsController extends Controller
             return redirect()->route('organization', $organization->id)->with('error', 'You are not authorized to manage this organization');
         }
 
-        $pendingHostRequests = \App\Models\PivotChangeHostOrganization::query()
+        $pendingHostRequests = PivotChangeHostOrganization::query()
             ->where('organizationID', $organization->id)
             ->where('new_host_acceptance_status', false)
             ->with('newHost')
@@ -277,7 +278,7 @@ class OrganizationsController extends Controller
             Note::query()->where('organizationID', $organization->id)->delete();
             OrganizationsMember::query()->where('organizationID', $organization->id)->delete();
             Theme4orgWallet::query()->where('organizationID', $organization->id)->delete();
-            \App\Models\PivotChangeHostOrganization::query()->where('organizationID', $organization->id)->delete();
+            PivotChangeHostOrganization::query()->where('organizationID', $organization->id)->delete();
             $organization->delete();
         });
 

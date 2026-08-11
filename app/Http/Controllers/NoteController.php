@@ -14,13 +14,26 @@ use Illuminate\Support\Facades\DB;
 
 class NoteController extends Controller
 {
-    public function home()
+    public function home(Request $request)
     {
         if (! Auth::check()) {
             return redirect()->route('login');
         }
 
         $userId = Auth::id();
+
+        $noteFilters = [
+            'all' => 'Tất cả ghi chú',
+            'not-done' => 'Chưa hoàn thành',
+            'done' => 'Hoàn tất',
+            'by-me' => 'Do tôi tạo',
+            'shared' => 'Được chia sẻ với tôi',
+        ];
+
+        $filter = $request->query('filter', 'all');
+        if (! array_key_exists($filter, $noteFilters)) {
+            $filter = 'all';
+        }
 
         $ownNotes = Note::query()
             ->where('creater_id', $userId)
@@ -34,7 +47,9 @@ class NoteController extends Controller
             ->take(20)
             ->get();
 
-        $allNotes = $ownNotes->merge($sharedNotes)->unique('id')->sortByDesc('created_at')->values();
+        // Note cũ đứng trước, note mới xếp sau (hàng đợi): khi note phía trên bị
+        // skip / đánh dấu hoàn thành thì note mới hơn trồi lên thay thế vị trí.
+        $allNotes = $ownNotes->merge($sharedNotes)->unique('id')->sortBy('created_at')->values();
 
         $doneNoteIds = MarkAsDone::query()
             ->where('userID', $userId)
@@ -42,9 +57,20 @@ class NoteController extends Controller
             ->pluck('noteID')
             ->all();
 
+        $notes = match ($filter) {
+            'done' => $allNotes->filter(fn ($note) => in_array($note->id, $doneNoteIds)),
+            'not-done' => $allNotes->filter(fn ($note) => ! in_array($note->id, $doneNoteIds)),
+            'by-me' => $ownNotes,
+            'shared' => $sharedNotes,
+            default => $allNotes,
+        };
+        $notes = $notes->sortBy('created_at')->values();
+
         return view('home', [
-            'notes' => $allNotes,
+            'notes' => $notes,
             'doneNoteIds' => $doneNoteIds,
+            'noteFilter' => $filter,
+            'noteFilters' => $noteFilters,
         ]);
     }
 

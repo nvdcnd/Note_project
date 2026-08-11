@@ -102,7 +102,10 @@
                 }
             } else if (mode === 'EDIT') {
                 const currentTitle = card.querySelector('.card-title')?.textContent.trim() || '';
-                const currentText = card.querySelector('.card-text')?.textContent.trim() || '';
+                // Ưu tiên nội dung đầy đủ (hidden span) thay vì bản đã cắt 200 ký tự trên card,
+                // tránh ghi đè mất dữ liệu khi lưu từ chế độ sửa inline.
+                const currentText = (card.querySelector('.note-full-description')?.textContent.trim()
+                    || card.querySelector('.card-text')?.textContent.trim() || '');
                 if (headerTitle) headerTitle.innerHTML = '✏️ Sửa ghi chú';
                 cardBody.innerHTML = `
                     <form action="/edit/note/${noteId}" method="POST" onsubmit="return false;">
@@ -146,6 +149,8 @@
                         if (t) t.textContent = newTitle;
                         if (c) c.textContent = newContent;
                         card.dataset.originalBodyHtml = tempDiv.innerHTML;
+                        const fullDesc = card.querySelector('.note-full-description');
+                        if (fullDesc) fullDesc.textContent = newContent;
                         showToast('🎉 Đã lưu thay đổi!');
                         swapCardMode(card, 'VIEW', options);
                     }).catch(() => showToast('⚠️ Không thể lưu ghi chú', true));
@@ -287,12 +292,27 @@
     window.swapCardMode = swapCardMode;
 
     // --- FAB Mobile Card Swap ---
+    // Đúng demo: form tạo note ẩn hoàn toàn trên mobile, FAB flip card đầu tiên thành form tạo.
     window.toggleMobileCardSwap = function (options) {
         const mobileContainer = document.querySelector('.mobile-view .note-container');
         if (!mobileContainer) return;
-        const card = mobileContainer.querySelector('.note-card');
+        // Chỉ chọn card note đang hiển thị (bỏ qua card đã bị ẩn sau skip/hoàn thành).
+        let card = [...mobileContainer.querySelectorAll('.note-card')].find((c) => c.offsetParent !== null) || null;
         const fab = document.getElementById('fabBtn');
-        if (!card) return;
+        if (!card) {
+            // Chưa có note nào: tạo tạm một card để chứa form tạo (khi bấm FAB lần nữa sẽ ẩn đi).
+            card = document.createElement('div');
+            card.className = 'card note-card';
+            card.dataset.cardMode = 'VIEW';
+            card.innerHTML =
+                '<div class="card-header note-header" style="display: flex; justify-content: center;"><p>Ghi chú</p></div>' +
+                '<div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">' +
+                '<p class="text-muted text-center mb-0">Chưa có ghi chú. Bấm + để tạo ghi chú đầu tiên!</p>' +
+                '</div>' +
+                '<div class="note-overlay" aria-hidden="true"><div class="overlay-box">Tạo ghi chú</div></div>';
+            mobileContainer.prepend(card);
+            initNoteCard(card);
+        }
         const currentMode = card.dataset.cardMode || 'VIEW';
         if (currentMode === 'VIEW') {
             if (fab) fab.classList.add('active-close');
@@ -464,7 +484,7 @@
                 } else if (mode === 'REPLY') {
                     card.querySelector('.btn-send-reply')?.click();
                 } else {
-                    triggerCardExit(card, -380, () => showToast('➔ Đã chuyển sang ghi chú tiếp theo'));
+                    dismissNoteCard(card, '➔ Đã chuyển sang ghi chú tiếp theo', 'up');
                 }
             } else if (currentY > 120) {
                 if (mode !== 'VIEW') {
@@ -473,10 +493,7 @@
                         showToast('🧹 Đã hủy / đặt lại biểu mẫu');
                     });
                 } else {
-                    triggerCardExit(card, 380, () => {
-                        showToast('✓ Đã hoàn thành!');
-                        card.style.display = 'none';
-                    });
+                    dismissNoteCard(card, '✓ Đã hoàn thành!', 'down');
                 }
             } else {
                 card.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
@@ -489,8 +506,45 @@
         card.addEventListener('pointercancel', handlePointerUpOrCancel);
     }
 
+    // --- Note deck helpers (xếp chồng kiểu bộ bài) ---
+    function reflowDeck(deck) {
+        if (!deck) return;
+        const cards = deck.querySelectorAll('.note-card');
+        const total = cards.length;
+        cards.forEach((card, i) => {
+            const offset = Math.min(i, 5) * 14;
+            card.style.top = `${offset}px`;
+            card.style.zIndex = String(total - i);
+            const isTop = i === 0;
+            card.classList.toggle('deck-inert', !isTop);
+            card.inert = !isTop;
+        });
+        if (total === 0) {
+            showToast('🎉 Đã xem hết ghi chú!');
+            deck.style.display = 'none';
+        } else {
+            deck.style.display = '';
+        }
+    }
+
+    // Dismiss (skip / hoàn thành) một card: bay ra ngoài rồi note kế tiếp trồi lên.
+    function dismissNoteCard(card, toastMessage, direction) {
+        const deck = card.closest('.note-deck');
+        const targetY = direction === 'up' ? -380 : 380;
+        triggerCardExit(card, targetY, () => {
+            showToast(toastMessage);
+            if (deck) {
+                card.remove();
+                reflowDeck(deck);
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.note-card').forEach(initNoteCard);
+        document.querySelectorAll('.note-deck').forEach(reflowDeck);
     });
 
     function escapeHtml(value) {

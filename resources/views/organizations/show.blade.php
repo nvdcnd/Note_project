@@ -18,35 +18,74 @@
         <p><small>Chủ sở hữu: {{ $organization->host?->name }}</small></p>
     </div>
 
-    <div class="row justify-content-center g-4">
-        <div class="col-lg-5 col-12">
-            <div class="card note-card" data-card-mode="VIEW">
-                <div class="card-header note-header" style="background-color: #FACC15; display: flex; justify-content: center;">
-                    <p>Tạo ghi chú trong tổ chức</p>
-                </div>
-                <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
-                    <form action="{{ route('create.note.organization', $organization->id) }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="noteTitle" class="form-label">Tiêu đề ghi chú</label>
-                            <input type="text" class="form-control" id="noteTitle" name="title" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="noteContent" class="form-label">Nội dung ghi chú</label>
-                            <textarea class="form-control bigform" id="noteContent" name="description" rows="3" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Tạo ghi chú</button>
-                    </form>
-                </div>
-                <div class="note-overlay" aria-hidden="true"><div class="overlay-box">Tạo ghi chú</div></div>
+    <div class="note-layout">
+        {{-- Create note card — đặt cạnh note deck, cùng kích thước 420px --}}
+        <div class="card note-card note-card-create" data-card-mode="CREATE">
+            <div class="card-header note-header" style="background-color: #FACC15; display: flex; justify-content: center;">
+                <p>Tạo ghi chú trong tổ chức</p>
             </div>
+            <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
+                <form action="{{ route('create.note.organization', $organization->id) }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="noteTitle" class="form-label">Tiêu đề ghi chú</label>
+                        <input type="text" class="form-control" id="noteTitle" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteContent" class="form-label">Nội dung ghi chú</label>
+                        <textarea class="form-control bigform" id="noteContent" name="description" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Tạo ghi chú</button>
+                </form>
+            </div>
+            <div class="note-overlay" aria-hidden="true"><div class="overlay-box">Tạo ghi chú</div></div>
         </div>
 
-        @forelse ($notes as $note)
-            <div class="col-lg-5 col-12">
+        {{-- Note deck — cạnh card tạo note, xếp chồng kiểu bộ bài (tất cả note trong MỘT deck) --}}
+        @if ($notes->isNotEmpty())
+            <div class="note-deck">
+                @foreach ($notes as $note)
+                    <div class="card note-card" data-card-mode="VIEW" data-note-id="{{ $note->id }}">
+                        <div class="card-header note-header" style="position: relative;">
+                            <p>Tạo lúc: {{ $note->created_at?->format('Y-m-d H:i') }}</p>
+                            <button class="pin-btn" aria-label="More" type="button">📌</button>
+                            <div class="note-menu" role="menu">
+                                <button type="button" data-action="mark-done">{{ in_array($note->id, $doneNoteIds) ? 'Hoàn tác' : 'Đánh dấu hoàn thành' }}</button>
+                                <button type="button" data-action="edit">Sửa</button>
+                                <button type="button" data-action="share">Chia sẻ</button>
+                                <button type="button" data-action="reply">Trả lời</button>
+                                <button type="button" data-action="delete">Xóa</button>
+                            </div>
+                        </div>
+                        <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
+                            <a href="{{ route('note', $note->id) }}" style="text-decoration: none; color: inherit;">
+                                <h3 class="card-title">{{ $note->title }}</h3>
+                            </a>
+                            <span class="d-none note-full-description">{{ $note->description }}</span>
+                            <p class="card-text">{{ Str::limit($note->description, 200) }}</p>
+                            <p class="card-text text-secondary">Bởi: {{ $note->creater?->name ?? 'Không rõ' }}</p>
+                            @if (in_array($note->id, $doneNoteIds))
+                                <span class="badge rounded-pill text-bg-success">✓ Hoàn thành</span>
+                            @endif
+                        </div>
+                        <div class="note-overlay" aria-hidden="true"><div class="overlay-box">Đánh dấu hoàn thành</div></div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <p class="text-muted text-center py-4">Chưa có ghi chú nào trong tổ chức này.</p>
+        @endif
+    </div>
+@endsection
+
+@section('content-mobile')
+    {{-- Note deck trên mobile: xếp chồng kiểu bộ bài, form tạo ẩn chỉ hiện khi bấm FAB --}}
+    @if ($notes->isNotEmpty())
+        <div class="note-deck">
+            @foreach ($notes as $note)
                 <div class="card note-card" data-card-mode="VIEW" data-note-id="{{ $note->id }}">
                     <div class="card-header note-header" style="position: relative;">
-                        <p>Tạo lúc: {{ $note->created_at?->format('Y-m-d H:i') }}</p>
+                        <p>{{ $note->created_at?->format('Y-m-d H:i') }}</p>
                         <button class="pin-btn" aria-label="More" type="button">📌</button>
                         <div class="note-menu" role="menu">
                             <button type="button" data-action="mark-done">{{ in_array($note->id, $doneNoteIds) ? 'Hoàn tác' : 'Đánh dấu hoàn thành' }}</button>
@@ -57,52 +96,20 @@
                         </div>
                     </div>
                     <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
-                        <a href="{{ route('note', $note->id) }}" style="text-decoration: none; color: inherit;">
-                            <h3 class="card-title">{{ $note->title }}</h3>
-                        </a>
+                        <h3 class="card-title">{{ $note->title }}</h3>
+                        <span class="d-none note-full-description">{{ $note->description }}</span>
                         <p class="card-text">{{ Str::limit($note->description, 200) }}</p>
                         <p class="card-text text-secondary">Bởi: {{ $note->creater?->name ?? 'Không rõ' }}</p>
-                        @if (in_array($note->id, $doneNoteIds))
-                            <span class="badge rounded-pill text-bg-success">✓ Hoàn thành</span>
-                        @endif
                     </div>
-                    <div class="note-overlay" aria-hidden="true"><div class="overlay-box">Đánh dấu hoàn thành</div></div>
                 </div>
-            </div>
-        @empty
-            <div class="col-12 text-center py-4">
-                <p class="text-muted">Chưa có ghi chú nào trong tổ chức này.</p>
-            </div>
-        @endforelse
-    </div>
-@endsection
-
-@section('content-mobile')
-    @forelse ($notes as $note)
-        <div class="card note-card" data-card-mode="VIEW" data-note-id="{{ $note->id }}">
-            <div class="card-header note-header" style="position: relative;">
-                <p>{{ $note->created_at?->format('Y-m-d H:i') }}</p>
-                <button class="pin-btn" aria-label="More" type="button">📌</button>
-                <div class="note-menu" role="menu">
-                    <button type="button" data-action="mark-done">{{ in_array($note->id, $doneNoteIds) ? 'Hoàn tác' : 'Đánh dấu hoàn thành' }}</button>
-                    <button type="button" data-action="edit">Sửa</button>
-                    <button type="button" data-action="share">Chia sẻ</button>
-                    <button type="button" data-action="reply">Trả lời</button>
-                    <button type="button" data-action="delete">Xóa</button>
-                </div>
-            </div>
-            <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
-                <h3 class="card-title">{{ $note->title }}</h3>
-                <p class="card-text">{{ Str::limit($note->description, 200) }}</p>
-                <p class="card-text text-secondary">Bởi: {{ $note->creater?->name ?? 'Không rõ' }}</p>
-            </div>
+            @endforeach
         </div>
-    @empty
+    @else
         <div class="text-center py-5">
             <div style="font-size: 4rem;">🏢</div>
             <h3>Chưa có ghi chú</h3>
         </div>
-    @endforelse
+    @endif
 @endsection
 
 @section('mobile-fab')

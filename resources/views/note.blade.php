@@ -3,7 +3,7 @@
 @section('title', $note->title.' - Noteket')
 
 @section('content')
-    <div class="row justify-content-center">
+    <div class="row justify-content-center note-page-center">
         <div class="col-lg-7 col-12">
             <div class="card note-card" data-card-mode="VIEW" data-note-id="{{ $note->id }}">
                 <div class="card-header note-header" style="background-color: #FACC15;">

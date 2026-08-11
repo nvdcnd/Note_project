@@ -60,6 +60,7 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
 
 .sidebar ul li {
     margin-bottom: 18px;
+    width: 100%;
 }
 
 .sidebar ul li a {
@@ -98,13 +99,21 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
 
 .drop {
     border: 3px solid var(--nk-yellow);
-    width: 200px;
+    width: auto;
+    min-width: 200px;
     font-size: 1.2rem;
     background: rgba(255, 255, 255, 0.35);
+    white-space: nowrap;
 }
 
 .drop:hover,
 .drop:focus {
+    background-color: var(--nk-yellow);
+    color: #000;
+}
+
+.dropdown-menu .dropdown-item.active,
+.dropdown-menu .dropdown-item:active {
     background-color: var(--nk-yellow);
     color: #000;
 }
@@ -454,6 +463,96 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
 }
 
 /* ------------------------------------------------------------------
+   Note layout — căn giữa note deck & card tạo note giữa màn hình
+   ------------------------------------------------------------------ */
+.note-layout {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    min-height: calc(100vh - 130px);
+}
+
+/* Trang xem 1 ghi chú — căn giữa theo chiều dọc màn hình */
+.note-page-center {
+    min-height: calc(100vh - 130px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ------------------------------------------------------------------
+   Note deck — xếp chồng kiểu bộ bài (desktop home)
+   Card trên cùng là note cũ cần xử lý; các card phía sau chồi nhẹ
+   phía dưới. Vị trí chồng dùng `top` (không dùng transform) để không
+   xung đột với animation swap/gesture của card.
+   ------------------------------------------------------------------ */
+.note-deck {
+    position: relative;
+    width: 420px;
+    max-width: 100%;
+    height: 500px;
+    margin: 0;
+}
+
+/* Card tạo note đồng bộ kích thước với card note trong deck (420px) */
+.note-card-create {
+    height: 420px;
+    display: flex;
+    flex-direction: column;
+    margin: 0; /* bỏ margin: 0 auto của .note-card để đứng cạnh deck */
+}
+
+.note-card-create .card-body {
+    flex: 1 1 auto;
+    max-height: none;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Form tạo note thu hẹp nội dung để sát card note bên cạnh (đúng demo) */
+.note-card-create form {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.note-deck .note-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 420px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    transition: top 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.35s ease;
+}
+
+.note-deck .note-card.dragging {
+    transition: none;
+}
+
+.note-deck .note-card .card-body {
+    flex: 1 1 auto;
+    max-height: none;
+    overflow-y: auto;
+}
+
+.note-deck .note-card.deck-inert {
+    pointer-events: none;
+    filter: brightness(0.97);
+}
+
+.note-deck .note-card.deck-inert * {
+    pointer-events: none !important;
+}
+
+/* ------------------------------------------------------------------
    Toast
    ------------------------------------------------------------------ */
 .toast-container {
@@ -574,9 +673,14 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
         display: none;
         user-select: none;
     }
+
+    .mobile{
+        display: none;
+        user-select: none;
+    }
 }
 
-@media (max-width: 991.98px) {
+@media (max-width: 992px) {
     .widescreen-only {
         display: none;
     }
@@ -587,5 +691,15 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
 
     .view {
         padding-bottom: 120px;
+    }
+
+    /* Dropdown topbar thu gọn trên màn hình nhỏ để vừa với balance + avatar */
+    .topbar-container .drop {
+        min-width: 0;
+        max-width: 150px;
+        font-size: 1rem;
+        padding: 8px 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }

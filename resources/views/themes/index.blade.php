@@ -47,6 +47,14 @@
 @endsection
 
 @section('content-mobile')
+    @if ($themes->isEmpty())
+        <div class="text-center py-5">
+            <div style="font-size: 4rem;">🎨</div>
+            <h3>Chưa có chủ đề nào</h3>
+            <a href="{{ route('create_theme_request_view') }}" class="btn btn-primary rounded-pill mt-3">Yêu cầu chủ đề đầu tiên</a>
+        </div>
+    @endif
+
     @foreach ($themes as $theme)
         <div class="card mb-3 w-100">
             <div class="card-body">

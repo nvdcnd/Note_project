@@ -29,3 +29,25 @@
         </div>
     </div>
 @endsection
+
+@section('content-mobile')
+    <div class="card w-100">
+        <div class="card-header" style="background-color: #FACC15;">
+            <h3 style="margin: 0; font-size: 1.5rem;">Tạo tổ chức mới</h3>
+        </div>
+        <div class="card-body" style="background-color: #FFE86E;">
+            <form action="{{ route('organizations.store') }}" method="POST">
+                @csrf
+                <div class="mb-3">
+                    <label for="nameOrgCreateM" class="form-label">Tên tổ chức</label>
+                    <input type="text" class="form-control" id="nameOrgCreateM" name="name" value="{{ old('name') }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="descriptionOrgCreateM" class="form-label">Mô tả</label>
+                    <textarea class="form-control bigform" id="descriptionOrgCreateM" name="description" rows="4" required>{{ old('description') }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Tạo tổ chức</button>
+            </form>
+        </div>
+    </div>
+@endsection
