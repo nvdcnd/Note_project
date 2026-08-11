@@ -52,4 +52,18 @@ class Theme4orgController extends Controller
             'owned' => $owned,
         ]);
     }
+
+    public function setTheme4org(Request $request, $theme_id, $org_id){
+        $org = Organization::find($org_id);
+        $theme4org = Theme4orgWallet::where('themeID',$theme_id)->where('OrganizationID',$org_id)->first();
+        $user = Auth::user();
+        if($theme4org && $user->id == $org->hostID){
+            $org->themeID = $theme4org->themeID;
+            $org->save();
+            return response()->json(["themeID"=>$theme4org->themeID],200);
+        } else {
+            return response()->json(["error"=>'error'],500);
+        }
+    }
 }
+
