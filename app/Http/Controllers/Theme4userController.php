@@ -3,63 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Theme4user;
+use App\Models\User;
+use App\Models\Theme4userWallet;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class Theme4userController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Theme4user $Theme4user)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Theme4user $Theme4user)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Theme4user $Theme4user)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Theme4user $Theme4user)
-    {
-        //
+    public function set_theme_4user(Request $request, $id){
+        $theme = Theme4userWallet::where('userID',Auth::user()->id)->where('themeID',$id)->first();
+        if($theme){
+            $user = Auth::user();
+            $user->theme_id = $theme->id;
+            $user->save();
+            return response()->json([
+                'themeID' => $theme->id,
+            ],200);
+        } else {
+            return response()->json(["error"=>"Error"],500);
+        }
     }
 }

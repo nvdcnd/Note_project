@@ -3,63 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Theme4org;
+use App\Models\User;
+use App\Models\Theme4orgWallet;
+use App\Models\Organization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 class Theme4orgController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Theme4org $theme4org)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Theme4org $theme4org)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Theme4org $theme4org)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Theme4org $theme4org)
-    {
-        //
+    public function setTheme4org(Request $request, $theme_id, $org_id){
+        $org = Organization::find($org_id);
+        $theme4org = Theme4orgWallet::where('themeID',$theme_id)->where('OrganizationID',$org_id)->first();
+        $user = Auth::user();
+        if($theme4org && $user->id == $org->hostID){
+            $org->themeID = $theme4org->themeID;
+            $org->save();
+            return response()->json(["themeID"=>$theme4org->themeID],200);
+        } else {
+            return response()->json(["error"=>'error'],500);
+        }
     }
 }
