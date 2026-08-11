@@ -68,6 +68,10 @@ Route::middleware(['auth'])->group(function () {
         }
     })->name('note');
 
+    // Note
+    Route::post('/create/note', [NoteController::class, 'create_note'])->name('create.note');
+    Route::post('/create/note/organization/{id}', [NoteController::class, 'create_note_in_organization'])->name('create.note.organization');
+
     // Reply
     Route::post('/edit/note/{id}', [NoteController::class, 'edit_note'])->name('edit.note');
     Route::post('/reply/note/{id}', [ReplyNoteController::class, 'reply_note'])->name('reply.note');
@@ -110,8 +114,8 @@ Route::middleware(['auth'])->group(function () {
             $current_members = OrganizationsMember::query()->where('organizationID', '=', $organization->id, 'and')->where('status', '=', true, 'and')->count('*');
             $pending_member = OrganizationsMember::query()->where('organizationID', '=', $organization->id, 'and')->where('status', '=', false, 'and')->count('*');
             $all_note = Note::query()->where('organizationID', '=', $organization->id, 'and')->count('*');
-            $undone_note = Note::query()->where('organizationID', '=', $organization->id, 'and')->where('org_done','=',false)->count('*');
-            $done_note = Note::query()->where('organizationID', '=', $organization->id, 'and')->where('org_done','=',true)->count('*');
+            $undone_note = Note::query()->where('organizationID', '=', $organization->id, 'and')->where('org_done', '=', false)->count('*');
+            $done_note = Note::query()->where('organizationID', '=', $organization->id, 'and')->where('org_done', '=', true)->count('*');
 
             return view('organization.dashboard', compact('organization', 'current_members', 'pending_member', 'all_note', 'undone_note', 'done_note'));
         }

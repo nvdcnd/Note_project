@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css" integrity="sha512-ApSLB1Pd3/bZN8fWB/RG9YhN/7bd9Hkf3AGaE2mPfebjrxagjuBtx2GcgdqIlJkUzwylBo61r9Xa9NmgBI0swA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
-<title>Document</title> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<title>Noteket - Trang chủ tổ chức</title> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 <style>
     body {
         font-family: 'Caveat', cursive;
@@ -246,7 +246,7 @@
         border: 2px solid #ef4444 !important;
     }
 
-    /* Toast Notification */
+    /* Toast Thông báo */
     .toast-container {
         position: fixed; top: 20px; left: 50%;
         transform: translateX(-50%); z-index: 3000;
@@ -264,7 +264,7 @@
     }
     .custom-toast.show { opacity: 1; transform: translateY(0); }
 
-    /* FAB Add Button & Active Close Rotation */
+    /* FAB Thêm Button & Active Close Rotation */
     .fab-add-btn {
         transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.25s, box-shadow 0.25s !important;
     }
@@ -425,6 +425,8 @@
     .content .col { display: flex; justify-content: center; }
     .view { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
     .mobile-view .note-container { width: 100%; max-width: 420px; }
+    /* Empty state: hiển thị khi danh sách không có dữ liệu (bỏ class để hiện) */
+    .empty-state { display: none; }
 </style>
 </head>
 <body>
@@ -432,7 +434,7 @@
     <div class="toast-container">
         <div class="custom-toast" id="toast">
             <i class="fas fa-info-circle"></i>
-            <span id="toastMsg">Notification</span>
+            <span id="toastMsg">Thông báo</span>
         </div>
     </div>
 
@@ -445,11 +447,11 @@
                     </div>
                 <div class="sidebar-container">
                     <ul>
-                        <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
-                        <li><a href="#"><i class="fas fa-info-circle"></i> Teams</a></li>
-                        <li><a href="#"><i class="fas fa-cogs"></i> Theme</a></li>
-                        <li><a href="#"><i class="fas fa-envelope"></i> Balanced</a></li>
-                        <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                        <li><a href="../home.html"><i class="fas fa-home"></i> Trang chủ</a></li>
+                        <li><a href="index.html"><i class="fas fa-info-circle"></i> Tổ chức</a></li>
+                        <li><a href="../theme/index.html"><i class="fas fa-cogs"></i> Chủ đề</a></li>
+                        <li><a href="balance.html"><i class="fas fa-envelope"></i> Ví</a></li>
+                        <li><a href="setting.html"><i class="fas fa-cog"></i> Cài đặt</a></li>
                     </ul>
                     <div class="sidebar-footer">
                         <p class="text-center" style="color: #000;font-family: 'Caveat', cursive;">&copy; 2026 Noteket</p>
@@ -466,13 +468,13 @@
                 <div class="topbar-container">
                     <div class="dropdown">
                         <a class="btn drop dropdown-toggle rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Dropdown link
+                            Liên kết thả xuống
                         </a>
 
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Action</a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            <li><a class="dropdown-item" href="#">Thao tác</a></li>
+                            <li><a class="dropdown-item" href="#">Hành động khác</a></li>
+                            <li><a class="dropdown-item" href="#">Một thứ gì đó ở đây</a></li>
                         </ul>
                     </div>
                     <h3 class="text-center" style="margin-top: 20px;">Org ID.3</h3>
@@ -493,45 +495,46 @@
                         <div class="col">
                             <div class="card note-card" data-card-mode="CREATE">
                                  <div class="card-header note-header" style="background-color: #FACC15;padding: 7px;display: flex;justify-content: center;align-items: center;">
-                                    <p>Create Note</p>
+                                    <p>Tạo ghi chú</p>
                                 </div>
                                 <div class="card-body rounded" style="background-color: #FFE86E;padding: 20px;">
                                     <form action="/create/note" method="POST">
+                                        @csrf
                                         <div class="mb-3">
-                                            <label for="noteTitle" class="form-label">Note Title</label>
+                                            <label for="noteTitle" class="form-label">Tiêu đề ghi chú</label>
                                             <input type="text" class="form-control" id="noteTitle" name="noteTitle" required />
                                         </div>
                                         <div class="mb-3">
-                                            <label for="noteContent" class="form-label">Note Content</label>
+                                            <label for="noteContent" class="form-label">Nội dung ghi chú</label>
                                             <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2.5" required></textarea>
                                         </div>
-                                        <button type="submit" class="btn btn-primary w-100">Create Note</button>
+                                        <button type="submit" class="btn btn-primary w-100">Tạo ghi chú</button>
                                     </form>
                                 </div>
                                 <div class="note-overlay" aria-hidden="true">
-                                    <div class="overlay-box">Create Note</div>
+                                    <div class="overlay-box">Tạo ghi chú</div>
                                 </div>
                             </div>
                         </div>
                         <div class="col">
                             <div class="card note-card" data-card-mode="VIEW">
                                     <div class="card-header note-header" style="position: relative;">
-                                        <p>Created at: 2023-10-01 06:50:00</p>
+                                        <p>Tạo lúc: 2023-10-01 06:50:00</p>
                                         <button class="pin-btn" aria-label="More">📌</button>
                                         <div class="note-menu" role="menu">
-                                            <button data-action="share">Share</button>
-                                            <button data-action="edit">Edit</button>
-                                            <button data-action="delete">Delete</button>
-                                            <button data-action="reply">Reply</button>
+                                            <button data-action="share">Chia sẻ</button>
+                                            <button data-action="edit">Sửa</button>
+                                            <button data-action="delete">Xóa</button>
+                                            <button data-action="reply">Trả lời</button>
                                         </div>
                                     </div>
                                 <div class="card-body rounded" style="background-color: #FFE86E;padding: 20px;">
-                                    <h3 class="card-title">Note title</h3>
-                                    <p class="card-text">This is the card body content.</p>
+                                    <h3 class="card-title">Tiêu đề ghi chú</h3>
+                                    <p class="card-text">Đây là nội dung ghi chú.</p>
                                     <p class="card-text text-secondary">By: John Doe</p>
                                 </div>
                                 <div class="note-overlay" aria-hidden="true">
-                                    <div class="overlay-box">Mark as done</div>
+                                    <div class="overlay-box">Đánh dấu hoàn thành</div>
                                 </div>
                             </div>
                         </div>
@@ -550,13 +553,13 @@
                 <div class="topbar-container">
                     <div class="dropdown" style="margin-left:50px;">
                         <a class="btn drop dropdown-toggle rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            All note
+                            Tất cả ghi chú
                         </a>
 
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Undone</a></li>
-                            <li><a class="dropdown-item" href="#">Done</a></li>
-                            <li><a class="dropdown-item" href="#">Created by me</a></li>
+                            <li><a class="dropdown-item" href="#">Chưa hoàn thành</a></li>
+                            <li><a class="dropdown-item" href="#">Hoàn tất</a></li>
+                            <li><a class="dropdown-item" href="#">Do tôi tạo</a></li>
                         </ul>
                     </div>
                     <h3>Org ID.3</h3>
@@ -572,22 +575,22 @@
             <div class="note-container">
                 <div class="card note-card" data-card-mode="VIEW">
                     <div class="card-header note-header" style="position:relative;">
-                        <p>Created at: 2023-10-01 06:50:00</p>
+                        <p>Tạo lúc: 2023-10-01 06:50:00</p>
                         <button class="pin-btn" aria-label="More">📌</button>
                         <div class="note-menu" role="menu">
-                            <button data-action="share">Share</button>
-                            <button data-action="edit">Edit</button>
-                            <button data-action="delete">Delete</button>
-                            <button data-action="reply">Reply</button>
+                            <button data-action="share">Chia sẻ</button>
+                            <button data-action="edit">Sửa</button>
+                            <button data-action="delete">Xóa</button>
+                            <button data-action="reply">Trả lời</button>
                         </div>
                     </div>
                     <div class="card-body rounded" style="background-color: #FFE86E;padding: 20px;">
-                        <h3 class="card-title">Note title</h3>
-                        <p class="card-text">This is the card body content.</p>
+                        <h3 class="card-title">Tiêu đề ghi chú</h3>
+                        <p class="card-text">Đây là nội dung ghi chú.</p>
                         <p class="card-text text-secondary">By: John Doe</p>
                     </div>
                     <div class="note-overlay" aria-hidden="true">
-                        <div class="overlay-box">Mark as done</div>
+                        <div class="overlay-box">Đánh dấu hoàn thành</div>
                     </div>
                 </div>
             </div>
@@ -612,23 +615,21 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body rounded">
-                <h2 class="text-center">Create Note</h2>
+                <h2 class="text-center">Tạo ghi chú</h2>
                 <form action="/create/note" method="POST">
+                    @csrf
                     <div class="mb-3">
-                        <label for="noteTitle" class="form-label">Note Title</label>
-                        <input type="text" class="form-control" id="noteTitle" name="noteTitle" required>
+                        <label for="noteTitle-2" class="form-label">Tiêu đề ghi chú</label>
+                        <input type="text" class="form-control" id="noteTitle-2" name="noteTitle" required>
                     </div>
                     <div class="mb-3">
-                        <label for="noteContent" class="form-label">Note Content</label>
-                        <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2.5" required></textarea>
+                        <label for="noteContent-2" class="form-label">Nội dung ghi chú</label>
+                        <textarea class="form-control bigform" id="noteContent-2" name="noteContent" rows="2.5" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Create Note</button>
+                    <button type="submit" class="btn btn-primary w-100">Tạo ghi chú</button>
                 </form>
             </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>-->
+            
             </div>
         </div>
     </div>
@@ -639,17 +640,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body rounded">
-                <h2 class="text-center">Edit Note</h2>
+                <h2 class="text-center">Sửa ghi chú</h2>
                 <form action="/edit/note/{id}" method="POST">
+                    @csrf
                     <div class="mb-3">
-                        <label for="noteTitle" class="form-label">Note Title</label>
-                        <input type="text" class="form-control" id="noteTitle" name="noteTitle" value="Example" required>
+                        <label for="noteTitle-3" class="form-label">Tiêu đề ghi chú</label>
+                        <input type="text" class="form-control" id="noteTitle-3" name="noteTitle" value="Example" required>
                     </div>
                     <div class="mb-3">
-                        <label for="noteContent" class="form-label">Note Content</label>
-                        <textarea class="form-control bigform" id="noteContent" name="noteContent" value="Hello" rows="2.5" required></textarea>
+                        <label for="noteContent-3" class="form-label">Nội dung ghi chú</label>
+                        <textarea class="form-control bigform" id="noteContent-3" name="noteContent" value="Hello" rows="2.5" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Edit Note</button>
+                    <button type="submit" class="btn btn-primary w-100">Sửa ghi chú</button>
                 </form>
             </div>
             </div>
@@ -662,19 +664,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body rounded">
-                <h2 class="text-center">Reply Note to note.{id}</h2>
+                <h2 class="text-center">Trả lời ghi chú {id}</h2>
                 <form action="/reply/note/{id}" method="POST">
+                    @csrf
                     <div class="mb-3">
-                        <label for="noteContent" class="form-label">Content</label>
-                        <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2.5" required></textarea>
+                        <label for="noteContent-4" class="form-label">Nội dung</label>
+                        <textarea class="form-control bigform" id="noteContent-4" name="noteContent" rows="2.5" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Create Reply Note</button>
+                    <button type="submit" class="btn btn-primary w-100">Tạo ghi chú trả lời</button>
                 </form>
             </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>-->
+            
             </div>
         </div>
     </div>
@@ -685,14 +685,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body rounded">
-                <h2 class="text-center">Share Note</h2>
+                <h2 class="text-center">Chia sẻ ghi chú</h2>
                 <div class="input-group mb-3">
-                    <input class="form-control" id="Link_to_copy" value="https://example.com" />
-                    <button class="btn btn-secondary" id="copy_shared_link">Copy</button>
+                    <input class="form-control" id="Link_to_copy" value="" placeholder="https://noteket.app/note/1" />
+                    <button class="btn btn-secondary" id="copy_shared_link">Sao chép</button>
                 </div>
                 <div class="input-group mb-3">
                     <input class="form-control" id="Email_shared_input" type="email" />
-                    <button class="btn btn-secondary" id="addShareEmail">Add</button>
+                    <button class="btn btn-secondary" id="addShareEmail">Thêm</button>
                 </div>
                 <div class="mb-3">
                     <table class="table">
@@ -706,12 +706,9 @@
                         </tbody>
                     </table>
                 </div>
-                <button class="btn btn-primary" id="Submit_shared">Shared</button>
+                <button class="btn btn-primary" id="Submit_shared">Chia sẻ</button>
             </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>-->
+            
             </div>
         </div>
     </div>
@@ -737,10 +734,10 @@
             function copyToClipboard(text) {
                 if (!text) return;
                 navigator.clipboard.writeText(text).then(() => {
-                    showToast('📋 Link copied to clipboard!');
+                    showToast('📋 Đã sao chép liên kết!');
                 }).catch(err => {
                     console.error('Failed to copy: ', err);
-                    showToast('⚠️ Failed to copy link', true);
+                    showToast('⚠️ Sao chép liên kết thất bại', true);
                 });
             }
 

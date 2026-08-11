@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css" integrity="sha512-ApSLB1Pd3/bZN8fWB/RG9YhN/7bd9Hkf3AGaE2mPfebjrxagjuBtx2GcgdqIlJkUzwylBo61r9Xa9NmgBI0swA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
-<title>Document</title> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<title>Noteket - Chi tiết chủ đề</title> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 <style>
     body {
         font-family: 'Caveat', cursive;
@@ -390,6 +390,8 @@
     #note:active{
         cursor:grabbing;
     }*/
+    /* Empty state: hiển thị khi danh sách không có dữ liệu (bỏ class để hiện) */
+    .empty-state { display: none; }
 </style>
 </head>
 <body>
@@ -402,11 +404,11 @@
                     </div>
                 <div class="sidebar-container">
                     <ul>
-                        <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
-                        <li><a href="#"><i class="fas fa-info-circle"></i> Teams</a></li>
-                        <li><a href="#"><i class="fas fa-cogs"></i> Theme</a></li>
-                        <li><a href="#"><i class="fas fa-envelope"></i> Balanced</a></li>
-                        <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                        <li><a href="../../home.html"><i class="fas fa-home"></i> Trang chủ</a></li>
+                        <li><a href="../../org/index.html"><i class="fas fa-info-circle"></i> Tổ chức</a></li>
+                        <li><a href="../index.html"><i class="fas fa-cogs"></i> Chủ đề</a></li>
+                        <li><a href="../../balance.html"><i class="fas fa-envelope"></i> Ví</a></li>
+                        <li><a href="../../setting.html"><i class="fas fa-cog"></i> Cài đặt</a></li>
                     </ul>
                     <div class="sidebar-footer">
                         <p class="text-center" style="color: #000;font-family: 'Caveat', cursive;">&copy; 2026 Noteket</p>
@@ -423,13 +425,13 @@
                 <div class="topbar-container">
                     <!--<div class="dropdown">
                         <a class="btn drop dropdown-toggle rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Dropdown link
+                            Liên kết thả xuống
                         </a>
 
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Action</a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            <li><a class="dropdown-item" href="#">Thao tác</a></li>
+                            <li><a class="dropdown-item" href="#">Hành động khác</a></li>
+                            <li><a class="dropdown-item" href="#">Một thứ gì đó ở đây</a></li>
                         </ul>
                     </div>-->
                 </div>
@@ -443,7 +445,7 @@
                 </div>
             </div>
             </section>
-            <h1 style="margin-left: 30px;font-size: 5rem;font-weight: bold;margin-bottom: -20px;">Theme.1 - Basic</h1>
+            <h1 style="margin-left: 30px;font-size: 5rem;font-weight: bold;margin-bottom: -20px;">Chủ đề.1 - Basic</h1>
             <section class="content">
                 <div id="carouselExampleIndicators" class="carousel slide">
                     <div class="carousel-indicators">
@@ -464,16 +466,16 @@
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
+                        <span class="visually-hidden">Trước</span>
                     </button>
                     <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
+                        <span class="visually-hidden">Tiếp</span>
                     </button>
                 </div>
                 <div class="rounded-pill" style="background-color: #000;width: 100%;height: 2px;"></div>
                 <p class="container" style="margin-top: 30px;">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi turpis justo, ultrices ac laoreet vel, auctor in velit. Quisque vel arcu pulvinar risus molestie gravida. Sed quis augue ligula. Etiam aliquam turpis nec mauris venenatis convallis. Fusce venenatis turpis egestas tempus malesuada. Curabitur turpis nibh, consectetur sit amet ante accumsan, cursus convallis arcu. Sed tincidunt justo pharetra lacus volutpat tempus. Donec sit amet neque non leo posuere suscipit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In scelerisque pharetra felis viverra porttitor. Duis suscipit odio quis laoreet cursus.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi turpis justo, ultrices ac laoreet vel, auctor in velit. Quisque vel arcu pulvinar risus molestie gravida. Sed quis augue ligula. Etiam aliquam turpis nec mauris venenatis convallis. Fusce venenatis turpis egestas tempus malesuada. Curabitur turpis nibh, consectetur sit amet ante accumsan, cursus convallis arcu. Sed tincidunt justo pharetra lacus volutpat tempus. Hoàn tấtc sit amet neque non leo posuere suscipit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In scelerisque pharetra felis viverra porttitor. Duis suscipit odio quis laoreet cursus.
                 </p>
                 <div class="row" style="margin-bottom: 30px;">
                     <div class="col-lg">
@@ -484,17 +486,17 @@
                     </div>
                 </div>
                 <p style="margin-top: 30px;color: transparent;">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi turpis justo, ultrices ac laoreet vel, auctor in velit. Quisque vel arcu pulvinar risus molestie gravida. Sed quis augue ligula. Etiam aliquam turpis nec mauris venenatis convallis. Fusce venenatis turpis egestas tempus malesuada. Curabitur turpis nibh, consectetur sit amet ante accumsan, cursus convallis arcu. Sed tincidunt justo pharetra lacus volutpat tempus. Donec sit amet neque non leo posuere suscipit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In scelerisque pharetra felis viverra porttitor. Duis suscipit odio quis laoreet cursus.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi turpis justo, ultrices ac laoreet vel, auctor in velit. Quisque vel arcu pulvinar risus molestie gravida. Sed quis augue ligula. Etiam aliquam turpis nec mauris venenatis convallis. Fusce venenatis turpis egestas tempus malesuada. Curabitur turpis nibh, consectetur sit amet ante accumsan, cursus convallis arcu. Sed tincidunt justo pharetra lacus volutpat tempus. Hoàn tấtc sit amet neque non leo posuere suscipit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In scelerisque pharetra felis viverra porttitor. Duis suscipit odio quis laoreet cursus.
                 </p>
             </section>
             <!--<section style="display: flex;justify-content: center;align-items: center;">
                 <nav aria-label="...">
                 <ul class="pagination">
-                    <li class="page-item"><a href="#" class="page-link">Previous</a></li>
+                    <li class="page-item"><a href="#" class="page-link">Trước</a></li>
                     <li class="page-item"><a class="page-link" href="#">1</a></li>
                     <li class="page-item"><a class="page-link" href="#" aria-current="page">2</a></li>
                     <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Tiếp</a></li>
                 </ul>
             </nav>
             </section>-->
@@ -510,13 +512,13 @@
                 <div class="topbar-container">
                     <!--<div class="dropdown" style="margin-left:50px;">
                         <a class="btn drop dropdown-toggle rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            All note
+                            Tất cả ghi chú
                         </a>
 
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Undone</a></li>
-                            <li><a class="dropdown-item" href="#">Done</a></li>
-                            <li><a class="dropdown-item" href="#">Created by me</a></li>
+                            <li><a class="dropdown-item" href="#">Chưa hoàn thành</a></li>
+                            <li><a class="dropdown-item" href="#">Hoàn tất</a></li>
+                            <li><a class="dropdown-item" href="#">Do tôi tạo</a></li>
                         </ul>
                     </div>-->
                 </div>
@@ -531,12 +533,12 @@
             </div>
             </section>
         <div class="view">
-           <h1 class="text-center" style="margin-left: 30px;font-size: 2.5rem;font-weight: bold;">Theme.1 - Basic</h1>
-                <div id="carouselExampleIndicators" class="carousel slide">
+           <h1 class="text-center" style="margin-left: 30px;font-size: 2.5rem;font-weight: bold;">Chủ đề.1 - Basic</h1>
+                <div id="carouselExampleIndicatorsMobile" class="carousel slide">
                     <div class="carousel-indicators">
-                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                        <button type="button" data-bs-target="#carouselExampleIndicatorsMobile" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                        <button type="button" data-bs-target="#carouselExampleIndicatorsMobile" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                        <button type="button" data-bs-target="#carouselExampleIndicatorsMobile" data-bs-slide-to="2" aria-label="Slide 3"></button>
                     </div>
                     <div class="carousel-inner w-100">
                         <div class="carousel-item active">
@@ -549,18 +551,18 @@
                         <img src="https://dummyimage.com/600x400/000/fff" class="d-block w-100" alt="...">
                         </div>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicatorsMobile" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
+                        <span class="visually-hidden">Trước</span>
                     </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicatorsMobile" data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
+                        <span class="visually-hidden">Tiếp</span>
                     </button>
                 </div>
                 <div class="rounded-pill" style="background-color: #000;width: 100%;height: 2px;"></div>
                 <p class="container" style="margin-top: 30px;">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi turpis justo, ultrices ac laoreet vel, auctor in velit. Quisque vel arcu pulvinar risus molestie gravida. Sed quis augue ligula. Etiam aliquam turpis nec mauris venenatis convallis. Fusce venenatis turpis egestas tempus malesuada. Curabitur turpis nibh, consectetur sit amet ante accumsan, cursus convallis arcu. Sed tincidunt justo pharetra lacus volutpat tempus. Donec sit amet neque non leo posuere suscipit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In scelerisque pharetra felis viverra porttitor. Duis suscipit odio quis laoreet cursus.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi turpis justo, ultrices ac laoreet vel, auctor in velit. Quisque vel arcu pulvinar risus molestie gravida. Sed quis augue ligula. Etiam aliquam turpis nec mauris venenatis convallis. Fusce venenatis turpis egestas tempus malesuada. Curabitur turpis nibh, consectetur sit amet ante accumsan, cursus convallis arcu. Sed tincidunt justo pharetra lacus volutpat tempus. Hoàn tấtc sit amet neque non leo posuere suscipit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In scelerisque pharetra felis viverra porttitor. Duis suscipit odio quis laoreet cursus.
                 </p>
                 <div class="row" style="margin-bottom: 30px;">
                     <div class="col-lg">
@@ -571,7 +573,7 @@
                     </div>
                 </div>
                 <p style="margin-top: 30px;color: transparent;">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi turpis justo, ultrices ac laoreet vel, auctor in velit. Quisque vel arcu pulvinar risus molestie gravida. Sed quis augue ligula. Etiam aliquam turpis nec mauris venenatis convallis. Fusce venenatis turpis egestas tempus malesuada. Curabitur turpis nibh, consectetur sit amet ante accumsan, cursus convallis arcu. Sed tincidunt justo pharetra lacus volutpat tempus. Donec sit amet neque non leo posuere suscipit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In scelerisque pharetra felis viverra porttitor. Duis suscipit odio quis laoreet cursus.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi turpis justo, ultrices ac laoreet vel, auctor in velit. Quisque vel arcu pulvinar risus molestie gravida. Sed quis augue ligula. Etiam aliquam turpis nec mauris venenatis convallis. Fusce venenatis turpis egestas tempus malesuada. Curabitur turpis nibh, consectetur sit amet ante accumsan, cursus convallis arcu. Sed tincidunt justo pharetra lacus volutpat tempus. Hoàn tấtc sit amet neque non leo posuere suscipit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In scelerisque pharetra felis viverra porttitor. Duis suscipit odio quis laoreet cursus.
                 </p>
         </div>
 
@@ -592,23 +594,21 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body rounded">
-                <h2 class="text-center">Create Note</h2>
+                <h2 class="text-center">Tạo ghi chú</h2>
                 <form action="/create/note" method="POST">
+                    @csrf
                     <div class="mb-3">
-                        <label for="noteTitle" class="form-label">Note Title</label>
+                        <label for="noteTitle" class="form-label">Tiêu đề ghi chú</label>
                         <input type="text" class="form-control" id="noteTitle" name="noteTitle" required>
                     </div>
                     <div class="mb-3">
-                        <label for="noteContent" class="form-label">Note Content</label>
+                        <label for="noteContent" class="form-label">Nội dung ghi chú</label>
                         <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2.5" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Create Note</button>
+                    <button type="submit" class="btn btn-primary w-100">Tạo ghi chú</button>
                 </form>
             </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>-->
+            
             </div>
         </div>
     </div>
@@ -619,17 +619,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body rounded">
-                <h2 class="text-center">Edit Note</h2>
+                <h2 class="text-center">Sửa ghi chú</h2>
                 <form action="/edit/note/{id}" method="POST">
+                    @csrf
                     <div class="mb-3">
-                        <label for="noteTitle" class="form-label">Note Title</label>
-                        <input type="text" class="form-control" id="noteTitle" name="noteTitle" value="Example" required>
+                        <label for="noteTitle-2" class="form-label">Tiêu đề ghi chú</label>
+                        <input type="text" class="form-control" id="noteTitle-2" name="noteTitle" value="Example" required>
                     </div>
                     <div class="mb-3">
-                        <label for="noteContent" class="form-label">Note Content</label>
-                        <textarea class="form-control bigform" id="noteContent" name="noteContent" value="Hello" rows="2.5" required></textarea>
+                        <label for="noteContent-2" class="form-label">Nội dung ghi chú</label>
+                        <textarea class="form-control bigform" id="noteContent-2" name="noteContent" value="Hello" rows="2.5" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Edit Note</button>
+                    <button type="submit" class="btn btn-primary w-100">Sửa ghi chú</button>
                 </form>
             </div>
             </div>
@@ -642,19 +643,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body rounded">
-                <h2 class="text-center">Reply Note to note.{id}</h2>
+                <h2 class="text-center">Trả lời ghi chú {id}</h2>
                 <form action="/reply/note/{id}" method="POST">
+                    @csrf
                     <div class="mb-3">
-                        <label for="noteContent" class="form-label">Content</label>
-                        <textarea class="form-control bigform" id="noteContent" name="noteContent" rows="2.5" required></textarea>
+                        <label for="noteContent-3" class="form-label">Nội dung</label>
+                        <textarea class="form-control bigform" id="noteContent-3" name="noteContent" rows="2.5" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Create Reply Note</button>
+                    <button type="submit" class="btn btn-primary w-100">Tạo ghi chú trả lời</button>
                 </form>
             </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>-->
+            
             </div>
         </div>
     </div>
@@ -665,14 +664,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body rounded">
-                <h2 class="text-center">Share Note</h2>
+                <h2 class="text-center">Chia sẻ ghi chú</h2>
                 <div class="input-group mb-3">
-                    <input class="form-control" id="Link_to_copy" value="https://example.com" />
-                    <button class="btn btn-secondary" id="copy_shared_link">Copy</button>
+                    <input class="form-control" id="Link_to_copy" value="" placeholder="https://noteket.app/note/1" />
+                    <button class="btn btn-secondary" id="copy_shared_link">Sao chép</button>
                 </div>
                 <div class="input-group mb-3">
                     <input class="form-control" id="Email_shared_input" type="email" />
-                    <button class="btn btn-secondary" id="addShareEmail">Add</button>
+                    <button class="btn btn-secondary" id="addShareEmail">Thêm</button>
                 </div>
                 <div class="mb-3">
                     <table class="table">
@@ -686,279 +685,13 @@
                         </tbody>
                     </table>
                 </div>
-                <button class="btn btn-primary" id="Submit_shared">Shared</button>
+                <button class="btn btn-primary" id="Submit_shared">Chia sẻ</button>
             </div>
-            <!--<div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>-->
+            
             </div>
         </div>
     </div>
-    <!--<script>
-        (function(){
-            const NOTE_REMOVAL_THRESHOLD = 220; // px to perform action downward
-            const NOTE_SKIP_THRESHOLD = -220; // px to perform action upward
-            const OVERLAY_THRESHOLD = 100; // px to show overlay hint
-            let pre_noteID = 0; // to track which note is being acted upon
-
-            function valid_email(email) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return emailRegex.test(email);
-            }
-
-            function copyToClipboard(text) {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('Link copied to clipboard!');
-                }).catch(err => {
-                    console.error('Failed to copy: ', err);
-                });
-            }
-
-
-            document.getElementById('copy_shared_link').addEventListener('click', copyToClipboard(document.getElementById("Link_to_copy").value));
-
-            function add_to_list(email, emailListContainer){
-                const email_list = document.getElementById("Shared_Body");
-                const new_id = document.createElement('td')
-                const new_email = document.createElement('td')
-                new_id.textContent = String(emailListContainer.length);
-                new_email.textContent = email;
-                email_list.appendChild(new_id);
-                email_list.appendChild(new_email);
-            }
-
-            //function Emailadded()
-
-                document.getElementById("addShareEmail").addEventListener("click", function() {
-                    alert("Hello");
-                    const emailInput = document.getElementById("Email_shared_input");
-                    const email = emailInput.value.trim();
-                    if (valid_email(email)) {
-                        // Add the email to the list
-                        const emailListContainer = []
-                        emailListContainer.push(email)
-                        add_to_list(email,emailListContainer);
-                        emailInput.value = ''; // Clear input
-                    } else {
-                        alert("Please enter a valid email address.");
-                    }
-                });
-
-            async function send_share_to_api(emailListContainer){
-                try{
-                    const url = "https://";
-                    const send = await fetch(url, {
-                        method: "POST",
-                        body: JSON.stringify({"email_list": emailListContainer})
-                    });
-                    if (send.status == 200){
-                        return alert("Chia se thanh cong")
-                    }
-                } catch {
-                    return alert("Error")
-                }
-            }
-
-            document.getElementById("Shared_Body").addEventListener('click', send_share_to_api);
-
-            /*function show_shared_emails_list(shared_emails){
-                const emailListContainer = document.getElementById('sharedEmailsList');
-                emailListContainer.innerHTML = ''; // Clear previous list
-                shared_emails.forEach(email => {
-                    const li = document.createElement('li');
-                    li.textContent = email;
-                    emailListContainer.appendChild(li);
-                });
-            }*/
-
-            function performAction(card, dir){
-                // dir: 'down' -> mark done, 'up' -> skip
-                const out = dir === 'down' ? 'translateY(120vh)' : 'translateY(-120vh)';
-                card.style.transition = 'transform 320ms cubic-bezier(.2,.9,.2,1), opacity 240ms ease';
-                card.style.transform = out;
-                card.style.opacity = '0';
-                const ov = card.querySelector('.note-overlay'); if(ov) ov.classList.remove('show');
-                setTimeout(()=> card.remove(), 340);
-            }
-
-            function initNoteCard(card){
-                if(!card) return;
-                const pin = card.querySelector('.pin-btn');
-                const menu = card.querySelector('.note-menu');
-                const overlay = card.querySelector('.note-overlay');
-                const overlayBox = overlay && overlay.querySelector('.overlay-box');
-
-                // Menu toggle
-                pin && pin.addEventListener('click', (ev)=>{
-                    ev.stopPropagation();
-                    menu && menu.classList.toggle('show');
-                });
-                document.addEventListener('click', (e)=>{ if(menu && !card.contains(e.target)) menu.classList.remove('show'); });
-
-                // Menu actions
-                if(menu){
-                    menu.addEventListener('click', (e)=>{
-                        const action = e.target.getAttribute('data-action');
-                        if(!action) return;
-                        e.stopPropagation();
-                        if(action==='delete') performAction(card,'down');
-                        else showNoteActionModal(action, card);
-                        menu.classList.remove('show');
-                    });
-                }
-
-                // Drag handling
-                let dragging = false, startY = 0, currentY = 0, pointerId = null, actionPerformed = false;
-
-                function showOverlay(state){ // 'down' | 'up' | null
-                    if(!overlay) return;
-                    if(state === 'down'){
-                        overlay.classList.add('show','down'); overlay.classList.remove('up');
-                        overlayBox && (overlayBox.textContent = 'Release to mark as done');
-                    } else if(state === 'up'){
-                        overlay.classList.add('show','up'); overlay.classList.remove('down');
-                        overlayBox && (overlayBox.textContent = 'Release to skip');
-                    } else {
-                        overlay.classList.remove('show','up','down');
-                    }
-                }
-
-                function onPointerDown(e){
-                    if(e.target.closest('.pin-btn') || e.target.closest('.note-menu')) return;
-                    dragging = true; pointerId = e.pointerId; startY = e.clientY; currentY = 0; actionPerformed = false;
-                    card.classList.add('dragging'); try{ document.body.style.overflow='hidden'; }catch(e){}
-                    card.setPointerCapture && card.setPointerCapture(pointerId); card.style.transition='none';
-                }
-
-                function onPointerMove(e){
-                    if(!dragging) return;
-                    currentY = e.clientY - startY;
-                    // apply transform
-                    const scale = Math.max(0.98, 1 - Math.abs(currentY)/2000);
-                    card.style.transform = `translateY(${currentY}px) scale(${scale})`;
-
-                    // overlay logic
-                    if(currentY >= OVERLAY_THRESHOLD){ showOverlay('down'); }
-                    else if(currentY <= -OVERLAY_THRESHOLD){ showOverlay('up'); }
-                    else { showOverlay(null); }
-
-                    // if crosses action threshold, perform immediately
-                    if(currentY >= NOTE_REMOVAL_THRESHOLD && !actionPerformed){ actionPerformed = true; performAction(card,'down'); }
-                    if(currentY <= NOTE_SKIP_THRESHOLD && !actionPerformed){ actionPerformed = true; performAction(card,'up'); }
-                }
-
-                function endDrag(){
-                    if(!dragging) return;
-                    dragging = false; card.classList.remove('dragging'); card.style.transition='transform 300ms ease, opacity 240ms ease';
-                    try{ document.body.style.overflow=''; }catch(e){}
-                    // if action already performed, nothing else
-                    if(actionPerformed) return;
-                    // if user released while within overlay zone (but not action threshold), revert
-                    if(currentY >= OVERLAY_THRESHOLD && currentY < NOTE_REMOVAL_THRESHOLD){ showOverlay(null); card.style.transform='none'; return; }
-                    if(currentY <= -OVERLAY_THRESHOLD && currentY > NOTE_SKIP_THRESHOLD){ showOverlay(null); card.style.transform='none'; return; }
-
-                    // otherwise check final position
-                    if(currentY >= NOTE_REMOVAL_THRESHOLD){ performAction(card,'down'); }
-                    else if(currentY <= NOTE_SKIP_THRESHOLD){ performAction(card,'up'); }
-                    else { showOverlay(null); card.style.transform='none'; card.style.opacity='1'; }
-                }
-
-                card.addEventListener('pointerdown', onPointerDown);
-                card.addEventListener('pointermove', onPointerMove);
-                card.addEventListener('pointerup', (e)=>{ card.releasePointerCapture && card.releasePointerCapture(e.pointerId); endDrag(); });
-                card.addEventListener('pointercancel', endDrag);
-
-                // touch fallback
-                card.addEventListener('touchstart', function(ev){ if(ev.touches.length>1) return; const t=ev.touches[0]; dragging=true; startY=t.clientY; currentY=0; actionPerformed=false; card.classList.add('dragging'); try{ document.body.style.overflow='hidden'; }catch(e){} card.style.transition='none'; }, {passive:true});
-                card.addEventListener('touchmove', function(ev){ if(!dragging) return; ev.preventDefault(); const t=ev.touches[0]; currentY = t.clientY - startY; const scale = Math.max(0.98, 1 - Math.abs(currentY)/2000); card.style.transform = `translateY(${currentY}px) scale(${scale})`; if(currentY >= OVERLAY_THRESHOLD) showOverlay('down'); else if(currentY <= -OVERLAY_THRESHOLD) showOverlay('up'); else showOverlay(null); if(currentY >= NOTE_REMOVAL_THRESHOLD && !actionPerformed){ actionPerformed=true; performAction(card,'down'); } if(currentY <= NOTE_SKIP_THRESHOLD && !actionPerformed){ actionPerformed=true; performAction(card,'up'); } }, {passive:false});
-                card.addEventListener('touchend', function(ev){ if(dragging){ endDrag(); } });
-            }
-
-            /*function showNoteActionModal(action, card) {
-                const modalElement = document.getElementById('noteActionModal');
-                const modalTitle = modalElement.querySelector('.modal-title');
-                const modalBody = modalElement.querySelector('#noteActionModalBody');
-                //const modalFooter = modalElement.querySelector('#noteActionModalFooter');
-                const noteTitle = card.querySelector('.card-title')?.textContent || 'Untitled note';
-                const noteText = card.querySelector('.card-text')?.textContent || '';
-                const author = card.querySelector('.card-text.text-secondary')?.textContent || '';
-                //modalFooter.innerHTML = '';
-                if(action === 'edit') {
-                    modalTitle.textContent = 'Edit Note';
-                    modalBody.innerHTML = `
-                        <form id="noteEditForm">
-                            <div class="mb-3">
-                                <label class="form-label" for="editNoteTitle">Note Title</label>
-                                <input type="text" class="form-control" id="editNoteTitle" value="${noteTitle}" />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" for="editNoteContent">Note Content</label>
-                                <textarea class="form-control bigform" id="editNoteContent" rows="4">${noteText}</textarea>
-                            </div>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveNoteEdit">Save</button>
-                        </form>
-                    `;
-                    // modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="saveNoteEdit">Save</button>`;
-                } else if(action === 'share') {
-                    modalTitle.textContent = 'Share Note';
-                    var note_shared_list = []
-
-                    const shareUrl = `https://example.com/note/${encodeURIComponent(noteTitle.toLowerCase().replace(/\s+/g,'-'))}`;
-                    modalBody.innerHTML = `
-                        <div class="mb-3">
-                            <p class="mb-2">Share the note with others.</p>
-                            <div class="input-group mb-3">
-                                <input type="text" readonly class="form-control" value="${shareUrl}" id="shareNoteUrl" />
-                                <button class="btn btn-outline-secondary" onclick="copyShareUrl()" type="button" id="copyShareUrl">Copy</button>
-                            </div>
-                        </div>
-                        </div>
-                        <div class="mb-3">
-                                <label class="form-label" for="shareEmail">Share via email</label>
-                                <div class="input-group mb-3">
-                                    <input type="email" class="form-control" id="Email_shared_input" placeholder="Enter email to share..." />
-                                    <button class="btn btn-outline-secondary" type="button" id="addShareEmail">Add</button>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <ul id="sharedEmailsList"></ul>
-                        </div>
-                    `;
-                    //modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-primary" id="copyShareUrl">Copy Link</button>`;
-                } else if(action === 'reply') {
-                    modalTitle.textContent = 'Reply to Note';
-                    modalBody.innerHTML = `
-                        <div class="mb-3">
-                            <label class="form-label" for="replyNoteText">Reply message</label>
-                            <textarea class="form-control bigform" id="replyNoteText" rows="4" placeholder="Type your reply..."></textarea>
-                        </div>
-                    `;
-                    //modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="sendReply">Send</button>`;
-                }
-
-                const bootstrapModal = new bootstrap.Modal(modalElement);
-                bootstrapModal.show();
-
-                modalFooter.querySelector('#saveNoteEdit')?.addEventListener('click', () => {
-                    alert('Note saved.');
-                    bootstrapModal.hide();
-                });
-                modalFooter.querySelector('#copyShareUrl')?.addEventListener('click', () => {
-                    const input = modalBody.querySelector('#shareNoteUrl');
-                    input.select();
-                    document.execCommand('copy');
-                    alert('Link copied.');
-                });
-                modalFooter.querySelector('#sendReply')?.addEventListener('click', () => {
-                    alert('Reply sent.');
-                    bootstrapModal.hide();
-                });
-            }*/
-
-            document.querySelectorAll('.note-card').forEach(initNoteCard);
-        })();
-    </script>-->
+    
 
      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
