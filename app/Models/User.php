@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'balance', 'avatar_image_url', 'banner_url', 'theme4_id', 'organizationID'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -24,7 +24,22 @@ class User extends Authenticatable
 
     public function sharedNotes()
     {
-        return $this->belongsToMany(Note::class, 'PivotForNote', 'shared_with', 'note_id');
+        return $this->belongsToMany(Note::class, 'pivot_for_note', 'shared_with', 'note_id');
+    }
+
+    public function organizations()
+    {
+        return $this->hasMany(Organization::class, 'hostID');
+    }
+
+    public function memberships()
+    {
+        return $this->hasMany(OrganizationsMember::class, 'userID');
+    }
+
+    public function themeWallets()
+    {
+        return $this->hasMany(Theme4userWallet::class, 'userID');
     }
 
     /**
@@ -36,7 +51,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            // 'password' => 'hashed',
+            'balance' => 'decimal:2',
+            'password' => 'hashed',
         ];
     }
 }

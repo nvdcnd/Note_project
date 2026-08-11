@@ -6,91 +6,117 @@ use App\Mail\Password_change;
 use App\Models\PasswordChangeRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 class PasswordChangeRequestController extends Controller
 {
+    public const MAX_ATTEMPTS = 5;
+
     public function one_time_password_generator($length = 6)
     {
-        $chars = '0123456789';
-        $pass = '';
-
-        for ($i = 0; $i < $length; $i++) {
-            $pass .= $chars[rand(0, strlen($chars) - 1)];
-        }
-
-        $existingRequests = PasswordChangeRequest::query()->where('used', false)->get();
-
-        foreach ($existingRequests as $requestModel) {
-            if (Hash::check($pass, $requestModel->token)) {
-                return $this->one_time_password_generator();
-            }
-        }
+        do {
+            $pass = (string) random_int(10 ** ($length - 1), (10 ** $length) - 1);
+        } while (PasswordChangeRequest::query()->where('used', false)->get()->contains(
+            fn (PasswordChangeRequest $requestModel) => Hash::check($pass, $requestModel->token)
+        ));
 
         return $pass;
     }
 
+    public function forgot_password_view(Request $request)
+    {
+        return view('password.forgot');
+    }
+
     public function forgot_password(Request $request)
     {
-        $request->validate([
-            'email' => 'required',
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
         ]);
-        $data = $request->all();
-        $email = $data['email'] ?? '';
-        $user = User::query()->where('email', $email)->first();
-        if ($user) {
-            $passkey = $this->one_time_password_generator();
-            $password_change_request = new PasswordChangeRequest;
-            $password_change_request->user_id = $user->id;
-            $password_change_request->token = Hash::make($passkey);
-            $password_change_request->expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
-            $password_change_request->save();
-            Mail::to($email)->send(new Password_change($passkey));
 
-            return redirect('/login')->with('success', 'Password reset token sent to your email');
-        } else {
-            return redirect('login_view')->with('error', 'User not found');
+        $user = User::query()->where('email', $validated['email'])->first();
+
+        // Generic message in both cases to avoid user enumeration (E19).
+        if (! $user) {
+            return redirect()->route('password.forgot')->with('status', 'If that email exists, a reset link has been sent');
         }
+
+        $passkey = $this->one_time_password_generator();
+        $password_change_request = new PasswordChangeRequest;
+        $password_change_request->user_id = $user->id;
+        $password_change_request->token = Hash::make($passkey);
+        $password_change_request->expires_at = now()->addMinutes(10);
+        $password_change_request->attempts = 0;
+        $password_change_request->save();
+
+        Mail::to($user->email)->send(new Password_change($passkey));
+
+        return redirect()->route('password.forgot')->with('status', 'If that email exists, a reset link has been sent');
+    }
+
+    public function change_password_view(Request $request, $id)
+    {
+        $change_password_request = PasswordChangeRequest::query()->find($id);
+        if (! $change_password_request || $change_password_request->used) {
+            return redirect()->route('password.forgot')->with('error', 'This password reset link is invalid or has already been used');
+        }
+
+        return view('password.reset', [
+            'change_password_request' => $change_password_request,
+        ]);
     }
 
     public function change_password(Request $request, $id)
     {
-        $request->validate([
-            'passkey' => 'required',
-            'password' => 'required',
+        $validated = $request->validate([
+            'passkey' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
-        $data = $request->all();
+
         /** @var PasswordChangeRequest|null $change_password_request */
         $change_password_request = PasswordChangeRequest::query()->find($id);
-        if (! $change_password_request) {
-            return redirect('/login')->with('error', 'Invalid password reset request');
+
+        if (! $change_password_request || $change_password_request->used) {
+            return redirect()->route('password.forgot')->with('error', 'Invalid password reset request');
+        }
+
+        if ($change_password_request->attempts >= self::MAX_ATTEMPTS) {
+            $change_password_request->delete();
+
+            return redirect()->route('password.forgot')->with('error', 'Too many attempts. Please request a new reset link');
         }
 
         $user = User::query()->find($change_password_request->user_id);
         if (! $user) {
-            PasswordChangeRequest::destroy($change_password_request->id);
+            $change_password_request->delete();
 
-            return redirect('/login')->with('error', 'User not found');
+            return redirect()->route('password.forgot')->with('error', 'User not found');
         }
 
-        $passkey_input = $data['passkey'];
-        $time = Carbon::parse($change_password_request->expires_at);
+        if (now()->greaterThan($change_password_request->expires_at)) {
+            $change_password_request->delete();
 
-        if (Hash::check($passkey_input, $change_password_request->token) && ! (now()->greaterThan($time))) {
-            $user->password = Hash::make($data['password']);
-            $user->save();
-            $change_password_request->used = true;
-            $change_password_request->save();
-            Auth::login($user);
-
-            return redirect('home')->with('success', 'Password changed successfully');
+            return redirect()->route('password.forgot')->with('error', 'This reset link has expired. Please request a new one');
         }
 
-        PasswordChangeRequest::destroy($change_password_request->id);
+        if (! Hash::check($validated['passkey'], $change_password_request->token)) {
+            // Keep the request alive so the user can retry (BE-26 / E18).
+            $change_password_request->increment('attempts');
 
-        return redirect('/login')->with('error', 'Invalid or expired OTP');
+            return redirect()->route('password.reset.view', $change_password_request->id)
+                ->with('error', 'Invalid OTP. '.($change_password_request->attempts).' failed attempt(s).');
+        }
+
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+        $change_password_request->used = true;
+        $change_password_request->save();
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->route('home')->with('success', 'Password changed successfully');
     }
 }

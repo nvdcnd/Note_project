@@ -3,63 +3,42 @@
 namespace App\Http\Controllers;
 
 use App\Models\Theme4user;
+use App\Models\Theme4userWallet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class Theme4userController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $themes = Theme4user::query()->latest()->get();
+
+        $ownedThemeIds = Theme4userWallet::query()
+            ->where('userID', Auth::id())
+            ->pluck('theme4ID')
+            ->all();
+
+        return view('themes.index', [
+            'themes' => $themes,
+            'ownedThemeIds' => $ownedThemeIds,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(Request $request, $id)
     {
-        //
-    }
+        $theme = Theme4user::query()->find($id);
+        if (! $theme) {
+            abort(404);
+        }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $owned = Theme4userWallet::query()
+            ->where('userID', Auth::id())
+            ->where('theme4ID', $theme->id)
+            ->exists();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Theme4user $Theme4user)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Theme4user $Theme4user)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Theme4user $Theme4user)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Theme4user $Theme4user)
-    {
-        //
+        return view('themes.show', [
+            'theme' => $theme,
+            'owned' => $owned,
+        ]);
     }
 }

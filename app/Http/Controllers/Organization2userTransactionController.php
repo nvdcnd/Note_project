@@ -7,158 +7,197 @@ use App\Models\Organization;
 use App\Models\Organization2userTransaction;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
 
 class Organization2userTransactionController extends Controller
 {
-    public function organization2user_transaction_OTP_generator()
-    {
-        $otp = rand(100000, 999999);
-        $existing = Organization2userTransaction::query()->where('status', '!=', 'finished')->get();
+    public const MAX_ATTEMPTS = 5;
 
-        foreach ($existing as $transaction) {
-            if (Hash::check((string) $otp, $transaction->otp)) {
-                return $this->organization2user_transaction_OTP_generator();
-            }
+    public function create_view($id)
+    {
+        $organization = Organization::query()->find($id);
+        if (! $organization) {
+            abort(404);
         }
 
-        return (string) $otp;
+        if ($organization->hostID !== Auth::id()) {
+            abort(403);
+        }
+
+        return view('transactions.organization2user.create', compact('organization'));
+    }
+
+    public function verify_view($id)
+    {
+        $transaction = Organization2userTransaction::query()->where('id', $id)->first();
+        if (! $transaction) {
+            return redirect()->route('home')->with('error', 'Invalid transaction');
+        }
+
+        return view('transactions.organization2user.verify', compact('transaction'));
+    }
+
+    public function history_view($id)
+    {
+        $userId = Auth::id();
+        $allTransactions = Organization2userTransaction::query()
+            ->where(function ($q) use ($userId) {
+                $q->where('organizationID', $userId)->orWhere('userID', $userId);
+            })
+            ->latest()
+            ->get();
+        $fromTransactions = Organization2userTransaction::query()->where('organizationID', $userId)->latest()->get();
+        $toTransactions = Organization2userTransaction::query()->where('userID', $userId)->latest()->get();
+
+        return view('transactions.organization2user.history', compact('allTransactions', 'fromTransactions', 'toTransactions'));
+    }
+
+    public function organization2user_transaction_OTP_generator()
+    {
+        do {
+            $otp = (string) random_int(100000, 999999);
+        } while (Organization2userTransaction::query()->where('status', '!=', 'finished')->pluck('otp')->contains(
+            fn ($hash) => Hash::check($otp, $hash)
+        ));
+
+        return $otp;
     }
 
     public function organization2user_transaction_create(Request $request, $id)
     {
-        $request->validate([
-            'userID' => 'required',
-            'amount' => 'required',
+        $validated = $request->validate([
+            'password' => ['required', 'string'],
+            'amount' => ['required', 'numeric', 'min:1'],
+            'recipient_email' => ['required_without:userID', 'nullable', 'email'],
+            'userID' => ['required_without:recipient_email', 'nullable', 'integer', 'exists:users,id'],
         ]);
 
-        $data = $request->all();
-        $Organization2userTransaction = new Organization2userTransaction;
+        if (! empty($validated['recipient_email'])) {
+            $recipient = User::query()->where('email', strtolower(trim($validated['recipient_email'])))->first();
+            if (! $recipient) {
+                return redirect()->back()->with('error', 'No account found for that email');
+            }
+            $validated['userID'] = $recipient->id;
+        }
+
         $organization = Organization::query()->find($id);
-
         if (! $organization) {
-            return response()->json(['error' => 'Organization not found']);
+            return redirect()->back()->with('error', 'Organization not found');
         }
 
-        if (! Hash::check((string) $data['password'], Auth::user()->password) || Auth::user()->id != $organization->hostID) {
-            return response()->json(['error' => 'Invalid password']);
+        if (Auth::id() !== $organization->hostID) {
+            return redirect()->back()->with('error', 'Only the organization host can send money');
         }
 
-        $Organization2userTransaction->organizationID = $organization->id;
-        $Organization2userTransaction->userID = $data['userID'];
-        $Organization2userTransaction->amount = $data['amount'];
-        $Organization2userTransaction->current_hostID = Auth::user()->id;
-        $Organization2userTransaction->status = 'pending';
-        $Organization2userTransaction->otp = Hash::make($this->organization2user_transaction_OTP_generator());
-        $Organization2userTransaction->expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
-        $Organization2userTransaction->save();
-        Mail::to(Auth::user()->email)->send(new organization2user_trans_otp($Organization2userTransaction));
+        if (! Hash::check($validated['password'], Auth::user()->password)) {
+            return redirect()->back()->with('error', 'Invalid password');
+        }
 
-        return redirect()->route('organization2user_transaction_verify_view', $Organization2userTransaction->id);
+        $otp = $this->organization2user_transaction_OTP_generator();
+
+        $transaction = new Organization2userTransaction;
+        $transaction->organizationID = $organization->id;
+        $transaction->userID = $validated['userID'];
+        $transaction->amount = $validated['amount'];
+        $transaction->current_hostID = Auth::id();
+        $transaction->status = Organization2userTransaction::STATUS_PENDING;
+        $transaction->otp = Hash::make($otp);
+        $transaction->expires_at = now()->addMinutes(10);
+        $transaction->attempts = 0;
+        $transaction->save();
+        Mail::to(Auth::user()->email)->send(new organization2user_trans_otp($transaction, $otp));
+
+        return redirect()->route('organization2user_transaction_verify_view', $transaction->id)->with('success', 'OTP sent to your email');
     }
 
     public function organization2user_transaction_verify(Request $request, $id)
     {
-        /** @var Organization2userTransaction|null $transaction */
-        $transaction = Organization2userTransaction::query()->where('id', $id)->where('status', 'pending')->first();
-        $request->validate([
-            'passkey' => 'required',
+        $validated = $request->validate([
+            'passkey' => ['required', 'string'],
         ]);
 
-        $data = $request->all();
-        $user = Auth::user();
-        $passkey = (string) $data['passkey'];
+        /** @var Organization2userTransaction|null $transaction */
+        $transaction = Organization2userTransaction::query()
+            ->where('id', $id)
+            ->where('status', Organization2userTransaction::STATUS_PENDING)
+            ->first();
 
         if (! $transaction) {
             return redirect()->route('home')->with('error', 'Invalid transaction');
         }
 
-        return DB::transaction(function () use ($passkey, $transaction) {
-           $organization = Organization::query()->find($transaction->organizationID);
+        $user = Auth::user();
+        $passkey = $validated['passkey'];
+
+        return DB::transaction(function () use ($passkey, $transaction, $user) {
+            $organization = Organization::query()->lockForUpdate()->find($transaction->organizationID);
+            $targetUser = User::query()->lockForUpdate()->find($transaction->userID);
+
             if (! $organization) {
-                Organization2userTransaction::destroy($transaction->id);
+                $transaction->update(['status' => Organization2userTransaction::STATUS_FAILED]);
 
                 return redirect()->route('home')->with('error', 'Organization not found');
             }
 
-            $time = Carbon::parse($transaction->expires_at);
-
-            if (! Hash::check($passkey, $transaction->otp)) {
-                Organization2userTransaction::destroy($transaction->id);
-
-                return redirect()->route('home')->with('error', 'Invalid passkey');
-            }
-
-            if (now()->greaterThan($time)) {
-                Organization2userTransaction::destroy($transaction->id);
-
-                return redirect()->route('home')->with('error', 'The transaction has expired. Please create a new transaction');
-            }
-
-            if ($organization->balance < $transaction->amount) {
-                return redirect()->route('home')->with('error', 'Organization has insufficient balance');
-            }
-
-            $targetUser = User::query()->find($transaction->userID);
             if (! $targetUser) {
+                $transaction->update(['status' => Organization2userTransaction::STATUS_FAILED]);
+
                 return redirect()->route('home')->with('error', 'Recipient user not found');
             }
 
-            $organization->balance -= $transaction->amount;
-            $organization->save();
+            if ($transaction->attempts >= self::MAX_ATTEMPTS) {
+                $transaction->update(['status' => Organization2userTransaction::STATUS_FAILED]);
 
-            $targetUser->balance += $transaction->amount;
-            $targetUser->save();
+                return redirect()->route('home')->with('error', 'Too many failed attempts. Transaction cancelled');
+            }
 
-            $transaction->status = 'finished';
-            $transaction->save();
+            if (now()->greaterThan($transaction->expires_at)) {
+                $transaction->update(['status' => Organization2userTransaction::STATUS_EXPIRED]);
+
+                return redirect()->route('organization2user_transaction_history_view', $organization->id)->with('error', 'The transaction has expired. Please create a new transaction');
+            }
+
+            if (! Hash::check($passkey, $transaction->otp)) {
+                $transaction->increment('attempts');
+
+                return redirect()->route('organization2user_transaction_verify_view', $transaction->id)
+                    ->with('error', 'Invalid passkey. '.($transaction->attempts).' failed attempt(s) out of '.self::MAX_ATTEMPTS);
+            }
+
+            if ($organization->balance < $transaction->amount) {
+                return redirect()->route('organization', $organization->id)->with('error', 'Organization has insufficient balance');
+            }
+
+            $organization->decrement('balance', $transaction->amount);
+            $targetUser->increment('balance', $transaction->amount);
+
+            $transaction->update(['status' => Organization2userTransaction::STATUS_FINISHED]);
 
             return redirect()->route('organization2user_transaction_history_view', $organization->id)->with('success', 'Transaction completed successfully');
         });
     }
 
-    /*
-
     public function organization2user_transaction_cancel(Request $request, $id)
     {
-        $Organization2userTransaction = Organization2userTransaction::where('id', $id)->where('status', '!=', 'declined')->where('status', '!=', 'accepted')->first();
-        if ($Organization2userTransaction) {
-            if (Auth::user()->id == $Organization2userTransaction->userID) {
-                $Organization2userTransaction->status = 'declined';
-                // $Organization2userTransaction->otp = $this->organization2user_transaction_OTP_generator();
-                $Organization2userTransaction->save();
+        $transaction = Organization2userTransaction::query()
+            ->where('id', $id)
+            ->where('status', Organization2userTransaction::STATUS_PENDING)
+            ->first();
 
-                return response()->json($Organization2userTransaction);
-            } else {
-                return response()->json(['error' => 'You are not authorized to cancel this transaction']);
-            }
-        } else {
-            return response()->json(['error' => 'Invalid transaction ID']);
+        if (! $transaction) {
+            return redirect()->route('organization2user_transaction_history_view', Auth::id())->with('error', 'Transaction not found or already processed');
         }
+
+        $organization = Organization::query()->find($transaction->organizationID);
+        if (! $organization || Auth::id() !== $organization->hostID) {
+            return redirect()->route('organization2user_transaction_history_view', Auth::id())->with('error', 'You are not authorized to cancel this transaction');
+        }
+
+        $transaction->update(['status' => Organization2userTransaction::STATUS_CANCELLED]);
+
+        return redirect()->route('organization2user_transaction_history_view', Auth::id())->with('success', 'Transaction cancelled successfully');
     }
-
-    public function organization2user_transaction_verify(Request $request, $id)
-    {
-        $Organization2userTransaction = Organization2userTransaction::where('id', $id)->where('status', '!=', 'declined')->where('status', '!=', 'accepted')->first();
-        if ($Organization2userTransaction) {
-            if (Auth::user()->id == $Organization2userTransaction->userID) {
-                if ($Organization2userTransaction->otp == $request->otp) {
-                    $Organization2userTransaction->status = 'accepted';
-                    $Organization2userTransaction->save();
-
-                    return response()->json($Organization2userTransaction);
-                } else {
-                    return response()->json(['error' => 'Invalid OTP']);
-                }
-            } else {
-                return response()->json(['error' => 'You are not authorized to verify this transaction']);
-            }
-        } else {
-            return response()->json(['error' => 'Invalid transaction ID']);
-        }
-    } */
 }

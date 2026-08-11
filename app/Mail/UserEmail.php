@@ -41,7 +41,7 @@ class UserEmail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Note no.'.$this->notes->id.' has been shared with you by'.$this->user->username,
+            subject: 'Note no.'.$this->notes->id.' has been shared with you by '.$this->user->name,
         );
     }
 

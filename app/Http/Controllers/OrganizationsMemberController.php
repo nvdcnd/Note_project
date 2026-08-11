@@ -14,9 +14,27 @@ class OrganizationsMemberController extends Controller
 {
     public function add_member(Request $request, $organizationID)
     {
-        $request->validate(['user_list' => 'required']);
-        $data = $request->all();
-        $user_list = collect($data['user_list'] ?? [])
+        $organization = Organization::query()->find($organizationID);
+        if (! $organization) {
+            return redirect()->route('organizations.index')->with('error', 'Organization not found');
+        }
+
+        if ($organization->hostID !== Auth::id()) {
+            return redirect()->route('organization', $organization->id)->with('error', 'Only the host can add members');
+        }
+
+        // Accept either user_list[] (array) or user_list_text (comma separated).
+        $rawList = $request->input('user_list', []);
+        if (empty($rawList) && $request->filled('user_list_text')) {
+            $rawList = array_map('trim', explode(',', $request->input('user_list_text')));
+        }
+
+        $request->validate([
+            'user_list' => ['nullable', 'array'],
+            'user_list.*' => ['email'],
+        ]);
+
+        $user_list = collect($rawList)
             ->filter(fn ($value) => is_string($value) && trim($value) !== '')
             ->map(fn ($value) => strtolower(trim($value)))
             ->unique()
@@ -27,8 +45,8 @@ class OrganizationsMemberController extends Controller
         $skippedExisting = 0;
         $invalidCount = 0;
 
-        foreach ($user_list as $userID) {
-            $targetUser = User::where('email', $userID)->first();
+        foreach ($user_list as $email) {
+            $targetUser = User::where('email', $email)->first();
             if (! $targetUser) {
                 $invalidCount++;
 
@@ -71,26 +89,34 @@ class OrganizationsMemberController extends Controller
     {
         $organization_member = OrganizationsMember::find($id);
         if ($organization_member) {
+            // Only the invited user themselves may accept.
+            if ($organization_member->userID !== Auth::id()) {
+                return redirect()->route('home')->with('error', 'You are not allowed to accept this invitation');
+            }
+
             $organization_member->status = true;
             $organization_member->save();
 
             return redirect()->route('organization', $organization_member->organizationID)->with('success', 'Member accepted successfully');
-        } else {
-            return redirect()->route('home')->with('error', 'Member not found');
         }
+
+        return redirect()->route('home')->with('error', 'Member not found');
     }
 
     public function decline_member(Request $request, $id)
     {
         $organization_member = OrganizationsMember::find($id);
         if ($organization_member) {
-            $organization_member->status = false;
-            $organization_member->save();
+            if ($organization_member->userID !== Auth::id()) {
+                return redirect()->route('home')->with('error', 'You are not allowed to decline this invitation');
+            }
+
+            $organization_member->delete();
 
             return redirect()->route('home')->with('success', 'You have declined the invitation');
-        } else {
-            return redirect()->route('home')->with('error', 'Member not found');
         }
+
+        return redirect()->route('home')->with('error', 'Member not found');
     }
 
     public function member_leave(Request $request, $id)
@@ -102,10 +128,10 @@ class OrganizationsMemberController extends Controller
             }
             $organization_member->delete();
 
-            return redirect()->route('home')->with('success', 'You have left the organization');
-        } else {
-            return redirect()->route('home')->with('error', 'Member record not found');
+            return redirect()->route('organizations.index')->with('success', 'You have left the organization');
         }
+
+        return redirect()->route('home')->with('error', 'Member record not found');
     }
 
     public function remove_member(Request $request, $organizationid, $userID)
@@ -116,8 +142,8 @@ class OrganizationsMemberController extends Controller
             $organization_member->delete();
 
             return redirect()->route('organization', $organizationid)->with('success', 'Member removed successfully');
-        } else {
-            return redirect()->route('organization', $organizationid)->with('error', 'Member not found or You are not the host');
         }
+
+        return redirect()->route('organization', $organizationid)->with('error', 'Member not found or You are not the host');
     }
 }

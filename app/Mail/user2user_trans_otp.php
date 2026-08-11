@@ -14,7 +14,7 @@ class user2user_trans_otp extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public User2userTransaction $transaction) {}
+    public function __construct(public User2userTransaction $transaction, public string $otp) {}
 
     /**
      * Get the message envelope.
@@ -32,7 +32,11 @@ class user2user_trans_otp extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.user2user_otp_send',
+            view: 'emails.transaction_notification',
+            with: [
+                'transaction' => $this->transaction,
+                'otp' => $this->otp,
+            ],
         );
     }
 

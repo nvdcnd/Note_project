@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('replynotes', function (Blueprint $table) {
             $table->id()->autoIncrement()->unique();
             $table->foreignId('noteID')->constrained('note')->cascadeOnDelete();
-            $table->foreignId('userID')->constrained('user')->cascadeOnDelete();
+            $table->foreignId('userID')->constrained('users')->cascadeOnDelete();
             $table->string('description');
             $table->timestamps();
         });

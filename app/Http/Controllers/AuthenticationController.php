@@ -14,48 +14,50 @@ class AuthenticationController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-            'remember' => 'required',
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
         ]);
-        $data = $request->all();
-        $email = $data['email'];
-        $password = $data['password'];
+
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt(['email' => $email, 'password' => $password], $remember)) {
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             return redirect()->route('home')->with('success', 'User logged in successfully');
-        } else {
-            return redirect('login')->with('error', 'Invalid username or password');
         }
+
+        return redirect()->route('login')->with('error', 'Invalid username or password');
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->with('success', 'You have been logged out');
     }
 
     public function signup(Request $request)
     {
-        $request->validate([
-            'email' => 'required',
-            'name' => 'required',
-            'password' => 'required',
-            'remember' => 'required',
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'unique:users,email', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
-        $name = $request->name;
-        $email = $request->email;
-        $password = $request->password;
-        $remember = $request->boolean('remember');
 
-        $user = new User;
-        $user->name = $name;
-        $user->email = $email;
-        $user->password = Hash::make($password);
-        $user->save();
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+        ]);
 
-        Auth::login($user, $remember);
+        Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
-        return redirect()->route('home')->with('success', 'User logged in successfully');
+        return redirect()->route('home')->with('success', 'Account created successfully');
     }
 
     public function signup40acc_note(Request $request, $shareid)
@@ -64,25 +66,18 @@ class AuthenticationController extends Controller
         if (! $pivot) {
             return redirect('login')->with('error', 'Invalid share id');
         }
-        // $data = $request->all();
-        $request->validate([
-            'email' => 'required',
-            'name' => 'required',
-            'password' => 'required',
-            'remember' => 'required',
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
-        $email = $pivot->shared_with;
-        $password = $request->password;
-        $name = $request->name;
-        $remember = $request->boolean('remember');
 
-        $user = new User;
-        $user->email = $email;
-        $user->password = Hash::make($password);
-        $user->name = $name;
-        $user->save();
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $pivot->shared_with,
+            'password' => $validated['password'],
+        ]);
 
-        Auth::login($user, $remember);
+        Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
         return redirect()->route('note', $pivot->noteID)->with('success', 'You have accepted the invitation');
@@ -94,25 +89,18 @@ class AuthenticationController extends Controller
         if (! $pivot) {
             return redirect('login')->with('error', 'Invalid share id');
         }
-        // $data = $request->all();
-        $request->validate([
-            'email' => 'required',
-            'name'=> 'required',
-            'password' => 'required',
-            'remember' => 'required',
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
-        $email = $pivot->shared_with;
-        $password = $request->password;
-        $name = $request->name;
-        $remember = $request->boolean('remember');
 
-        $user = new User;
-        $user->email = $email;
-        $user->password = Hash::make($password);
-        $user->name = $name;
-        $user->save();
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $pivot->shared_with,
+            'password' => $validated['password'],
+        ]);
 
-        Auth::login($user);
+        Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
         return redirect()->route('home')->with('success', 'You have accepted the invitation');
@@ -124,25 +112,18 @@ class AuthenticationController extends Controller
         if (! $pivot) {
             return redirect('login')->with('error', 'Invalid share id');
         }
-        $request->validate([
-            'email' => 'required',
-            'name' => 'required',
-            'password' => 'required',
-            'remember' => 'required',
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
-        // $data = $request->all();
-        $email = $pivot->email;
-        $password = $request->password;
-        $name = $request->name;
-        $remember = $request->boolean('remember');
 
-        $user = new User;
-        $user->email = $email;
-        $user->password = Hash::make($password);
-        $user->name = $name;
-        $user->save();
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $pivot->email,
+            'password' => $validated['password'],
+        ]);
 
-        Auth::login($user, $remember);
+        Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
         return redirect()->route('home')->with('success', 'You have accepted the invitation');

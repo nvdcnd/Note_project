@@ -17,9 +17,14 @@ class PivotChangeHostOrganizationController extends Controller
 {
     public function change_host_for_organization(Request $request, $id)
     {
-        $data = $request->all();
         $organization = Organization::find($id);
         if ($organization && $organization->hostID == Auth::user()->id) {
+            // Cancel any previous pending host-change request for this org.
+            PivotChangeHostOrganization::query()
+                ->where('organizationID', $organization->id)
+                ->where('new_host_acceptance_status', false)
+                ->delete();
+
             $pivot = new PivotChangeHostOrganization;
             $pivot->organizationID = $organization->id;
             $pivot->current_host_ID = $organization->hostID;
@@ -29,18 +34,20 @@ class PivotChangeHostOrganizationController extends Controller
                 Mail::to($hostUser->email)->send(new change_host_organization($pivot->id));
             }
 
-            return redirect()->route('organization', $id)->with('success', 'Organization host changed successfully');
-        } else {
-            return redirect()->route('home')->with('error', 'You are not authorized to change host for this organization');
+            return redirect()->route('organization', $id)->with('success', 'Host change request created');
         }
+
+        return redirect()->route('home')->with('error', 'You are not authorized to change host for this organization');
     }
 
     public function change_host_real(Request $request, $id)
     {
-        $data = $request->all();
+        $data = $request->validate([
+            'new_host_email' => ['required', 'email'],
+        ]);
         $pivot = PivotChangeHostOrganization::find($id);
         if ($pivot && $pivot->current_host_ID == Auth::user()->id) {
-            $new_host = $data['new_host_email'] ?? '';
+            $new_host = strtolower(trim($data['new_host_email']));
             $user = User::where('email', $new_host)->first();
             if ($user) {
                 $pivot->new_host_ID = $user->id;
@@ -48,22 +55,29 @@ class PivotChangeHostOrganizationController extends Controller
                 $pivot->save();
                 Mail::to($user->email)->send(new user_accept_host_organization($pivot->id));
 
-                return redirect()->route('organization', $pivot->organizationID)->with('success', 'Organization host changed request successfully');
-            } else {
-                Mail::to($new_host)->send(new host_changed_40_acc($new_host));
-
-                return redirect()->route('organization', $pivot->organizationID)->with('error', 'User not found');
+                return redirect()->route('organization', $pivot->organizationID)->with('success', 'Host change request sent');
             }
-        } else {
-            return redirect()->route('home')->with('error', 'You are not authorized to change host for this organization');
+
+            // Notify the unregistered email; they must create an account first.
+            $pivot->new_host_ID = null;
+            $pivot->new_host_acceptance_status = false;
+            $pivot->save();
+            Mail::to($new_host)->send(new host_changed_40_acc($new_host));
+
+            return redirect()->route('organization', $pivot->organizationID)->with('warning', 'That email is not registered yet. An invitation was sent');
         }
+
+        return redirect()->route('home')->with('error', 'You are not authorized to change host for this organization');
     }
 
-    public function delete_old_request($id)
+    public function delete_old_request(Request $request, $id)
     {
         $pivot = PivotChangeHostOrganization::find($id);
         if ($pivot) {
             $orgId = $pivot->organizationID;
+            if ($pivot->current_host_ID !== Auth::id() && $pivot->new_host_ID !== Auth::id()) {
+                return redirect()->route('home')->with('error', 'You are not authorized to delete this request');
+            }
             $pivot->delete();
 
             return redirect()->route('organization', $orgId)->with('success', 'Request deleted successfully');
@@ -91,21 +105,25 @@ class PivotChangeHostOrganizationController extends Controller
                 $organ->hostID = $pivot->new_host_ID;
                 $organ->save();
             }
+
+            return redirect()->route('organization', $pivot->organizationID ?? 1)->with('success', 'Organization host changed successfully');
         }
 
-        return redirect()->route('organization', $pivot->organizationID ?? 1)->with('success', 'Organization host changed successfully');
+        return redirect()->route('home')->with('error', 'You are not authorized to accept this host request');
     }
 
     public function new_host_decline(Request $request, $id)
     {
         $pivot = PivotChangeHostOrganization::find($id);
         if ($pivot) {
-            $pivot->new_host_acceptance_status = false;
-            $pivot->save();
+            if ($pivot->new_host_ID !== Auth::id()) {
+                return redirect()->route('home')->with('error', 'You are not authorized to decline this host request');
+            }
+            $pivot->delete();
 
             return redirect()->route('organization', $pivot->organizationID)->with('success', 'Declined host invitation');
         }
 
-        return redirect()->route('home')->with('success', 'Organization host changed successfully');
+        return redirect()->route('home')->with('error', 'Host request not found');
     }
 }

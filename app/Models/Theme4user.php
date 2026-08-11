@@ -14,4 +14,18 @@ class Theme4user extends Model
         'drag_type',
         'price',
     ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+    ];
+
+    public function styles()
+    {
+        return $this->hasMany(Theme4userStyle::class, 'theme4userID');
+    }
+
+    public function wallets()
+    {
+        return $this->hasMany(Theme4userWallet::class, 'theme4ID');
+    }
 }

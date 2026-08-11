@@ -3,17 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Mail40account;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use App\Mail\UserEmail;
 use App\Models\Note;
 use App\Models\PivotForNote;
 use App\Models\User;
-//use Illuminate\Http\Request;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-
-// use App\Mail;
 
 class PivotForNoteController extends Controller
 {
@@ -28,24 +24,29 @@ class PivotForNoteController extends Controller
     public function share_note(Request $request, $noteid)
     {
         $request->validate([
-            'shared_with' => 'required',
+            'shared_with' => ['required', 'array'],
+            'shared_with.*' => ['email'],
         ]);
 
-        $data = $request->all();
-        $sharedwith = collect($data['shared_with'] ?? [])
+        $noteModel = Note::find($noteid);
+        if (! $noteModel) {
+            return redirect()->route('home')->with('error', 'Note not found');
+        }
+
+        if ($noteModel->creater_id !== Auth::id()) {
+            return redirect()->route('note', $noteModel->id)->with('error', 'Only the creator can share this note');
+        }
+
+        $sharedwith = collect($request->input('shared_with', []))
             ->filter(fn ($value) => is_string($value) && trim($value) !== '')
             ->map(fn ($value) => strtolower(trim($value)))
             ->unique()
             ->values()
             ->all();
-        $noteModel = Note::find($noteid);
+
         $newShares = [];
         $unregisteredEmails = [];
         $skippedExistingShares = 0;
-
-        if (! $noteModel) {
-            return redirect()->route('home')->with('error', 'Note not found');
-        }
 
         foreach ($sharedwith as $userEmail) {
             $userModel = User::where('email', $userEmail)->first();
@@ -89,8 +90,7 @@ class PivotForNoteController extends Controller
             $message = 'Note shared successfully. Skipped '.$skippedExistingShares.' recipient(s) that were already shared.';
         }
 
-        //return redirect()->route('note', $noteModel->id)->with('success', $message);
-        return response()->json(['message'=> $message],200);
+        return redirect()->route('note', $noteModel->id)->with('success', $message);
     }
 
     public function undo_shared_note(Request $request, $id)
@@ -100,7 +100,7 @@ class PivotForNoteController extends Controller
             return redirect()->route('home')->with('error', 'Shared note record not found');
         }
         $note = Note::find($pivot->note_id);
-        if (! $note || $note->creater_id != Auth::user()->id) {
+        if (! $note || $note->creater_id !== Auth::user()->id) {
             return redirect()->route('home')->with('error', 'You are not authorized to unshare this note');
         }
         $pivot->delete();

@@ -29,6 +29,8 @@ it('deduplicates shared recipients and keeps the flow resilient for partial succ
         'creater_id' => $creator->id,
     ]);
 
+    $this->actingAs($creator);
+
     $request = new Request(['shared_with' => [$recipient->email, $recipient->email, 'missing@example.com']]);
 
     $response = app(PivotForNoteController::class)->share_note($request, $note->id);
@@ -50,6 +52,8 @@ it('adds valid members and skips missing addresses instead of failing the whole 
 
     $member = User::factory()->create(['email' => 'member@example.com']);
 
+    $this->actingAs($host);
+
     $request = new Request(['user_list' => ['member@example.com', 'missing@example.com']]);
     $response = app(OrganizationsMemberController::class)->add_member($request, $organization->id);
 
@@ -70,6 +74,7 @@ it('keeps a pending transaction alive when the passkey is wrong so the user can 
     $transaction->status = 'pending';
     $transaction->otp = Hash::make('123456');
     $transaction->expires_at = now()->addMinutes(10)->toDateTimeString();
+    $transaction->attempts = 0;
     $transaction->save();
 
     $this->actingAs($sender);
@@ -78,6 +83,7 @@ it('keeps a pending transaction alive when the passkey is wrong so the user can 
 
     expect($response->isRedirect())->toBeTrue();
     expect($transaction->fresh()->status)->toBe('pending');
+    expect($transaction->fresh()->attempts)->toBe(1);
     expect($sender->fresh()->balance)->toBe(1000.0);
     expect($recipient->fresh()->balance)->toBe(0.0);
 });
