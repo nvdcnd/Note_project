@@ -14,12 +14,12 @@ Noteket combines personal note-taking with lightweight organization management, 
 
 | Area | Highlights |
 | --- | --- |
-| **Notes** | Create, edit, delete, mark-as-done / undo, share with other users (invite by email), and reply to notes |
-| **Organizations** | Create & manage orgs, invite members (accept/decline via email links), remove members, host handover with OTP confirmation |
+| **Notes** | Create, edit, delete, mark-as-done / undo, filter (all / done / not-done / mine / shared), paginated queue-ordered feed, share by email, and reply to notes |
+| **Organizations** | Create & manage orgs, invite members (existing users accept in-app; unregistered emails get a signup link), remove members, host handover with OTP confirmation |
 | **Transactions** | Send money between users/orgs with decimal balances, 6-digit email OTP (10-minute expiry, 5 attempts max), full transaction history, cancel flow |
-| **Themes** | Marketplace of themes for personal and organization use, purchased via OTP-verified wallet transactions |
-| **Auth & Accounts** | Signup/login/logout, password reset with OTP, profile & avatar settings, "accept invitation" signup flows |
-| **Quality** | Pest test suite, PHPStan static analysis (0 errors), Laravel Pint code style, Laravel Boost (MCP) for AI-assisted development |
+| **Themes** | Marketplace of themes for personal and organization use, purchased via OTP-verified wallet transactions, then **applied** — a theme repaints the UI via CSS variables and changes the card drag feel |
+| **Auth & Accounts** | Signup/login/logout, password reset with OTP, profile & avatar settings, and invitation signup via a single-use `/invite/{token}` link |
+| **Quality** | Pest test suite, PHPStan static analysis (0 errors), Laravel Pint code style, all three enforced in CI on every branch (`composer check`) |
 
 ---
 
@@ -105,7 +105,14 @@ Copy `.env.example` to `.env` and adjust the following:
 
 ## ✉️ Mail Configuration
 
-The application sends transactional emails (OTP codes, invitations, password resets) with the **synchronous** `Mail::to(...)->send()` API, so **no queue worker is required for emails** to be delivered.
+Transactional emails come in two flavours, and this distinction matters operationally:
+
+| Kind | API | Queue worker needed? |
+|---|---|---|
+| OTP codes, password resets, org accept/decline notifications | `Mail::to(...)->send()` (synchronous) | No |
+| Share-a-note and invite-by-email messages (`Mail40account`, `UserEmail`, `OrganizationInvitation`) | `Mail::to(...)->queue()` (`ShouldQueue`) | **Yes** |
+
+So with `QUEUE_CONNECTION=database` you **must** run a worker (see [Queue worker](#-queue-worker)) or invitation emails will sit in the `jobs` table and never arrive. For local testing without a worker, set `QUEUE_CONNECTION=sync` in `.env` to make queued mail send immediately.
 
 ### Local development (default: `log`)
 

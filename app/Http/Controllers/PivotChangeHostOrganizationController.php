@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Mail\change_host_organization;
-use App\Mail\host_changed_40_acc;
+use App\Mail\OrganizationInvitation;
 use App\Mail\user_accept_host_organization;
+use App\Models\Invitation;
 use App\Models\Organization;
 use App\Models\OrganizationsMember;
 use App\Models\PivotChangeHostOrganization;
@@ -34,10 +35,10 @@ class PivotChangeHostOrganizationController extends Controller
                 Mail::to($hostUser->email)->send(new change_host_organization($pivot->id));
             }
 
-            return redirect()->route('organization', $id)->with('success', 'Host change request created');
+            return redirect()->route('organization', $id)->with('success', 'Đã tạo yêu cầu đổi chủ sở hữu.');
         }
 
-        return redirect()->route('home')->with('error', 'You are not authorized to change host for this organization');
+        return redirect()->route('home')->with('error', 'Bạn không có quyền đổi chủ sở hữu của tổ chức này.');
     }
 
     public function change_host_real(Request $request, $id)
@@ -55,19 +56,27 @@ class PivotChangeHostOrganizationController extends Controller
                 $pivot->save();
                 Mail::to($user->email)->send(new user_accept_host_organization($pivot->id));
 
-                return redirect()->route('organization', $pivot->organizationID)->with('success', 'Host change request sent');
+                return redirect()->route('organization', $pivot->organizationID)->with('success', 'Đã gửi yêu cầu đổi chủ sở hữu.');
             }
 
-            // Notify the unregistered email; they must create an account first.
+            // Email chưa có tài khoản: không thể trao quyền chủ sở hữu cho một
+            // người chưa tồn tại, nên mời họ vào tổ chức trước. Sau khi họ đăng
+            // ký và trở thành thành viên, chủ sở hữu tạo lại yêu cầu đổi chủ.
             $pivot->new_host_ID = null;
             $pivot->new_host_acceptance_status = false;
             $pivot->save();
-            Mail::to($new_host)->send(new host_changed_40_acc($new_host));
 
-            return redirect()->route('organization', $pivot->organizationID)->with('warning', 'That email is not registered yet. An invitation was sent');
+            $organization = Organization::find($pivot->organizationID);
+            if ($organization) {
+                $issued = Invitation::issueFor($organization, $new_host, Auth::id());
+                Mail::to($new_host)->queue(new OrganizationInvitation($organization, $new_host, $issued['token']));
+            }
+
+            return redirect()->route('organization', $pivot->organizationID)
+                ->with('warning', 'Email này chưa có tài khoản. Đã gửi lời mời tham gia tổ chức — sau khi họ đăng ký, hãy tạo lại yêu cầu đổi chủ sở hữu.');
         }
 
-        return redirect()->route('home')->with('error', 'You are not authorized to change host for this organization');
+        return redirect()->route('home')->with('error', 'Bạn không có quyền đổi chủ sở hữu của tổ chức này.');
     }
 
     public function delete_old_request(Request $request, $id)
@@ -76,14 +85,14 @@ class PivotChangeHostOrganizationController extends Controller
         if ($pivot) {
             $orgId = $pivot->organizationID;
             if ($pivot->current_host_ID !== Auth::id() && $pivot->new_host_ID !== Auth::id()) {
-                return redirect()->route('home')->with('error', 'You are not authorized to delete this request');
+                return redirect()->route('home')->with('error', 'Bạn không có quyền xóa yêu cầu này.');
             }
             $pivot->delete();
 
-            return redirect()->route('organization', $orgId)->with('success', 'Request deleted successfully');
+            return redirect()->route('organization', $orgId)->with('success', 'Đã xóa yêu cầu.');
         }
 
-        return redirect()->route('home')->with('success', 'Organization host changed successfully');
+        return redirect()->route('home')->with('success', 'Đã đổi chủ sở hữu tổ chức.');
     }
 
     public function new_host_accept(Request $request, $id)
@@ -106,10 +115,10 @@ class PivotChangeHostOrganizationController extends Controller
                 $organ->save();
             }
 
-            return redirect()->route('organization', $pivot->organizationID ?? 1)->with('success', 'Organization host changed successfully');
+            return redirect()->route('organization', $pivot->organizationID ?? 1)->with('success', 'Đã đổi chủ sở hữu tổ chức.');
         }
 
-        return redirect()->route('home')->with('error', 'You are not authorized to accept this host request');
+        return redirect()->route('home')->with('error', 'Bạn không có quyền chấp nhận yêu cầu đổi chủ sở hữu này.');
     }
 
     public function new_host_decline(Request $request, $id)
@@ -117,13 +126,13 @@ class PivotChangeHostOrganizationController extends Controller
         $pivot = PivotChangeHostOrganization::find($id);
         if ($pivot) {
             if ($pivot->new_host_ID !== Auth::id()) {
-                return redirect()->route('home')->with('error', 'You are not authorized to decline this host request');
+                return redirect()->route('home')->with('error', 'Bạn không có quyền từ chối yêu cầu đổi chủ sở hữu này.');
             }
             $pivot->delete();
 
-            return redirect()->route('organization', $pivot->organizationID)->with('success', 'Declined host invitation');
+            return redirect()->route('organization', $pivot->organizationID)->with('success', 'Đã từ chối lời mời làm chủ sở hữu.');
         }
 
-        return redirect()->route('home')->with('error', 'Host request not found');
+        return redirect()->route('home')->with('error', 'Không tìm thấy yêu cầu đổi chủ sở hữu.');
     }
 }

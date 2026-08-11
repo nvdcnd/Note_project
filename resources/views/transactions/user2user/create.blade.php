@@ -6,10 +6,10 @@
     <div class="row justify-content-center">
         <div class="col-lg-6 col-12">
             <div class="card">
-                <div class="card-header" style="background-color: #FACC15;">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
                     <h3 style="margin: 0; font-size: 1.6rem;">Chuyển điểm cho người dùng</h3>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     <form action="{{ route('user2user_transaction_create') }}" method="POST">
                         @csrf
                         <div class="mb-3">

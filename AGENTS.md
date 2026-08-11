@@ -106,6 +106,13 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 - Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
 
+=== tests rules ===
+
+# Test Enforcement
+
+- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+
 === laravel/core rules ===
 
 # Do Things the Laravel Way
@@ -156,12 +163,14 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 ## Noteket project-specific context
 
-- **Reports source of truth:** `report/11-08-26-Bao-Cao-Toan-Dien-Du-An.md` describes the codebase BEFORE the 11-08 refactor commits `2c36a23`/`1b4660f` and is outdated — read `report/11-08-26-Bao-Cao-Toan-Dien-Du-An-Sau-Refactor.md` first. `phpstan-report.json` is a stale UTF-16 dump from another machine (pre-refactor) — ignore it.
-- **Signup-invite flow is not wired:** `AuthenticationController::signup40acc_note|host_org|member_org` have NO routes despite the README's "accept invitation signup" claim. Note `pivot_for_note.shared_with` is a FK to `users.id` (an ID, not an email) yet those methods treat it as email — wiring them will break. Invite emails (`Mail40account`, `user_accept_organization`, host-change) contain no action links; org invites are only actionable via the pending UI in `organizations/index`.
-- **Legacy JSON fetchers:** base `Controller.php` has 6 unrouted `*_fetch()` methods querying non-existent `note.user_id` — dead code; do not route them without fixing the query.
+- **Reports source of truth:** read `report/11-08-26-Bao-Cao-Toan-Dien-Du-An-V3-Sau-Theme-Applied.md` first. The two earlier reports (`...-Du-An.md`, `...-Sau-Refactor.md`) are superseded history. `phpstan-report.json` no longer exists — run `composer phpstan` instead.
+- **Quality gate is enforced in CI on every branch:** `composer check` runs Pint + PHPStan + Pest, and `.github/workflows/laravel.yml` runs all three on every push/PR. Keep all three green; do not add PHPStan `ignoreErrors` entries to paper over new code (Larastan cannot be installed — it does not support Laravel 13 yet, which is why plain PHPStan needs the existing 4 Eloquent-related ignores).
+- **Signup-invite runs through the `invitations` table:** sharing a note with, or inviting an org member by, an unregistered email issues an `Invitation` (SHA-256 hashed, single-use, 7-day TTL) and emails a `/invite/{token}` link. `InvitationController` creates the account — the email ALWAYS comes from the invitation, never from the form. The old `signup40acc_*` methods were removed; do not reintroduce them. `pivot_for_note.shared_with` is still a FK to `users.id`, so it can never hold an email.
+- **Themes actually change the UI:** a theme carries a `style` JSON that maps to the `--nk-*` CSS variables in `noteket.css`, plus `drag_type` (1/2/3) read from `<body data-drag-type>` by `noteket.js`. A view composer on `layouts.app` resolves which theme wins (organization theme beats personal theme inside an organization). Style values are sanitized to hex-only by `App\Support\ThemeStyle` — never bypass it, the output goes straight into a `<style>` tag. Blade views must use `var(--nk-yellow)` / `var(--nk-sticky)`, not hard-coded hex, or they will not follow the theme. Email templates are the exception: they keep literal hex because mail clients do not support CSS variables.
 - **Money-locking caveat:** `lockForUpdate()` is a no-op on SQLite (default dev DB), so the race protection only works on MySQL/Postgres. A deadlock cycle is only possible between two opposite-direction user2user transfers.
-- **Edit-from-card truncates notes:** `noteket.js` EDIT mode pre-fills the description from `Str::limit(..., 200)` rendered on home/org cards, so saving overwrites and truncates the real content — pre-fill from full text instead.
-- **DB column naming is mixed:** camelCase (`hostID`, `userID`, `noteID`, `organizationID`, `theme4ID`, `current_hostID`) alongside snake_case (`creater_id`, `note_id`, `shared_with`, `org_done`) — check the migration before writing queries/relations.
+- **DB column naming is mixed:** camelCase (`hostID`, `userID`, `noteID`, `organizationID`, `theme4ID`, `themeID`, `current_hostID`) alongside snake_case (`creater_id`, `note_id`, `shared_with`, `org_done`, `theme4_id`) — check the migration before writing queries/relations. "Theme id" alone has four spellings: `theme4ID` (wallet tables), `theme4_id` (users), `themeID` (organizations, theme4org_transactions). Getting this wrong is exactly what broke the first theme-apply attempt.
+- **Never edit a migration that has already run** — add a new one. A column added by editing `create_organizations_table` silently never appeared in any migrated database.
+- **User-facing strings are Vietnamese.** Flash messages, `abort()` messages and email bodies are all Vietnamese; keep new ones consistent.
 - **Two views dirs:** `resources/view/` (singular) holds static prototypes (`test/test1/testing/test2`); real Blade lives in `resources/views/`. If artisan fails with "Failed to open stream: .../vendor/autoload.php", run `composer install` first (this checkout can lack `vendor/`).
 - **User preference:** audits/report work is read-only — do not modify code without explicit approval.
 - **Preview/webview quirk:** in the Freebuff preview pane, IntersectionObserver callbacks may never fire (webview not composited) — avoid IO-gated visibility/animations; use CSS-only animations that always end visible. Screenshots can fail with "no frames" while snapshot/evaluate still work.

@@ -10,10 +10,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link href="{{ asset('css/noteket.css') }}" rel="stylesheet">
+    {{-- Chủ đề đang áp dụng: ghi đè các biến --nk-* của noteket.css.
+         Phải đặt SAU thẻ link noteket.css thì mới thắng được khối :root mặc định.
+         Giá trị đã được ThemeStyle::sanitize() lọc chỉ còn mã màu hex hợp lệ. --}}
+    <style>{{ $nkThemeCss }}</style>
     <title>@yield('title', 'Noteket')</title>
     @stack('styles')
 </head>
-<body>
+<body data-drag-type="{{ $nkThemeDragType }}">
     <!-- Toast container -->
     <div class="toast-container"></div>
 

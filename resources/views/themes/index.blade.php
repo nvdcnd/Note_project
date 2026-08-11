@@ -30,8 +30,13 @@
                         <p class="card-text flex-grow-1">{{ Str::limit($theme->description, 100) }}</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="badge rounded-pill text-bg-warning" style="font-size: 1rem;">{{ number_format($theme->price, 0, ',', '.') }} điểm</span>
-                            @if (in_array($theme->id, $ownedThemeIds))
-                                <span class="badge rounded-pill text-bg-success">✓ Đã sở hữu</span>
+                            @if ($theme->id === $appliedThemeId)
+                                <span class="badge rounded-pill text-bg-primary">★ Đang áp dụng</span>
+                            @elseif (in_array($theme->id, $ownedThemeIds))
+                                <form action="{{ route('themes.apply', $theme->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">Áp dụng</button>
+                                </form>
                             @else
                                 <form action="{{ route('theme.user.buy', $theme->id) }}" method="POST">
                                     @csrf
@@ -63,7 +68,14 @@
                 </a>
                 <p class="card-text">{{ Str::limit($theme->description, 80) }}</p>
                 <span class="badge rounded-pill text-bg-warning">{{ number_format($theme->price, 0, ',', '.') }} điểm</span>
-                @if (! in_array($theme->id, $ownedThemeIds))
+                @if ($theme->id === $appliedThemeId)
+                    <span class="badge rounded-pill text-bg-primary ms-2">★ Đang áp dụng</span>
+                @elseif (in_array($theme->id, $ownedThemeIds))
+                    <form action="{{ route('themes.apply', $theme->id) }}" method="POST" class="d-inline ms-2">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-primary btn-sm">Áp dụng</button>
+                    </form>
+                @else
                     <form action="{{ route('theme.user.buy', $theme->id) }}" method="POST" class="d-inline ms-2">
                         @csrf
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyThemeModal" data-theme-id="{{ $theme->id }}" data-theme-name="{{ $theme->name }}">Mua</button>

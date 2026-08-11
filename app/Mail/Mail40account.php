@@ -23,8 +23,12 @@ class Mail40account extends Mailable implements ShouldQueue
 
     public ?Note $notes = null;
 
-    public function __construct(User|string $userOrEmail, Note|int|null $notes)
+    /** Token nguyên bản của lời mời, dùng để dựng link đăng ký trong email. */
+    public ?string $inviteToken = null;
+
+    public function __construct(User|string $userOrEmail, Note|int|null $notes, ?string $inviteToken = null)
     {
+        $this->inviteToken = $inviteToken;
         if ($userOrEmail instanceof User) {
             $this->user = $userOrEmail;
             $this->recipientEmail = $userOrEmail->email;
@@ -42,11 +46,10 @@ class Mail40account extends Mailable implements ShouldQueue
      */
     public function envelope(): Envelope
     {
-        $fromName = $this->user ? $this->user->name : $this->recipientEmail;
-        $noteId = $this->notes ? $this->notes->id : '';
+        $noteTitle = $this->notes?->title ?: 'Ghi chú';
 
         return new Envelope(
-            subject: 'Note no.'.$noteId.' has been shared with you by '.$fromName,
+            subject: 'Bạn được chia sẻ ghi chú "'.$noteTitle.'" trên Noteket',
         );
     }
 
@@ -61,6 +64,7 @@ class Mail40account extends Mailable implements ShouldQueue
                 'user' => $this->user,
                 'recipientEmail' => $this->recipientEmail,
                 'notes' => $this->notes,
+                'inviteUrl' => $this->inviteToken ? route('invitation.show', $this->inviteToken) : null,
             ],
         );
     }

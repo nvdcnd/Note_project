@@ -14,7 +14,7 @@ class ReplyNoteController extends Controller
     {
         $note = Note::find($id);
         if (! $note) {
-            return redirect()->route('home')->with('error', 'Note not found');
+            return redirect()->route('home')->with('error', 'Không tìm thấy ghi chú.');
         }
 
         $canReply = $note->creater_id === Auth::id()
@@ -24,7 +24,7 @@ class ReplyNoteController extends Controller
                 ->exists();
 
         if (! $canReply) {
-            return redirect()->route('note', $note->id)->with('error', 'You are not authorized to reply to this note');
+            return redirect()->route('note', $note->id)->with('error', 'Bạn không có quyền trả lời ghi chú này.');
         }
 
         $validated = $request->validate([
@@ -37,22 +37,22 @@ class ReplyNoteController extends Controller
             'userID' => Auth::id(),
         ]);
 
-        return redirect()->route('note', $note->id)->with('success', 'Reply added successfully');
+        return redirect()->route('note', $note->id)->with('success', 'Đã gửi trả lời.');
     }
 
     public function delete_reply(Request $request, $id)
     {
         $reply = Replynote::find($id);
         if (! $reply) {
-            return redirect()->route('home')->with('error', 'Reply not found');
+            return redirect()->route('home')->with('error', 'Không tìm thấy trả lời.');
         }
 
         if ($reply->userID !== Auth::id()) {
-            return redirect()->route('note', $reply->noteID)->with('error', 'Only the author can delete this reply');
+            return redirect()->route('note', $reply->noteID)->with('error', 'Chỉ người viết mới có thể xóa trả lời này.');
         }
 
         $reply->delete();
 
-        return redirect()->route('note', $reply->noteID)->with('success', 'Reply deleted successfully');
+        return redirect()->route('note', $reply->noteID)->with('success', 'Đã xóa trả lời.');
     }
 }

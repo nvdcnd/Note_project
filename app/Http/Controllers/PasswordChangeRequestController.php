@@ -60,7 +60,7 @@ class PasswordChangeRequestController extends Controller
     {
         $change_password_request = PasswordChangeRequest::query()->find($id);
         if (! $change_password_request || $change_password_request->used) {
-            return redirect()->route('password.forgot')->with('error', 'This password reset link is invalid or has already been used');
+            return redirect()->route('password.forgot')->with('error', 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã được dùng.');
         }
 
         return view('password.reset', [
@@ -79,26 +79,26 @@ class PasswordChangeRequestController extends Controller
         $change_password_request = PasswordChangeRequest::query()->find($id);
 
         if (! $change_password_request || $change_password_request->used) {
-            return redirect()->route('password.forgot')->with('error', 'Invalid password reset request');
+            return redirect()->route('password.forgot')->with('error', 'Yêu cầu đặt lại mật khẩu không hợp lệ.');
         }
 
         if ($change_password_request->attempts >= self::MAX_ATTEMPTS) {
             $change_password_request->delete();
 
-            return redirect()->route('password.forgot')->with('error', 'Too many attempts. Please request a new reset link');
+            return redirect()->route('password.forgot')->with('error', 'Bạn đã thử quá nhiều lần. Vui lòng yêu cầu liên kết đặt lại mới.');
         }
 
         $user = User::query()->find($change_password_request->user_id);
         if (! $user) {
             $change_password_request->delete();
 
-            return redirect()->route('password.forgot')->with('error', 'User not found');
+            return redirect()->route('password.forgot')->with('error', 'Không tìm thấy người dùng.');
         }
 
         if (now()->greaterThan($change_password_request->expires_at)) {
             $change_password_request->delete();
 
-            return redirect()->route('password.forgot')->with('error', 'This reset link has expired. Please request a new one');
+            return redirect()->route('password.forgot')->with('error', 'Liên kết đặt lại mật khẩu đã hết hạn. Vui lòng yêu cầu liên kết mới.');
         }
 
         if (! Hash::check($validated['passkey'], $change_password_request->token)) {
@@ -107,7 +107,7 @@ class PasswordChangeRequestController extends Controller
             $change_password_request->refresh();
 
             return redirect()->route('password.reset.view', $change_password_request->id)
-                ->with('error', 'Invalid OTP. '.($change_password_request->attempts).' failed attempt(s).');
+                ->with('error', 'Mã OTP không đúng. '.($change_password_request->attempts).' lần nhập sai.');
         }
 
         $user->password = Hash::make($validated['password']);
@@ -118,6 +118,6 @@ class PasswordChangeRequestController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('home')->with('success', 'Password changed successfully');
+        return redirect()->route('home')->with('success', 'Đã đổi mật khẩu.');
     }
 }

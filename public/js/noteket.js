@@ -37,6 +37,20 @@
         });
     });
 
+    // --- Kiểu kéo thả theo chủ đề đang áp dụng ---
+    // Chủ đề mang theo `drag_type`; layout đặt giá trị đó lên <body data-drag-type>.
+    // 1 = Cổ điển, 2 = Xoay nhẹ, 3 = Bay. Giá trị lạ rơi về 1.
+    const DRAG_PROFILES = {
+        1: { rotateFactor: 0.04, scaleDivisor: 2000, minScale: 0.98, exitRotateFactor: 0.05 },
+        2: { rotateFactor: 0.12, scaleDivisor: 1600, minScale: 0.96, exitRotateFactor: 0.15 },
+        3: { rotateFactor: 0.02, scaleDivisor: 500, minScale: 0.88, exitRotateFactor: 0.03 },
+    };
+
+    function dragProfile() {
+        const raw = document.body?.dataset?.dragType;
+        return DRAG_PROFILES[raw] || DRAG_PROFILES[1];
+    }
+
     // --- Helpers ---
     function validEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -61,7 +75,7 @@
 
     function triggerCardExit(element, targetY, callback) {
         element.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-        element.style.transform = `translateY(${targetY}px) rotate(${targetY * 0.05}deg)`;
+        element.style.transform = `translateY(${targetY}px) rotate(${targetY * dragProfile().exitRotateFactor}deg)`;
         element.style.opacity = '0';
         setTimeout(() => {
             if (typeof callback === 'function') callback();
@@ -138,10 +152,27 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
                         body: JSON.stringify({ title: newTitle, description: newContent }),
-                    }).then((r) => {
-                        if (r.redirected) { window.location.href = r.url; return; }
-                        return r.json();
-                    }).then(() => {
+                    }).then(async (r) => {
+                        if (r.redirected) { window.location.href = r.url; return null; }
+                        // Không được coi mọi phản hồi là thành công: validation lỗi trả 422
+                        // và trước đây vẫn hiện toast "Đã lưu thay đổi" dù không lưu được.
+                        if (!r.ok) {
+                            let message = 'Không thể lưu ghi chú';
+                            try {
+                                const data = await r.json();
+                                if (data && data.errors) {
+                                    message = Object.values(data.errors).flat().join(' ');
+                                } else if (data && data.message) {
+                                    message = data.message;
+                                }
+                            } catch (err) {
+                                // Phản hồi không phải JSON — giữ thông báo mặc định.
+                            }
+                            throw new Error(message);
+                        }
+                        return r.json().catch(() => ({}));
+                    }).then((data) => {
+                        if (data === null) return; // đã chuyển hướng ở bước trên
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = card.dataset.originalBodyHtml;
                         const t = tempDiv.querySelector('.card-title');
@@ -153,7 +184,10 @@
                         if (fullDesc) fullDesc.textContent = newContent;
                         showToast('🎉 Đã lưu thay đổi!');
                         swapCardMode(card, 'VIEW', options);
-                    }).catch(() => showToast('⚠️ Không thể lưu ghi chú', true));
+                    }).catch((err) => {
+                        showToast('⚠️ '+((err && err.message) || 'Không thể lưu ghi chú'), true);
+                        playShakeAnimation(card);
+                    });
                 });
             } else if (mode === 'SHARE') {
                 if (headerTitle) headerTitle.innerHTML = '🔗 Chia sẻ ghi chú';
@@ -443,8 +477,9 @@
             if (!isDragging) return;
             if (e.cancelable) e.preventDefault();
             currentY = e.clientY - startY;
-            const rotate = currentY * 0.04;
-            const scale = Math.max(0.98, 1 - Math.abs(currentY) / 2000);
+            const profile = dragProfile();
+            const rotate = currentY * profile.rotateFactor;
+            const scale = Math.max(profile.minScale, 1 - Math.abs(currentY) / profile.scaleDivisor);
             card.style.transform = `translateY(${currentY}px) rotate(${rotate}deg) scale(${scale})`;
             if (currentY <= -35) showOverlay('up');
             else if (currentY >= 35) showOverlay('down');
@@ -543,7 +578,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.note-card').forEach(initNoteCard);
+        // Bỏ qua .note-card-static (card ở trang chi tiết ghi chú): nó chỉ để
+        // hiển thị, không có menu ghim và không kéo thả được.
+        document.querySelectorAll('.note-card:not(.note-card-static)').forEach(initNoteCard);
         document.querySelectorAll('.note-deck').forEach(reflowDeck);
     });
 

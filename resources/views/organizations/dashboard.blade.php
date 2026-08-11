@@ -64,10 +64,10 @@
     </div>
 
     <div class="card mt-4">
-        <div class="card-header" style="background-color: #FACC15;">
+        <div class="card-header" style="background-color: var(--nk-yellow);">
             <h4 style="margin: 0; font-size: 1.3rem;">Thành viên hiện tại</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             @forelse ($currentMemberList as $member)
                 <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded" style="background: rgba(255,255,255,0.6);">
                     <span><strong>{{ $member->user?->name }}</strong> <small class="text-muted">{{ $member->user?->email }}</small></span>
@@ -88,10 +88,10 @@
     </div>
 
     <div class="card mt-4">
-        <div class="card-header" style="background-color: #FACC15;">
+        <div class="card-header" style="background-color: var(--nk-yellow);">
             <h4 style="margin: 0; font-size: 1.3rem;">Thành viên chờ duyệt</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             @forelse ($pendingMemberList as $member)
                 <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded" style="background: rgba(255,255,255,0.6);">
                     <span><strong>{{ $member->user?->name ?? '#' . $member->userID }}</strong> <small class="text-muted">{{ $member->user?->email }}</small></span>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\Mail40account;
 use App\Mail\UserEmail;
+use App\Models\Invitation;
 use App\Models\Note;
 use App\Models\PivotForNote;
 use App\Models\User;
@@ -13,11 +14,21 @@ use Illuminate\Support\Facades\Mail;
 
 class PivotForNoteController extends Controller
 {
-    public function mail_for_no_account($users, $noteid)
+    /**
+     * Gửi lời mời cho các email chưa có tài khoản.
+     *
+     * Mỗi email được cấp một lời mời có token riêng, nhờ đó email chứa link
+     * đăng ký thật sự dùng được — trước đây email được gửi đi mà không kèm
+     * đường dẫn nào nên người nhận không có cách nào vào ứng dụng.
+     *
+     * @param  array<int, string>  $users
+     */
+    public function mail_for_no_account($users, Note $noteid)
     {
-        // $users is an array of email strings, $noteid is a Note model
         foreach ($users as $email) {
-            Mail::to($email)->queue(new Mail40account($email, $noteid));
+            $issued = Invitation::issueFor($noteid, $email, Auth::id());
+
+            Mail::to($email)->queue(new Mail40account($email, $noteid, $issued['token']));
         }
     }
 
@@ -30,11 +41,11 @@ class PivotForNoteController extends Controller
 
         $noteModel = Note::find($noteid);
         if (! $noteModel) {
-            return redirect()->route('home')->with('error', 'Note not found');
+            return redirect()->route('home')->with('error', 'Không tìm thấy ghi chú.');
         }
 
         if ($noteModel->creater_id !== Auth::id()) {
-            return redirect()->route('note', $noteModel->id)->with('error', 'Only the creator can share this note');
+            return redirect()->route('note', $noteModel->id)->with('error', 'Chỉ người tạo mới có thể chia sẻ ghi chú này.');
         }
 
         $sharedwith = collect($request->input('shared_with', []))
@@ -82,12 +93,12 @@ class PivotForNoteController extends Controller
         }
 
         if (count($newShares) === 0 && count($unregisteredEmails) === 0) {
-            return redirect()->route('note', $noteModel->id)->with('warning', 'No valid recipients were provided');
+            return redirect()->route('note', $noteModel->id)->with('warning', 'Bạn chưa nhập người nhận hợp lệ nào.');
         }
 
-        $message = 'Note shared successfully';
+        $message = 'Đã chia sẻ ghi chú.';
         if ($skippedExistingShares > 0) {
-            $message = 'Note shared successfully. Skipped '.$skippedExistingShares.' recipient(s) that were already shared.';
+            $message = 'Đã chia sẻ ghi chú. Bỏ qua '.$skippedExistingShares.' người nhận đã được chia sẻ trước đó.';
         }
 
         return redirect()->route('note', $noteModel->id)->with('success', $message);
@@ -97,14 +108,14 @@ class PivotForNoteController extends Controller
     {
         $pivot = PivotForNote::find($id);
         if (! $pivot) {
-            return redirect()->route('home')->with('error', 'Shared note record not found');
+            return redirect()->route('home')->with('error', 'Không tìm thấy bản ghi chia sẻ.');
         }
         $note = Note::find($pivot->note_id);
         if (! $note || $note->creater_id !== Auth::user()->id) {
-            return redirect()->route('home')->with('error', 'You are not authorized to unshare this note');
+            return redirect()->route('home')->with('error', 'Bạn không có quyền hủy chia sẻ ghi chú này.');
         }
         $pivot->delete();
 
-        return redirect()->route('note', $note->id)->with('success', 'Unshared note successfully');
+        return redirect()->route('note', $note->id)->with('success', 'Đã hủy chia sẻ ghi chú.');
     }
 }

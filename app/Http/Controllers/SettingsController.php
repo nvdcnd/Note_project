@@ -28,7 +28,7 @@ class SettingsController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('settings')->with('success', 'Profile updated successfully');
+        return redirect()->route('settings')->with('success', 'Đã cập nhật thông tin cá nhân.');
     }
 
     public function updateAvatar(Request $request)
@@ -43,7 +43,7 @@ class SettingsController extends Controller
         $path = $request->file('avatar')->store('avatars', 'public');
         $user->update(['avatar_image_url' => $path]);
 
-        return redirect()->route('settings')->with('success', 'Avatar updated successfully');
+        return redirect()->route('settings')->with('success', 'Đã cập nhật ảnh đại diện.');
     }
 
     public function changePassword(Request $request)
@@ -57,11 +57,11 @@ class SettingsController extends Controller
         ]);
 
         if (! Hash::check($validated['current_password'], $user->password)) {
-            return redirect()->route('settings')->with('error', 'Current password is incorrect');
+            return redirect()->route('settings')->with('error', 'Mật khẩu hiện tại không đúng.');
         }
 
         $user->update(['password' => $validated['password']]);
 
-        return redirect()->route('settings')->with('success', 'Password changed successfully');
+        return redirect()->route('settings')->with('success', 'Đã đổi mật khẩu.');
     }
 }

@@ -27,6 +27,7 @@ class Theme4orgController extends Controller
             'themes' => $themes,
             'organization' => $organization,
             'ownedThemeIds' => $ownedThemeIds,
+            'isHost' => $organization !== null && $organization->hostID === Auth::id(),
         ]);
     }
 
@@ -50,20 +51,68 @@ class Theme4orgController extends Controller
             'theme' => $theme,
             'organization' => $organization,
             'owned' => $owned,
+            'isApplied' => $organization !== null && (int) $organization->themeID === $theme->id,
+            'isHost' => $organization !== null && $organization->hostID === Auth::id(),
         ]);
     }
 
-    public function setTheme4org(Request $request, $theme_id, $org_id){
-        $org = Organization::find($org_id);
-        $theme4org = Theme4orgWallet::where('themeID',$theme_id)->where('OrganizationID',$org_id)->first();
-        $user = Auth::user();
-        if($theme4org && $user->id == $org->hostID){
-            $org->themeID = $theme4org->themeID;
-            $org->save();
-            return response()->json(["themeID"=>$theme4org->themeID],200);
-        } else {
-            return response()->json(["error"=>'error'],500);
+    /**
+     * Áp dụng một chủ đề mà tổ chức đã sở hữu. Chỉ chủ sở hữu tổ chức được phép.
+     */
+    public function apply_theme(Request $request, $organizationID, $themeID)
+    {
+        $organization = Organization::query()->find($organizationID);
+        if (! $organization) {
+            abort(404);
         }
+
+        $theme = Theme4org::query()->find($themeID);
+        if (! $theme) {
+            abort(404);
+        }
+
+        if ($organization->hostID !== Auth::id()) {
+            return redirect()->route('organization', $organization->id)
+                ->with('error', 'Chỉ chủ sở hữu tổ chức mới có thể đổi chủ đề.');
+        }
+
+        // Cột trong theme4org_wallets là `theme4ID` / `organizationID`.
+        $owned = Theme4orgWallet::query()
+            ->where('organizationID', $organization->id)
+            ->where('theme4ID', $theme->id)
+            ->exists();
+
+        if (! $owned) {
+            return redirect()->route('themes.org.show', ['id' => $theme->id, 'organizationID' => $organization->id])
+                ->with('error', 'Tổ chức cần mua chủ đề này trước khi áp dụng.');
+        }
+
+        $organization->themeID = $theme->id;
+        $organization->save();
+
+        return redirect()->route('organization.settings', $organization->id)
+            ->with('success', 'Đã áp dụng chủ đề "'.$theme->name.'" cho tổ chức.');
+    }
+
+    /**
+     * Gỡ chủ đề của tổ chức, quay về giao diện mặc định.
+     */
+    public function reset_theme(Request $request, $organizationID)
+    {
+        $organization = Organization::query()->find($organizationID);
+        if (! $organization) {
+            abort(404);
+        }
+
+        if ($organization->hostID !== Auth::id()) {
+            return redirect()->route('organization', $organization->id)
+                ->with('error', 'Chỉ chủ sở hữu tổ chức mới có thể đổi chủ đề.');
+        }
+
+        $organization->themeID = null;
+        $organization->save();
+
+        return redirect()->route('organization.settings', $organization->id)
+            ->with('success', 'Tổ chức đã quay lại giao diện mặc định.');
     }
 }
-

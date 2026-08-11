@@ -22,10 +22,10 @@
     <div class="note-layout">
         {{-- Create note card — đặt cạnh note deck, cùng kích thước 420px --}}
         <div class="card note-card note-card-create" data-card-mode="CREATE" data-note-id="">
-            <div class="card-header note-header" style="background-color: #FACC15; display: flex; justify-content: center; align-items: center;">
+            <div class="card-header note-header" style="background-color: var(--nk-yellow); display: flex; justify-content: center; align-items: center;">
                 <p>Tạo ghi chú</p>
             </div>
-            <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
+            <div class="card-body rounded" style="background-color: var(--nk-sticky); padding: 20px;">
                 <form action="{{ route('create.note') }}" method="POST">
                     @csrf
                     <div class="mb-3">
@@ -60,16 +60,21 @@
                                     <button type="button" data-action="delete">Xóa</button>
                                 </div>
                             </div>
-                            <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
+                            <div class="card-body rounded" style="background-color: var(--nk-sticky); padding: 20px;">
                                 <a href="{{ route('note', $note->id) }}" style="text-decoration: none; color: inherit;">
                                     <h3 class="card-title">{{ $note->title }}</h3>
                                 </a>
                                 <span class="d-none note-full-description">{{ $note->description }}</span>
                                 <p class="card-text">{{ \Illuminate\Support\Str::limit($note->description, 200) }}</p>
                                 <p class="card-text text-secondary">Bởi: {{ $note->creater?->name ?? 'Bạn' }}</p>
-                                @if (in_array($note->id, $doneNoteIds))
-                                    <span class="badge rounded-pill text-bg-success">✓ Hoàn thành</span>
-                                @endif
+                                <div style="display: flex;">
+                                    @if (in_array($note->id, $doneNoteIds))
+                                        <span class="badge rounded-pill text-bg-success">✓ Hoàn thành</span>
+                                    @endif
+                                    @if ($note->organizationID)
+                                        <span class="badge rounded-pill text-bg-primary">Ghi trong Org.{{ $note->organizationID }}</span>
+                                    @endif
+                                </div>
                             </div>
                             <div class="note-overlay" aria-hidden="true">
                                 <div class="overlay-box">Đánh dấu hoàn thành</div>
@@ -84,6 +89,12 @@
             </div>
         @endif
     </div>
+
+    @if ($notes->hasPages())
+        <div class="d-flex justify-content-center mt-4">
+            {{ $notes->links() }}
+        </div>
+    @endif
 @endsection
 
 @section('content-mobile')
@@ -103,7 +114,7 @@
                             <button type="button" data-action="delete">Xóa</button>
                         </div>
                     </div>
-                    <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
+                    <div class="card-body rounded" style="background-color: var(--nk-sticky); padding: 20px;">
                         <a href="{{ route('note', $note->id) }}" style="text-decoration: none; color: inherit;">
                             <h3 class="card-title">{{ $note->title }}</h3>
                         </a>
@@ -124,6 +135,12 @@
         <div class="text-center py-5">
             <div style="font-size: 4rem;">📌</div>
             <h3>Chưa có ghi chú nào</h3>
+        </div>
+    @endif
+
+    @if ($notes->hasPages())
+        <div class="d-flex justify-content-center mt-4">
+            {{ $notes->links() }}
         </div>
     @endif
 @endsection

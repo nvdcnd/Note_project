@@ -42,6 +42,12 @@ class User extends Authenticatable
         return $this->hasMany(Theme4userWallet::class, 'userID');
     }
 
+    /** Chủ đề cá nhân đang được áp dụng (null nếu dùng giao diện mặc định). */
+    public function appliedTheme()
+    {
+        return $this->belongsTo(Theme4user::class, 'theme4_id');
+    }
+
     /**
      * Get the attributes that should be cast.
      *

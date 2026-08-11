@@ -5,11 +5,11 @@
 @section('content')
     <div class="row justify-content-center note-page-center">
         <div class="col-lg-7 col-12">
-            <div class="card note-card" data-card-mode="VIEW" data-note-id="{{ $note->id }}">
-                <div class="card-header note-header" style="background-color: #FACC15;">
+            <div class="card note-card note-card-static" data-note-id="{{ $note->id }}">
+                <div class="card-header note-header" style="background-color: var(--nk-yellow);">
                     <p>Tạo lúc: {{ $note->created_at?->format('Y-m-d H:i') }}</p>
                 </div>
-                <div class="card-body rounded" style="background-color: #FFE86E; padding: 24px;">
+                <div class="card-body rounded" style="background-color: var(--nk-sticky); padding: 24px;">
                     <h3 class="card-title">{{ $note->title }}</h3>
                     <p class="card-text" style="white-space: pre-wrap;">{{ $note->description }}</p>
                     <p class="card-text text-secondary">Bởi: {{ $note->creater?->name ?? 'Không rõ' }}</p>
@@ -40,10 +40,10 @@
 
             {{-- Replies --}}
             <div class="card mt-4">
-                <div class="card-header" style="background-color: #FACC15;">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
                     <h4 style="margin: 0; font-size: 1.4rem;">💬 Trả lời ({{ $replies->count() }})</h4>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     @forelse ($replies as $reply)
                         <div class="mb-3 p-3 rounded" style="background: rgba(255,255,255,0.6);">
                             <p style="margin: 0; white-space: pre-wrap;">{{ $reply->description }}</p>
@@ -74,10 +74,10 @@
             {{-- Share list --}}
             @if ($isCreator)
                 <div class="card mt-4">
-                    <div class="card-header" style="background-color: #FACC15;">
+                    <div class="card-header" style="background-color: var(--nk-yellow);">
                         <h4 style="margin: 0; font-size: 1.4rem;">🔗 Đã chia sẻ với</h4>
                     </div>
-                    <div class="card-body" style="background-color: #FFE86E;">
+                    <div class="card-body" style="background-color: var(--nk-sticky);">
                         @forelse ($shares as $share)
                             <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded" style="background: rgba(255,255,255,0.6);">
                                 <span>{{ $share->user?->name ?? 'Người dùng #'.$share->shared_with }} ({{ $share->user?->email }})</span>
@@ -107,11 +107,11 @@
 @endsection
 
 @section('content-mobile')
-    <div class="card note-card" data-card-mode="VIEW" data-note-id="{{ $note->id }}">
-        <div class="card-header note-header" style="background-color: #FACC15;">
+    <div class="card note-card note-card-static" data-note-id="{{ $note->id }}">
+        <div class="card-header note-header" style="background-color: var(--nk-yellow);">
             <p>Tạo lúc: {{ $note->created_at?->format('Y-m-d H:i') }}</p>
         </div>
-        <div class="card-body rounded" style="background-color: #FFE86E; padding: 24px;">
+        <div class="card-body rounded" style="background-color: var(--nk-sticky); padding: 24px;">
             <h3 class="card-title">{{ $note->title }}</h3>
             <p class="card-text" style="white-space: pre-wrap;">{{ $note->description }}</p>
             <p class="card-text text-secondary">Bởi: {{ $note->creater?->name ?? 'Không rõ' }}</p>

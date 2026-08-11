@@ -6,10 +6,10 @@
     <h2 class="text-center mb-4">Danh sách thành viên - {{ $organization->name }}</h2>
 
     <div class="card mb-4">
-        <div class="card-header" style="background-color: #FACC15;">
+        <div class="card-header" style="background-color: var(--nk-yellow);">
             <h4 style="margin: 0; font-size: 1.3rem;">Thêm thành viên mới</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             <form action="{{ route('share.organization', $organization->id) }}" method="POST">
                 @csrf
                 <div class="mb-3">
@@ -22,10 +22,10 @@
     </div>
 
     <div class="card mb-4">
-        <div class="card-header" style="background-color: #FACC15;">
+        <div class="card-header" style="background-color: var(--nk-yellow);">
             <h4 style="margin: 0; font-size: 1.3rem;">Thành viên hiện tại ({{ $currentMemberList->count() }})</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             @forelse ($currentMemberList as $member)
                 <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded" style="background: rgba(255,255,255,0.6);">
                     <span><strong>{{ $member->user?->name }}</strong> <small class="text-muted">{{ $member->user?->email }}</small></span>
@@ -48,10 +48,10 @@
     </div>
 
     <div class="card">
-        <div class="card-header" style="background-color: #FACC15;">
+        <div class="card-header" style="background-color: var(--nk-yellow);">
             <h4 style="margin: 0; font-size: 1.3rem;">Chờ duyệt ({{ $pendingMemberList->count() }})</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             @forelse ($pendingMemberList as $member)
                 <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded" style="background: rgba(255,255,255,0.6);">
                     <span><strong>{{ $member->user?->name ?? '#' . $member->userID }}</strong> <small class="text-muted">{{ $member->user?->email }}</small></span>
@@ -65,8 +65,8 @@
 
 @section('content-mobile')
     <div class="card w-100 mb-3">
-        <div class="card-header" style="background-color: #FACC15;"><h4 style="margin: 0;">Thêm thành viên</h4></div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-header" style="background-color: var(--nk-yellow);"><h4 style="margin: 0;">Thêm thành viên</h4></div>
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             <form action="{{ route('share.organization', $organization->id) }}" method="POST">
                 @csrf
                 <div class="mb-3">

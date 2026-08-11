@@ -50,7 +50,7 @@
 
         @foreach ($pendingOrganizations as $pending)
             <div class="col-lg-4 col-md-6 col-12">
-                <div class="card h-100" style="border: 2px dashed #FACC15;">
+                <div class="card h-100" style="border: 2px dashed var(--nk-yellow);">
                     <div class="card-body">
                         <h5 class="card-title" style="font-size: 1.4rem;">{{ $pending->organization?->name ?? 'Tổ chức' }}</h5>
                         <p class="card-text"><small class="text-body-secondary">Lời mời đang chờ xử lý</small></p>
@@ -84,7 +84,7 @@
         </div>
     @endforeach
     @foreach ($pendingOrganizations as $pending)
-        <div class="card mb-3 w-100" style="border: 2px dashed #FACC15;">
+        <div class="card mb-3 w-100" style="border: 2px dashed var(--nk-yellow);">
             <div class="card-body">
                 <h5 class="card-title">{{ $pending->organization?->name ?? 'Tổ chức' }}</h5>
                 <div class="d-flex gap-2">

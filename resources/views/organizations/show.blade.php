@@ -21,10 +21,10 @@
     <div class="note-layout">
         {{-- Create note card — đặt cạnh note deck, cùng kích thước 420px --}}
         <div class="card note-card note-card-create" data-card-mode="CREATE">
-            <div class="card-header note-header" style="background-color: #FACC15; display: flex; justify-content: center;">
+            <div class="card-header note-header" style="background-color: var(--nk-yellow); display: flex; justify-content: center;">
                 <p>Tạo ghi chú trong tổ chức</p>
             </div>
-            <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
+            <div class="card-body rounded" style="background-color: var(--nk-sticky); padding: 20px;">
                 <form action="{{ route('create.note.organization', $organization->id) }}" method="POST">
                     @csrf
                     <div class="mb-3">
@@ -57,7 +57,7 @@
                                 <button type="button" data-action="delete">Xóa</button>
                             </div>
                         </div>
-                        <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
+                        <div class="card-body rounded" style="background-color: var(--nk-sticky); padding: 20px;">
                             <a href="{{ route('note', $note->id) }}" style="text-decoration: none; color: inherit;">
                                 <h3 class="card-title">{{ $note->title }}</h3>
                             </a>
@@ -76,6 +76,12 @@
             <p class="text-muted text-center py-4">Chưa có ghi chú nào trong tổ chức này.</p>
         @endif
     </div>
+
+    @if ($notes->hasPages())
+        <div class="d-flex justify-content-center mt-4">
+            {{ $notes->links() }}
+        </div>
+    @endif
 @endsection
 
 @section('content-mobile')
@@ -95,7 +101,7 @@
                             <button type="button" data-action="delete">Xóa</button>
                         </div>
                     </div>
-                    <div class="card-body rounded" style="background-color: #FFE86E; padding: 20px;">
+                    <div class="card-body rounded" style="background-color: var(--nk-sticky); padding: 20px;">
                         <h3 class="card-title">{{ $note->title }}</h3>
                         <span class="d-none note-full-description">{{ $note->description }}</span>
                         <p class="card-text">{{ Str::limit($note->description, 200) }}</p>
@@ -108,6 +114,12 @@
         <div class="text-center py-5">
             <div style="font-size: 4rem;">🏢</div>
             <h3>Chưa có ghi chú</h3>
+        </div>
+    @endif
+
+    @if ($notes->hasPages())
+        <div class="d-flex justify-content-center mt-4">
+            {{ $notes->links() }}
         </div>
     @endif
 @endsection

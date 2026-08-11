@@ -3,7 +3,7 @@
 @section('title', 'Noteket - Số dư')
 
 @section('content')
-    <div class="card w-100 mb-3" style="display: flex; justify-content: center; border: 2px solid #FFE86E;">
+    <div class="card w-100 mb-3" style="display: flex; justify-content: center; border: 2px solid var(--nk-sticky);">
         <div class="card-body">
             <div class="d-flex align-items-center" style="margin-bottom: -10px;">
                 <h1 style="font-size: 3rem;">{{ number_format($user->balance, 0, ',', '.') }}</h1>
@@ -77,7 +77,7 @@
 @endsection
 
 @section('content-mobile')
-    <div class="card w-100 mb-3" style="display: flex; justify-content: center; border: 2px solid #FFE86E;">
+    <div class="card w-100 mb-3" style="display: flex; justify-content: center; border: 2px solid var(--nk-sticky);">
         <div class="card-body">
             <div class="d-flex align-items-center" style="margin-bottom: -10px;">
                 <h1>{{ number_format($user->balance, 0, ',', '.') }}</h1>

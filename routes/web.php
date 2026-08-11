@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BalanceController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\MarkAsDoneController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\Organization2userTransactionController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Theme4userWalletController;
 use App\Http\Controllers\ThemeRequestController;
 use App\Http\Controllers\User2organizationTransactionController;
 use App\Http\Controllers\User2userTransactionController;
+use App\Models\ThemeRequest;
 use Illuminate\Support\Facades\Route;
 
 // ---------------------------------------------------------------------------
@@ -42,6 +44,12 @@ Route::get('/signup', function () {
 Route::post('/signup', [AuthenticationController::class, 'signup'])
     ->middleware('throttle:5,1')
     ->name('signup.post');
+
+// Nhận lời mời (công khai — người được mời chưa có tài khoản)
+Route::get('/invite/{token}', [InvitationController::class, 'show'])->name('invitation.show');
+Route::post('/invite/{token}', [InvitationController::class, 'accept'])
+    ->middleware('throttle:5,1')
+    ->name('invitation.accept');
 
 // Password reset (public)
 Route::get('/forgot-password', [PasswordChangeRequestController::class, 'forgot_password_view'])->name('password.forgot');
@@ -116,7 +124,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user2user/create/transaction', [User2userTransactionController::class, 'create_view'])->name('user2user_transaction_view');
     Route::get('/user2user/verify/transaction/{id}', [User2userTransactionController::class, 'verify_view'])->name('user2user_transaction_verify_view');
     Route::get('/user2user/{id}/transaction/history', [User2userTransactionController::class, 'history_view'])->name('user2user_transaction_history_view');
-    Route::post('/user2user/create/transaction', [User2userTransactionController::class, 'user2user_transaction_create'])->name('user2user_transaction_create');
+    // Tạo giao dịch cũng phải bị giới hạn tần suất, không chỉ bước verify:
+    // mỗi lần tạo đều sinh OTP và gửi email, nên là đường spam rất rẻ (E7).
+    Route::post('/user2user/create/transaction', [User2userTransactionController::class, 'user2user_transaction_create'])
+        ->middleware('throttle:5,1')
+        ->name('user2user_transaction_create');
     Route::post('/user2user/verify/transaction/{id}', [User2userTransactionController::class, 'user2user_transaction_verify'])
         ->middleware('throttle:5,1')
         ->name('user2user_transaction_verify');
@@ -126,7 +138,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user2organization/create/transaction', [User2organizationTransactionController::class, 'create_view'])->name('user2organization_transaction_view');
     Route::get('/user2organization/verify/transaction/{id}', [User2organizationTransactionController::class, 'verify_view'])->name('user2organization_transaction_verify_view');
     Route::get('/user2organization/{id}/transaction/history', [User2organizationTransactionController::class, 'history_view'])->name('user2organization_transaction_history_view');
-    Route::post('/user2organization/create/transaction', [User2organizationTransactionController::class, 'user2organization_transaction_create'])->name('user2organization_transaction_create');
+    Route::post('/user2organization/create/transaction', [User2organizationTransactionController::class, 'user2organization_transaction_create'])
+        ->middleware('throttle:5,1')
+        ->name('user2organization_transaction_create');
     Route::post('/user2organization/verify/transaction/{id}', [User2organizationTransactionController::class, 'user2organization_transaction_verify'])
         ->middleware('throttle:5,1')
         ->name('user2organization_transaction_verify');
@@ -136,35 +150,60 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/organization2user/{id}/create/transaction', [Organization2userTransactionController::class, 'create_view'])->name('organization2user_transaction_view');
     Route::get('/organization2user/verify/transaction/{id}', [Organization2userTransactionController::class, 'verify_view'])->name('organization2user_transaction_verify_view');
     Route::get('/organization2user/{id}/transaction/history', [Organization2userTransactionController::class, 'history_view'])->name('organization2user_transaction_history_view');
-    Route::post('/organization2user/{id}/create/transaction', [Organization2userTransactionController::class, 'organization2user_transaction_create'])->name('organization2user_transaction_create');
+    Route::post('/organization2user/{id}/create/transaction', [Organization2userTransactionController::class, 'organization2user_transaction_create'])
+        ->middleware('throttle:5,1')
+        ->name('organization2user_transaction_create');
     Route::post('/organization2user/{id}/verify/transaction', [Organization2userTransactionController::class, 'organization2user_transaction_verify'])
         ->middleware('throttle:5,1')
         ->name('organization2user_transaction_verify');
     Route::post('/organization2user/{id}/cancel/transaction', [Organization2userTransactionController::class, 'organization2user_transaction_cancel'])->name('organization2user_transaction_cancel');
 
     // Theme store
+    // LƯU Ý THỨ TỰ: '/themes/org' phải đứng TRƯỚC '/themes/{id}', nếu không Laravel
+    // sẽ khớp '/themes/org' vào route show với $id = 'org' và trả 404.
+    // Ràng buộc ->where('id', '[0-9]+') là lớp bảo vệ thứ hai cho lỗi này.
     Route::get('/themes', [Theme4userController::class, 'index'])->name('themes.index');
-    Route::get('/themes/{id}', [Theme4userController::class, 'show'])->name('themes.show');
     Route::get('/themes/org', [Theme4orgController::class, 'index'])->name('themes.org.index');
-    Route::get('/themes/org/{id}', [Theme4orgController::class, 'show'])->name('themes.org.show');
+    Route::get('/themes/org/{id}', [Theme4orgController::class, 'show'])
+        ->where('id', '[0-9]+')
+        ->name('themes.org.show');
+    Route::get('/themes/{id}', [Theme4userController::class, 'show'])
+        ->where('id', '[0-9]+')
+        ->name('themes.show');
+
+    // Theme apply (áp dụng chủ đề đã sở hữu)
+    Route::post('/themes/apply/reset', [Theme4userController::class, 'reset_theme'])->name('themes.reset');
+    Route::post('/themes/apply/{id}', [Theme4userController::class, 'apply_theme'])
+        ->where('id', '[0-9]+')
+        ->name('themes.apply');
+    Route::post('/organization/{organizationID}/themes/apply/reset', [Theme4orgController::class, 'reset_theme'])
+        ->where('organizationID', '[0-9]+')
+        ->name('themes.org.reset');
+    Route::post('/organization/{organizationID}/themes/apply/{themeID}', [Theme4orgController::class, 'apply_theme'])
+        ->where(['organizationID' => '[0-9]+', 'themeID' => '[0-9]+'])
+        ->name('themes.org.apply');
 
     // Theme create request
     Route::get('/create/theme/request', fn () => view('themes.request'))->name('create_theme_request_view');
     Route::post('/create/theme/request', [ThemeRequestController::class, 'create_theme_request'])->name('create_theme_request');
     Route::get('/create/theme/request/success/{id}', function ($id) {
-        $theme = \App\Models\ThemeRequest::query()->find($id);
+        $theme = ThemeRequest::query()->find($id);
 
         return view('themes.request_success', compact('theme'));
     })->name('create_theme_request_success_view');
 
     // Theme buy (user)
-    Route::post('/theme/user/buy/{themeID}', [Theme4userWalletController::class, 'user_buy_theme'])->name('theme.user.buy');
+    Route::post('/theme/user/buy/{themeID}', [Theme4userWalletController::class, 'user_buy_theme'])
+        ->middleware('throttle:5,1')
+        ->name('theme.user.buy');
     Route::post('/theme/user/buy/verify/{id}', [Theme4userWalletController::class, 'user_buy_theme_verify_otp'])
         ->middleware('throttle:5,1')
         ->name('theme.user.buy.verify');
 
     // Theme buy (org)
-    Route::post('/theme/org/buy/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme'])->name('theme.org.buy');
+    Route::post('/theme/org/buy/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme'])
+        ->middleware('throttle:5,1')
+        ->name('theme.org.buy');
     Route::post('/theme/org/buy/verify/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme_verify_otp'])
         ->middleware('throttle:5,1')
         ->name('theme.org.buy.verify');

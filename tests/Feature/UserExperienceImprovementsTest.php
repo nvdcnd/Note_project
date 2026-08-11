@@ -5,6 +5,7 @@ use App\Http\Controllers\PivotForNoteController;
 use App\Http\Controllers\User2userTransactionController;
 use App\Mail\Mail40account;
 use App\Mail\UserEmail;
+use App\Models\Invitation;
 use App\Models\Note;
 use App\Models\Organization;
 use App\Models\OrganizationsMember;
@@ -58,9 +59,12 @@ it('adds valid members and skips missing addresses instead of failing the whole 
     $response = app(OrganizationsMemberController::class)->add_member($request, $organization->id);
 
     expect($response->isRedirect())->toBeTrue();
-    expect(session('success'))->toBe('Member added successfully');
+    expect(session('success'))->toBe('Đã thêm thành viên.');
     expect(OrganizationsMember::where('organizationID', $organization->id)->count())->toBe(1);
     expect(OrganizationsMember::where('organizationID', $organization->id)->where('userID', $member->id)->exists())->toBeTrue();
+
+    // Email chưa đăng ký giờ nhận được lời mời thay vì bị bỏ qua âm thầm.
+    expect(Invitation::where('email', 'missing@example.com')->exists())->toBeTrue();
 });
 
 it('keeps a pending transaction alive when the passkey is wrong so the user can retry', function () {

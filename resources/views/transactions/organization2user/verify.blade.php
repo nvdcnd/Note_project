@@ -6,10 +6,10 @@
     <div class="row justify-content-center">
         <div class="col-lg-6 col-12">
             <div class="card">
-                <div class="card-header" style="background-color: #FACC15;">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
                     <h3 style="margin: 0; font-size: 1.6rem;">Xác thực giao dịch #{{ $transaction->id }}</h3>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     <div class="mb-3">
                         <p>Tổ chức #{{ $transaction->organizationID }} chuyển <strong>{{ number_format($transaction->amount, 0, ',', '.') }} điểm</strong> đến người dùng #{{ $transaction->userID }}</p>
                         <p class="text-muted">Mã OTP đã được gửi tới email của bạn và hết hạn sau 10 phút.</p>

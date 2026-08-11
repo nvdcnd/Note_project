@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrganizationInvitation;
 use App\Mail\user_accept_organization;
+use App\Models\Invitation;
 use App\Models\Organization;
 use App\Models\OrganizationsMember;
 use App\Models\User;
@@ -16,11 +18,11 @@ class OrganizationsMemberController extends Controller
     {
         $organization = Organization::query()->find($organizationID);
         if (! $organization) {
-            return redirect()->route('organizations.index')->with('error', 'Organization not found');
+            return redirect()->route('organizations.index')->with('error', 'Không tìm thấy tổ chức.');
         }
 
         if ($organization->hostID !== Auth::id()) {
-            return redirect()->route('organization', $organization->id)->with('error', 'Only the host can add members');
+            return redirect()->route('organization', $organization->id)->with('error', 'Chỉ chủ sở hữu mới có thể thêm thành viên.');
         }
 
         // Accept either user_list[] (array) or user_list_text (comma separated).
@@ -43,12 +45,16 @@ class OrganizationsMemberController extends Controller
 
         $addedCount = 0;
         $skippedExisting = 0;
-        $invalidCount = 0;
+        $invitedCount = 0;
 
         foreach ($user_list as $email) {
             $targetUser = User::where('email', $email)->first();
             if (! $targetUser) {
-                $invalidCount++;
+                // Email chưa có tài khoản: gửi lời mời có link đăng ký thay vì
+                // im lặng bỏ qua như trước.
+                $issued = Invitation::issueFor($organization, $email, Auth::id());
+                Mail::to($email)->queue(new OrganizationInvitation($organization, $email, $issued['token']));
+                $invitedCount++;
 
                 continue;
             }
@@ -73,13 +79,15 @@ class OrganizationsMemberController extends Controller
             $addedCount++;
         }
 
-        if ($addedCount === 0) {
-            return redirect()->route('organization', $organizationID)->with('warning', 'No new members were added');
+        if ($addedCount === 0 && $invitedCount === 0) {
+            return redirect()->route('organization', $organizationID)->with('warning', 'Không có thành viên mới nào được thêm.');
         }
 
-        $response = redirect()->route('organization', $organizationID)->with('success', 'Member added successfully');
-        if ($invalidCount > 0 || $skippedExisting > 0) {
-            $response->with('warning', 'Some invitations were skipped because they were invalid or already pending.');
+        $response = redirect()->route('organization', $organizationID)->with('success', 'Đã thêm thành viên.');
+        if ($skippedExisting > 0) {
+            $response->with('warning', 'Một số lời mời đã bị bỏ qua vì không hợp lệ hoặc đang chờ xử lý.');
+        } elseif ($invitedCount > 0 && $addedCount === 0) {
+            $response->with('warning', 'Đã gửi lời mời đăng ký tới '.$invitedCount.' email chưa có tài khoản.');
         }
 
         return $response;
@@ -91,16 +99,16 @@ class OrganizationsMemberController extends Controller
         if ($organization_member) {
             // Only the invited user themselves may accept.
             if ($organization_member->userID !== Auth::id()) {
-                return redirect()->route('home')->with('error', 'You are not allowed to accept this invitation');
+                return redirect()->route('home')->with('error', 'Bạn không có quyền chấp nhận lời mời này.');
             }
 
             $organization_member->status = true;
             $organization_member->save();
 
-            return redirect()->route('organization', $organization_member->organizationID)->with('success', 'Member accepted successfully');
+            return redirect()->route('organization', $organization_member->organizationID)->with('success', 'Đã chấp nhận thành viên.');
         }
 
-        return redirect()->route('home')->with('error', 'Member not found');
+        return redirect()->route('home')->with('error', 'Không tìm thấy thành viên.');
     }
 
     public function decline_member(Request $request, $id)
@@ -108,15 +116,15 @@ class OrganizationsMemberController extends Controller
         $organization_member = OrganizationsMember::find($id);
         if ($organization_member) {
             if ($organization_member->userID !== Auth::id()) {
-                return redirect()->route('home')->with('error', 'You are not allowed to decline this invitation');
+                return redirect()->route('home')->with('error', 'Bạn không có quyền từ chối lời mời này.');
             }
 
             $organization_member->delete();
 
-            return redirect()->route('home')->with('success', 'You have declined the invitation');
+            return redirect()->route('home')->with('success', 'Bạn đã từ chối lời mời.');
         }
 
-        return redirect()->route('home')->with('error', 'Member not found');
+        return redirect()->route('home')->with('error', 'Không tìm thấy thành viên.');
     }
 
     public function member_leave(Request $request, $id)
@@ -124,14 +132,14 @@ class OrganizationsMemberController extends Controller
         $organization_member = OrganizationsMember::where('organizationID', $id)->where('userID', Auth::user()->id)->first();
         if ($organization_member && $organization_member->userID == Auth::user()->id) {
             if (Organization::where('hostID', $organization_member->userID)->where('id', $id)->first()) {
-                return redirect()->route('organization', $id)->with('error', 'You are the host of this organization. First, change the host. And then you can leave');
+                return redirect()->route('organization', $id)->with('error', 'Bạn đang là chủ sở hữu tổ chức. Hãy chuyển quyền chủ sở hữu trước khi rời tổ chức.');
             }
             $organization_member->delete();
 
-            return redirect()->route('organizations.index')->with('success', 'You have left the organization');
+            return redirect()->route('organizations.index')->with('success', 'Bạn đã rời khỏi tổ chức.');
         }
 
-        return redirect()->route('home')->with('error', 'Member record not found');
+        return redirect()->route('home')->with('error', 'Không tìm thấy bản ghi thành viên.');
     }
 
     public function remove_member(Request $request, $organizationid, $userID)
@@ -141,9 +149,9 @@ class OrganizationsMemberController extends Controller
         if ($organization_member && $organization && ($organization->hostID == Auth::user()->id)) {
             $organization_member->delete();
 
-            return redirect()->route('organization', $organizationid)->with('success', 'Member removed successfully');
+            return redirect()->route('organization', $organizationid)->with('success', 'Đã xóa thành viên.');
         }
 
-        return redirect()->route('organization', $organizationid)->with('error', 'Member not found or You are not the host');
+        return redirect()->route('organization', $organizationid)->with('error', 'Không tìm thấy thành viên, hoặc bạn không phải chủ sở hữu.');
     }
 }

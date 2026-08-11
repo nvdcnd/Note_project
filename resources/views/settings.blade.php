@@ -8,10 +8,10 @@
     <div class="row justify-content-center">
         <div class="col-lg-6 col-12">
             <div class="card mb-4">
-                <div class="card-header" style="background-color: #FACC15;">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
                     <h4 style="margin: 0; font-size: 1.3rem;">Thông tin cá nhân</h4>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     <form action="{{ route('settings.profile') }}" method="POST">
                         @csrf
                         <div class="mb-3">
@@ -28,15 +28,15 @@
             </div>
 
             <div class="card mb-4">
-                <div class="card-header" style="background-color: #FACC15;">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
                     <h4 style="margin: 0; font-size: 1.3rem;">Ảnh đại diện</h4>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     <div class="text-center mb-3">
                         @if ($user->avatar_image_url)
                             <img src="{{ asset('storage/' . $user->avatar_image_url) }}" class="rounded-circle" style="width: 90px; height: 90px; object-fit: cover;" alt="Avatar">
                         @else
-                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 90px; height: 90px; background: #FACC15; font-size: 2.5rem;">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 90px; height: 90px; background: var(--nk-yellow); font-size: 2.5rem;">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
                         @endif
                     </div>
                     <form action="{{ route('settings.avatar') }}" method="POST" enctype="multipart/form-data">
@@ -50,10 +50,10 @@
             </div>
 
             <div class="card mb-4">
-                <div class="card-header" style="background-color: #FACC15;">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
                     <h4 style="margin: 0; font-size: 1.3rem;">Đổi mật khẩu</h4>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     <form action="{{ route('settings.password') }}" method="POST">
                         @csrf
                         <div class="mb-3">
@@ -77,7 +77,7 @@
                 <div class="card-header" style="background-color: #ef4444; color: #fff;">
                     <h4 style="margin: 0; font-size: 1.3rem;">Phiên đăng nhập</h4>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-outline-danger w-100">Đăng xuất</button>
@@ -90,10 +90,10 @@
 
 @section('content-mobile')
     <div class="card w-100 mb-3">
-        <div class="card-header" style="background-color: #FACC15;">
+        <div class="card-header" style="background-color: var(--nk-yellow);">
             <h4 style="margin: 0; font-size: 1.3rem;">Thông tin cá nhân</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             <form action="{{ route('settings.profile') }}" method="POST">
                 @csrf
                 <div class="mb-3">
@@ -110,10 +110,10 @@
     </div>
 
     <div class="card w-100 mb-3">
-        <div class="card-header" style="background-color: #FACC15;">
+        <div class="card-header" style="background-color: var(--nk-yellow);">
             <h4 style="margin: 0; font-size: 1.3rem;">Ảnh đại diện</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             <form action="{{ route('settings.avatar') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="mb-3">
@@ -125,10 +125,10 @@
     </div>
 
     <div class="card w-100 mb-3">
-        <div class="card-header" style="background-color: #FACC15;">
+        <div class="card-header" style="background-color: var(--nk-yellow);">
             <h4 style="margin: 0; font-size: 1.3rem;">Đổi mật khẩu</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             <form action="{{ route('settings.password') }}" method="POST">
                 @csrf
                 <div class="mb-3">
@@ -152,7 +152,7 @@
         <div class="card-header" style="background-color: #ef4444; color: #fff;">
             <h4 style="margin: 0; font-size: 1.3rem;">Phiên đăng nhập</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-outline-danger w-100">Đăng xuất</button>

@@ -3,6 +3,9 @@
    Extracted from resources/view/test2 prototypes (11-08-2026)
    ============================================================ */
 
+/* Các biến này là điểm móc của hệ thống chủ đề: khi người dùng áp dụng một
+   chủ đề, layout chèn một khối :root mới ở SAU file này để ghi đè.
+   Xem App\Support\ThemeStyle. */
 :root {
     --nk-yellow: #FACC15;
     --nk-yellow-dark: #EAB308;
@@ -10,6 +13,7 @@
     --nk-pink: #FFC0CB;
     --nk-ink: #111827;
     --nk-slate: #475569;
+    --nk-page: #fdf8e3;
 }
 
 html, body {
@@ -18,7 +22,7 @@ html, body {
 
 body {
     font-family: 'Caveat', cursive;
-    background: #fdf8e3;
+    background: var(--nk-page);
 }
 
 h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea {
@@ -49,13 +53,16 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 20px;
+    /* Không đệm ngang: .sidebar đã có padding 20px rồi. Đệm chồng lên nhau
+       làm vùng nav chỉ còn ~119px khiến "Trang chủ" bị xuống 2 dòng. */
+    padding: 20px 0;
     top: 0;
 }
 
 .sidebar ul {
     list-style-type: none;
-    padding: 10px;
+    /* Tương tự: bỏ đệm ngang để mục nav dùng trọn bề rộng sidebar. */
+    padding: 0;
 }
 
 .sidebar ul li {
@@ -73,6 +80,8 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
     gap: 10px;
     padding: 10px;
     border-radius: 8px;
+    /* Nhãn nav luôn nằm trên một dòng, không tự xuống dòng khi hẹp. */
+    white-space: nowrap;
     transition: all 0.2s ease;
 }
 
@@ -80,7 +89,10 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
 .sidebar ul li a.active {
     background-color: var(--nk-pink);
     clip-path: polygon(0% 0%, 85% 0%, 100% 50%, 85% 100%, 0% 100%);
-    width: 200px;
+    /* Mũi tên thò ra khỏi sidebar một khoảng CỐ ĐỊNH so với các mục khác.
+       Trước đây đặt cứng 200px nên mục active rộng 200px còn mục thường chỉ
+       119px — hai loại lệch hẳn nhau. */
+    width: calc(100% + 48px);
     color: #000;
 }
 
@@ -321,7 +333,9 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
 }
 
 .note-card .note-header {
-    background: rgba(250, 204, 21, 0.24);
+    /* Dùng biến chủ đề, không dùng rgba cứng: bản cũ vừa nhạt hơn hẳn header
+       của card "Tạo ghi chú" (đục 24%), vừa không đổi màu theo chủ đề. */
+    background: var(--nk-yellow);
     border-bottom: 1px solid rgba(15, 23, 42, 0.08);
     padding: 14px 18px;
     display: flex;
@@ -342,6 +356,31 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
     padding: 16px 18px 20px;
     overflow-y: auto;
     max-height: 65vh;
+}
+
+/* ------------------------------------------------------------------
+   Card ghi chú ở TRANG CHI TIẾT (note.blade.php)
+   Card này chỉ để hiển thị: không nằm trong deck, không có menu ghim,
+   không kéo thả. Nếu để nó dùng chung style của card trong deck thì:
+     - bị giới hạn 420px trong khi các card "Trả lời"/"Chia sẻ" bên dưới
+       rộng 900px, nhìn lệch hẳn;
+     - dính user-select/pointer-events: none nên KHÔNG bôi đen sao chép
+       được nội dung ghi chú của chính mình.
+   ------------------------------------------------------------------ */
+.note-card-static {
+    max-width: none;
+    cursor: default;
+    touch-action: auto;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.note-card-static .card-title,
+.note-card-static .card-text,
+.note-card-static .note-header p {
+    pointer-events: auto;
+    user-select: text;
+    -webkit-user-select: text;
 }
 
 .note-card .card-title {
@@ -469,9 +508,13 @@ h1, h2, h3, h4, h5, h6, p, a, label, td, th, li, button, input, select, textarea
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
+    /* Căn theo MÉP TRÊN, không căn giữa: .note-deck cao 500px (chừa chỗ cho các
+       card xếp chồng thò xuống) còn .note-card-create chỉ cao 420px, nên
+       align-items: center đẩy card tạo note thấp hơn deck đúng 40px. */
+    align-items: flex-start;
     gap: 24px;
     min-height: calc(100vh - 130px);
+    padding-top: 24px;
 }
 
 /* Trang xem 1 ghi chú — căn giữa theo chiều dọc màn hình */

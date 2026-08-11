@@ -23,8 +23,17 @@
                         <p class="card-text flex-grow-1">{{ Str::limit($theme->description, 100) }}</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="badge rounded-pill text-bg-warning" style="font-size: 1rem;">{{ number_format($theme->price, 0, ',', '.') }} điểm</span>
-                            @if ($ownedThemeIds->contains($theme->id))
-                                <span class="badge rounded-pill text-bg-success">✓ Đã sở hữu</span>
+                            @if ($organization && (int) $organization->themeID === $theme->id)
+                                <span class="badge rounded-pill text-bg-primary">★ Đang áp dụng</span>
+                            @elseif ($ownedThemeIds->contains($theme->id))
+                                @if ($isHost)
+                                    <form action="{{ route('themes.org.apply', ['organizationID' => $organization->id, 'themeID' => $theme->id]) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-primary btn-sm">Áp dụng</button>
+                                    </form>
+                                @else
+                                    <span class="badge rounded-pill text-bg-success">✓ Đã sở hữu</span>
+                                @endif
                             @else
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyOrgThemeModal" data-theme-id="{{ $theme->id }}" data-theme-name="{{ $theme->name }}">Mua</button>
                             @endif

@@ -25,9 +25,13 @@ class User2userTransaction extends Model
     ];
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_FINISHED = 'finished';
+
     public const STATUS_EXPIRED = 'expired';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public function sender()

@@ -8,10 +8,10 @@
     <div class="row justify-content-center">
         <div class="col-lg-6 col-12">
             <div class="card mb-4">
-                <div class="card-header" style="background-color: #FACC15;">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
                     <h4 style="margin: 0; font-size: 1.3rem;">Thông tin tổ chức</h4>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     <form action="{{ route('edit.organization', $organization->id) }}" method="POST">
                         @csrf
                         <div class="mb-3">
@@ -28,11 +28,29 @@
             </div>
 
             <div class="card mb-4">
-                <div class="card-header" style="background-color: #FACC15;">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
+                    <h4 style="margin: 0; font-size: 1.3rem;">Chủ đề của tổ chức</h4>
+                </div>
+                <div class="card-body" style="background-color: var(--nk-sticky);">
+                    <p class="mb-2">
+                        Đang áp dụng:
+                        <strong>{{ $organization->appliedTheme?->name ?? 'Giao diện mặc định' }}</strong>
+                    </p>
+                    <a href="{{ route('themes.org.index') }}?organizationID={{ $organization->id }}" class="btn btn-outline-primary w-100 mb-2">Mở cửa hàng chủ đề tổ chức</a>
+                    @if ($organization->themeID)
+                        <form action="{{ route('themes.org.reset', $organization->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-secondary w-100">Quay lại giao diện mặc định</button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
                     <h4 style="margin: 0; font-size: 1.3rem;">Đổi chủ sở hữu</h4>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
-                    <form action="{{ route('organization.change_host_real', $pendingHostRequests->first()?->id ?? 0) }}" method="POST" id="changeHostRealForm" style="display: none;"></form>
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     <form action="{{ route('organization.change_host', $organization->id) }}" method="POST">
                         @csrf
                         <p class="text-muted">Tạo yêu cầu chuyển quyền chủ sở hữu cho thành viên khác.</p>
@@ -58,10 +76,10 @@
             </div>
 
             <div class="card mb-4">
-                <div class="card-header" style="background-color: #FACC15;">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
                     <h4 style="margin: 0; font-size: 1.3rem;">Chọn chủ sở hữu mới</h4>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     @if ($pendingHostRequests->isEmpty())
                         <p class="text-muted">Trước tiên hãy tạo yêu cầu đổi chủ ở trên.</p>
                     @else
@@ -81,7 +99,7 @@
                 <div class="card-header" style="background-color: #ef4444; color: #fff;">
                     <h4 style="margin: 0; font-size: 1.3rem;">Vùng nguy hiểm</h4>
                 </div>
-                <div class="card-body" style="background-color: #FFE86E;">
+                <div class="card-body" style="background-color: var(--nk-sticky);">
                     <form action="{{ route('leave.organization', $organization->id) }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-outline-warning w-100 mb-2">Rời tổ chức</button>
@@ -99,10 +117,10 @@
 
 @section('content-mobile')
     <div class="card w-100 mb-3">
-        <div class="card-header" style="background-color: #FACC15;">
+        <div class="card-header" style="background-color: var(--nk-yellow);">
             <h4 style="margin: 0; font-size: 1.3rem;">Thông tin tổ chức</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             <form action="{{ route('edit.organization', $organization->id) }}" method="POST">
                 @csrf
                 <div class="mb-3">
@@ -119,10 +137,10 @@
     </div>
 
     <div class="card w-100 mb-3">
-        <div class="card-header" style="background-color: #FACC15;">
+        <div class="card-header" style="background-color: var(--nk-yellow);">
             <h4 style="margin: 0; font-size: 1.3rem;">Đổi chủ sở hữu</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             <form action="{{ route('organization.change_host', $organization->id) }}" method="POST">
                 @csrf
                 <p class="text-muted">Tạo yêu cầu chuyển quyền chủ sở hữu cho thành viên khác.</p>
@@ -135,7 +153,7 @@
         <div class="card-header" style="background-color: #ef4444; color: #fff;">
             <h4 style="margin: 0; font-size: 1.3rem;">Vùng nguy hiểm</h4>
         </div>
-        <div class="card-body" style="background-color: #FFE86E;">
+        <div class="card-body" style="background-color: var(--nk-sticky);">
             <form action="{{ route('leave.organization', $organization->id) }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-outline-warning w-100 mb-2">Rời tổ chức</button>

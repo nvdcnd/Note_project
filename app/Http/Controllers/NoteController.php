@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\DB;
 
 class NoteController extends Controller
 {
+    /** Số note hiển thị trên mỗi trang (trang chủ và trang tổ chức). */
+    public const NOTES_PER_PAGE = 20;
+
     public function home(Request $request)
     {
         if (! Auth::check()) {
@@ -35,21 +38,9 @@ class NoteController extends Controller
             $filter = 'all';
         }
 
-        $ownNotes = Note::query()
-            ->where('creater_id', $userId)
-            ->latest()
-            ->take(20)
-            ->get();
-
-        $sharedNotes = Note::query()
-            ->whereIn('id', PivotForNote::query()->where('shared_with', $userId)->select('note_id'))
-            ->latest()
-            ->take(20)
-            ->get();
-
-        // Note cũ đứng trước, note mới xếp sau (hàng đợi): khi note phía trên bị
-        // skip / đánh dấu hoàn thành thì note mới hơn trồi lên thay thế vị trí.
-        $allNotes = $ownNotes->merge($sharedNotes)->unique('id')->sortBy('created_at')->values();
+        $sharedNoteIds = PivotForNote::query()
+            ->where('shared_with', $userId)
+            ->pluck('note_id');
 
         $doneNoteIds = MarkAsDone::query()
             ->where('userID', $userId)
@@ -57,14 +48,23 @@ class NoteController extends Controller
             ->pluck('noteID')
             ->all();
 
-        $notes = match ($filter) {
-            'done' => $allNotes->filter(fn ($note) => in_array($note->id, $doneNoteIds)),
-            'not-done' => $allNotes->filter(fn ($note) => ! in_array($note->id, $doneNoteIds)),
-            'by-me' => $ownNotes,
-            'shared' => $sharedNotes,
-            default => $allNotes,
+        // Tập note người dùng được phép thấy: do mình tạo HOẶC được chia sẻ với mình.
+        $query = Note::query()->where(function ($q) use ($userId, $sharedNoteIds) {
+            $q->where('creater_id', $userId)->orWhereIn('id', $sharedNoteIds);
+        });
+
+        $query = match ($filter) {
+            'done' => $query->whereIn('id', $doneNoteIds),
+            'not-done' => $query->whereNotIn('id', $doneNoteIds),
+            'by-me' => $query->where('creater_id', $userId),
+            'shared' => $query->whereIn('id', $sharedNoteIds),
+            default => $query,
         };
-        $notes = $notes->sortBy('created_at')->values();
+
+        // Note cũ đứng trước, note mới xếp sau (hàng đợi): khi note phía trên được
+        // xử lý xong thì note kế tiếp trồi lên thay thế vị trí.
+        // Phân trang thay cho take(20) để note vượt quá 20 không bị ẩn mất (E3).
+        $notes = $query->oldest()->paginate(self::NOTES_PER_PAGE)->withQueryString();
 
         return view('home', [
             'notes' => $notes,
@@ -89,7 +89,7 @@ class NoteController extends Controller
                 ->exists();
 
         if (! $canView) {
-            abort(403, 'You are not authorized to view this note');
+            abort(403, 'Bạn không có quyền xem ghi chú này.');
         }
 
         $isDone = MarkAsDone::query()
@@ -126,14 +126,14 @@ class NoteController extends Controller
             'status' => false,
         ]);
 
-        return redirect()->route('note', $note->id)->with('success', 'Note created successfully');
+        return redirect()->route('note', $note->id)->with('success', 'Đã tạo ghi chú.');
     }
 
     public function create_note_in_organization(Request $request, $organizationID)
     {
         $organization = Organization::query()->find($organizationID);
         if (! $organization) {
-            return redirect()->route('organizations.index')->with('error', 'Organization not found');
+            return redirect()->route('organizations.index')->with('error', 'Không tìm thấy tổ chức.');
         }
 
         // Must be host or an accepted member to create notes (BE-23).
@@ -144,7 +144,7 @@ class NoteController extends Controller
             ->exists();
 
         if (! $isMember && $organization->hostID !== Auth::id()) {
-            return redirect()->route('organization', $organization->id)->with('error', 'You are not a member of this organization');
+            return redirect()->route('organization', $organization->id)->with('error', 'Bạn không phải thành viên của tổ chức này.');
         }
 
         $validated = $request->validate([
@@ -165,18 +165,18 @@ class NoteController extends Controller
             'status' => false,
         ]);
 
-        return redirect()->route('note', $note->id)->with('success', 'Note created successfully');
+        return redirect()->route('note', $note->id)->with('success', 'Đã tạo ghi chú.');
     }
 
     public function delete_note(Request $request, $id)
     {
         $note = Note::query()->find($id);
         if (! $note) {
-            return redirect()->route('home')->with('error', 'Note not found');
+            return redirect()->route('home')->with('error', 'Không tìm thấy ghi chú.');
         }
 
         if ($note->creater_id !== Auth::id()) {
-            return redirect()->route('note', $note->id)->with('error', 'Only the creator can delete this note');
+            return redirect()->route('note', $note->id)->with('error', 'Chỉ người tạo mới có thể xóa ghi chú này.');
         }
 
         DB::transaction(function () use ($note) {
@@ -186,7 +186,7 @@ class NoteController extends Controller
             $note->delete();
         });
 
-        return redirect()->route('home')->with('success', 'Note deleted successfully');
+        return redirect()->route('home')->with('success', 'Đã xóa ghi chú.');
     }
 
     public function edit_note(Request $request, $id)
@@ -195,7 +195,7 @@ class NoteController extends Controller
         $note = Note::query()->find($id);
 
         if (! $note) {
-            return redirect()->route('home')->with('error', 'Note not found');
+            return redirect()->route('home')->with('error', 'Không tìm thấy ghi chú.');
         }
 
         $canEdit = $note->creater_id === $user->id
@@ -205,7 +205,7 @@ class NoteController extends Controller
                 ->exists();
 
         if (! $canEdit) {
-            return redirect()->route('note', $id)->with('error', 'You cannot edit this note');
+            return redirect()->route('note', $id)->with('error', 'Bạn không thể chỉnh sửa ghi chú này.');
         }
 
         $validated = $request->validate([
@@ -215,6 +215,6 @@ class NoteController extends Controller
 
         $note->update($validated);
 
-        return redirect()->route('note', $id)->with('success', 'Note updated successfully');
+        return redirect()->route('note', $id)->with('success', 'Đã cập nhật ghi chú.');
     }
 }

@@ -30,10 +30,10 @@
 
     <div class="auth-body">
         <div class="card auth-card mx-auto rounded shadow">
-            <div class="card-header" style="background-color: #FACC15;">
+            <div class="card-header" style="background-color: var(--nk-yellow);">
                 <h3 class="text-center" style="color: transparent;">Noteket</h3>
             </div>
-            <div class="card-body rounded p-5" style="background-color: #FFE86E;">
+            <div class="card-body rounded p-5" style="background-color: var(--nk-sticky);">
                 @yield('content')
             </div>
         </div>

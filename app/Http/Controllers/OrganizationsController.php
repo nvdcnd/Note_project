@@ -57,14 +57,17 @@ class OrganizationsController extends Controller
             ->exists();
 
         if (! $isHost && ! $isMember) {
-            abort(403, 'You are not a member of this organization');
+            abort(403, 'Bạn không phải thành viên của tổ chức này.');
         }
 
+        // Cùng quy ước hàng đợi với trang chủ: note cũ trước, note mới sau.
+        // Phải phân trang thay vì take(20), nếu không các note mới nhất của tổ chức
+        // sẽ không bao giờ hiển thị khi tổ chức có hơn 20 note (E-B2 / E3).
         $notes = Note::query()
             ->where('organizationID', $organization->id)
             ->oldest()
-            ->take(20)
-            ->get();
+            ->paginate(NoteController::NOTES_PER_PAGE)
+            ->withQueryString();
 
         $doneNoteIds = MarkAsDone::query()
             ->where('userID', Auth::id())
@@ -95,7 +98,7 @@ class OrganizationsController extends Controller
         }
 
         if ($organization->hostID !== Auth::id()) {
-            return redirect()->route('organization', $organization->id)->with('error', 'You are not authorized to view this dashboard');
+            return redirect()->route('organization', $organization->id)->with('error', 'Bạn không có quyền xem bảng điều hành này.');
         }
 
         $currentMembers = OrganizationsMember::query()
@@ -144,7 +147,7 @@ class OrganizationsController extends Controller
         }
 
         if ($organization->hostID !== Auth::id()) {
-            return redirect()->route('organization', $organization->id)->with('error', 'You are not authorized to view members');
+            return redirect()->route('organization', $organization->id)->with('error', 'Bạn không có quyền xem danh sách thành viên.');
         }
 
         $currentMemberList = OrganizationsMember::query()
@@ -174,7 +177,7 @@ class OrganizationsController extends Controller
         }
 
         if ($organization->hostID !== Auth::id()) {
-            return redirect()->route('organization', $organization->id)->with('error', 'You are not authorized to manage this organization');
+            return redirect()->route('organization', $organization->id)->with('error', 'Bạn không có quyền quản lý tổ chức này.');
         }
 
         $pendingHostRequests = PivotChangeHostOrganization::query()
@@ -238,7 +241,7 @@ class OrganizationsController extends Controller
                 'status' => true,
             ]);
 
-            return redirect()->route('organization', $organization->id)->with('success', 'Organization created successfully');
+            return redirect()->route('organization', $organization->id)->with('success', 'Đã tạo tổ chức.');
         });
     }
 
@@ -246,7 +249,7 @@ class OrganizationsController extends Controller
     {
         $organization = Organization::find($id);
         if (! $organization || $organization->hostID != Auth::user()->id) {
-            return redirect()->route('home')->with('error', 'You are not authorized to edit this organization');
+            return redirect()->route('home')->with('error', 'Bạn không có quyền chỉnh sửa tổ chức này.');
         }
 
         $validated = $request->validate([
@@ -256,14 +259,14 @@ class OrganizationsController extends Controller
 
         $organization->update($validated);
 
-        return redirect()->route('organization', $id)->with('success', 'Organization edited successfully');
+        return redirect()->route('organization', $id)->with('success', 'Đã cập nhật tổ chức.');
     }
 
     public function delete_organization(Request $request, $id)
     {
         $organization = Organization::find($id);
         if (! $organization || $organization->hostID != Auth::user()->id) {
-            return redirect()->route('home')->with('error', 'You are not authorized to delete this organization');
+            return redirect()->route('home')->with('error', 'Bạn không có quyền xóa tổ chức này.');
         }
 
         DB::transaction(function () use ($organization) {
@@ -282,6 +285,6 @@ class OrganizationsController extends Controller
             $organization->delete();
         });
 
-        return redirect()->route('organizations.index')->with('success', 'Organization deleted successfully');
+        return redirect()->route('organizations.index')->with('success', 'Đã xóa tổ chức.');
     }
 }

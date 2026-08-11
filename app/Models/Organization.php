@@ -20,6 +20,7 @@ class Organization extends Model
         'banner_url',
         'balance',
         'hostID',
+        'themeID',
     ];
 
     protected $casts = [
@@ -49,5 +50,11 @@ class Organization extends Model
     public function themeWallets()
     {
         return $this->hasMany(Theme4orgWallet::class, 'organizationID');
+    }
+
+    /** Chủ đề đang được áp dụng cho tổ chức (null nếu dùng giao diện mặc định). */
+    public function appliedTheme()
+    {
+        return $this->belongsTo(Theme4org::class, 'themeID');
     }
 }
