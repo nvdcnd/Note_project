@@ -1,5 +1,5 @@
 <?php
-
+//use App\Http\Controllers\Controller;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\InvitationController;
@@ -67,6 +67,13 @@ Route::post('/reset-password/{id}', [PasswordChangeRequestController::class, 'ch
 
 Route::middleware(['auth'])->group(function () {
 
+    // Avatar
+    //Route::post('/upload/avatar',[Controller::class, 'AvatarUplaod'])->name('avatar.upload');
+
+    // Orrganization Upload
+    Route::post('/organization/{id}/upload/logo',[OrgnizationController::class, "OrgLogoUpload"])->name('organization.logo.upload');
+    Route::post('/organization/{id}/upload/banner',[OrganizationController::class, "OrgBannerUpload"])->name('organization.banner.upload');
+
     // Auth
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 
@@ -117,7 +124,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/balance', [BalanceController::class, 'index'])->name('balance');
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
-    Route::post('/settings/avatar', [SettingsController::class, 'updateAvatar'])->name('settings.avatar');
+    Route::post('/settings/avatar', [SettingsController::class, 'AvatarUpload'])->name('settings.avatar');
     Route::post('/settings/password', [SettingsController::class, 'changePassword'])->name('settings.password');
 
     // User2user transaction

@@ -42,7 +42,7 @@
                     <form action="{{ route('settings.avatar') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-3">
-                            <input type="file" class="form-control" name="avatar" accept="image/*" required>
+                            <input type="file" class="form-control" name="avatar" id="avatar" accept="image/*" required>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Cập nhật ảnh đại diện</button>
                     </form>

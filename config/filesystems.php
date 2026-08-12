@@ -77,17 +77,6 @@ return [
         public_path('storage') => storage_path('app/public'),
     ],
 
-    'r2' => [
-        'driver' => 's3',
-        'key' => env('R2_ACCESS_KEY_ID'),
-        'secret' => env('R2_SECRET_ACCESS_KEY'),
-        'region' => 'us-east-1', // Cloudflare R2 ignores region but S3 driver requires it
-        'bucket' => env('R2_BUCKET'),
-        'url' => env('R2_URL'),
-        'endpoint' => env('R2_ENDPOINT'),
-        'use_path_style_endpoint' => true,
-        'throw' => true,
-    ],
 
 
 ];

@@ -15,6 +15,7 @@ use App\Models\User2organizationTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use ImageKit\ImageKit;
 
 class OrganizationsController extends Controller
 {
@@ -286,5 +287,53 @@ class OrganizationsController extends Controller
         });
 
         return redirect()->route('organizations.index')->with('success', 'Đã xóa tổ chức.');
+    }
+
+    public function OrgLogoUpload(Request $request, Imagekit $imagekit, $id){
+        $org = Oragnization::find($id);
+        if ($org->hostID != Auth::user()->$id){
+            return redirect()->route("organization.settings")->with('error','You are not the host of the Organization');
+        }
+        $request->validate([
+            'file'=>'required'
+        ]);
+        $logo = $request->file;
+        $save_logo = $imagekit->uploadFile([
+            'file'=>fopen($logo->getRealPath(),'r'),
+            'fileName'=>"Logo_of_ORG.".(string)$id,
+            'folder'=>'/org/logo/',
+            'useUniqueFilename'=>true
+        ]);
+        if(isset($save_logo->error)){
+            return redirect() -> route('organization.settings')->with('error','Please upload the image again');
+        } else {
+            $org->logo_url = $save_logo->result->url;
+            $org->save();
+            return redirect() -> route('organization.settings')->with('success','Your logo has changed');
+        }
+    }
+
+    public function OrgBannerUpload(Request $request, Imagekit $imagekit){
+        $org = Oragnization::find($id);
+        if ($org->hostID != Auth::user()->$id){
+            return redirect()->route("organization.settings")->with('error','You are not the host of the Organization');
+        }
+        $request->validate([
+            'file'=>'required'
+        ]);
+        $banner = $request->file;
+        $save_banner = $imagekit->uploadFile([
+            'file'=>fopen($banner->getRealPath(),'r'),
+            'fileName'=>"Banner_of_ORG.".(string)$id,
+            'folder'=>'/org/logo/',
+            'useUniqueFilename'=>true
+        ]);
+        if(isset($save_banner->error)){
+            return redirect() -> route('organization.settings')->with('error','Please upload the image again');
+        } else {
+            $org->banner_url = $save_banner->result->url;
+            $org->save();
+            return redirect() -> route('organization.settings')->with('success','Your banner has changed');
+        }
     }
 }

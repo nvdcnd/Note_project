@@ -23,13 +23,16 @@
 
     {{-- Flash messages rendered as toasts --}}
     @if (session('success'))
-        <div data-toast="success" data-message="{{ session('success') }}" style="display: none;"></div>
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+        <div data-toast="success" data-message="{{ session('success') }}" style="display: block;"></div>
     @endif
     @if (session('error'))
-        <div data-toast="error" data-message="{{ session('error') }}" style="display: none;"></div>
+        <div data-toast="error" data-message="{{ session('error') }}" style="display: block;"></div>
     @endif
     @if (session('warning'))
-        <div data-toast="warning" data-message="{{ session('warning') }}" style="display: none;"></div>
+        <div data-toast="warning" data-message="{{ session('warning') }}" style="display: block;"></div>
     @endif
 
     {{-- Desktop shell --}}

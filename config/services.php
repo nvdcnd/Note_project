@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'imagekit' => [
+        'public_key'     => env('IMAGEKIT_PUBLIC'),
+        'private_key'    => env('IMAGEKIT_PRIVATE'),
+        'url_endpoint'   => env('IMAGEKIT_ENDPOINT'),
+    ],
+
 ];
