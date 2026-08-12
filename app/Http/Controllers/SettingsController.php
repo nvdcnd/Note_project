@@ -46,14 +46,15 @@ class SettingsController extends Controller
             'useUniqueFilename'=> true
         ]);
 
-        dd($save_image);
+        //dd($save_image);
 
         if(isset($save_image->error)){
             return redirect()->route('settings')->with('error','Please upload the image again');
         } else {
-            dump($save_image->result);
+            //dd($save_image->result);
             $user->avatar_image_url = $save_image->result->url;
             $user->save();
+            dump($user->avatar_image_url);
             return redirect()->route('settings')->with('success','Your avatar has changed');
         }
     }
