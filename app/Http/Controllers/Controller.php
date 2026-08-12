@@ -11,6 +11,5 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 abstract class Controller
 {
-
-
+    //
 }
