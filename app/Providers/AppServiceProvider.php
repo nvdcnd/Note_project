@@ -6,7 +6,10 @@ use App\Models\Organization;
 use App\Models\User;
 use App\Support\ThemeStyle;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View as ViewInstance;
@@ -36,6 +39,15 @@ class AppServiceProvider extends ServiceProvider
         // Giao diện dùng Bootstrap 5, không phải Tailwind (mặc định của Laravel),
         // nên phải khai báo để link phân trang render đúng theme.
         Paginator::useBootstrapFive();
+
+        // Job hết số lần thử chỉ nằm im trong bảng failed_jobs, không ai thấy
+        // nếu không ghi log. Với mail queue, tên job chính là tên mailable.
+        Queue::failing(function (JobFailed $event) {
+            Log::error('Queue job failed: '.$event->job->resolveName(), [
+                'connection' => $event->connectionName,
+                'exception' => $event->exception->getMessage(),
+            ]);
+        });
 
         // Chủ đề đang áp dụng được tính một lần cho layout chính, nên không
         // controller nào phải tự truyền xuống. Nếu view đang render trong phạm vi
