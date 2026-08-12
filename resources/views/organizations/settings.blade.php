@@ -29,6 +29,28 @@
 
             <div class="card mb-4">
                 <div class="card-header" style="background-color: var(--nk-yellow);">
+                    <h4 style="margin: 0; font-size: 1.3rem;">Ảnh đại diện</h4>
+                </div>
+                <div class="card-body" style="background-color: var(--nk-sticky);">
+                    <div class="text-center mb-3">
+                        @if ($organization->banner_url)
+                            <img src="{{ $organization->banner_url }}" class="rounded" style="width: 600px; height: 400px; object-fit: cover;" alt="Avatar">
+                        @else
+                            <div class="rounded mx-auto d-flex align-items-center justify-content-center" style="width: 600px; height: 400px; background: var(--nk-yellow); font-size: 2.5rem;">No image found</div>
+                        @endif
+                    </div>
+                    <form action="{{ route('organization.banner.upload', $organization->id) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="mb-3">
+                            <input type="file" class="form-control" name="file" id="file" accept="image/*" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Cập nhật Banner</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
                     <h4 style="margin: 0; font-size: 1.3rem;">Chủ đề của tổ chức</h4>
                 </div>
                 <div class="card-body" style="background-color: var(--nk-sticky);">
@@ -135,6 +157,28 @@
             </form>
         </div>
     </div>
+
+    <div class="card mb-4">
+                <div class="card-header" style="background-color: var(--nk-yellow);">
+                    <h4 style="margin: 0; font-size: 1.3rem;">Ảnh đại diện</h4>
+                </div>
+                <div class="card-body" style="background-color: var(--nk-sticky);">
+                    <div class="text-center mb-3">
+                        @if ($organization->banner_url)
+                            <img src="{{ $organization->banner_url }}" class="rounded" style="width: 400px; height: 200px; object-fit: cover;" alt="Avatar">
+                        @else
+                            <div class="rounded mx-auto d-flex align-items-center justify-content-center" style="width: 400px; height: 200px; background: var(--nk-yellow); font-size: 2.5rem;">No image found</div>
+                        @endif
+                    </div>
+                    <form action="{{ route('organization.banner.upload', $organization->id) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="mb-3">
+                            <input type="file" class="form-control" name="file" id="file" accept="image/*" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Cập nhật Banner</button>
+                    </form>
+                </div>
+            </div>
 
     <div class="card w-100 mb-3">
         <div class="card-header" style="background-color: var(--nk-yellow);">

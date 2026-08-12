@@ -4,7 +4,7 @@
 
 @section('topbar-actions')
     <div class="dropdown">
-        <a class="btn drop dropdown-toggle rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <a class="btn drop dropdown-toggle rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="width:400px;">
             {{ $noteFilters[$noteFilter] ?? 'Tất cả ghi chú' }}
         </a>
         <ul class="dropdown-menu">

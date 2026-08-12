@@ -54,7 +54,7 @@ class SettingsController extends Controller
             //dd($save_image->result);
             $user->avatar_image_url = $save_image->result->url;
             $user->save();
-            dump($user->avatar_image_url);
+            //dump($user->avatar_image_url);
             return redirect()->route('settings')->with('success','Your avatar has changed');
         }
     }

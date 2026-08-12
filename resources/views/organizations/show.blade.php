@@ -5,6 +5,7 @@
 @section('topbar-actions')
     @if ($isHost)
         <div class="d-flex gap-2">
+            <a href="{{ route('organization.balance', $organization->id) }}" class="btn btn-primary rounded-pill" style="padding: 10px 16px;">Ví tổ chức</a>
             <a href="{{ route('organization.dashboard', $organization->id) }}" class="btn btn-primary rounded-pill" style="padding: 10px 16px;">Bảng điều hành</a>
             <a href="{{ route('organization.settings', $organization->id) }}" class="btn btn-primary rounded-pill" style="padding: 10px 16px;">Cài đặt</a>
         </div>

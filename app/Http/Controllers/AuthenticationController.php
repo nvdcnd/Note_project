@@ -48,6 +48,7 @@ class AuthenticationController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],
+            'balanced' => 100,
         ]);
 
         Auth::login($user, $request->boolean('remember'));
