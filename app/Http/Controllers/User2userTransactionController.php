@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class User2userTransactionController extends Controller
 {
@@ -51,13 +53,10 @@ class User2userTransactionController extends Controller
 
     public function user2user_transaction_OTP_generator()
     {
-        do {
-            $otp = (string) random_int(100000, 999999);
-        } while (User2userTransaction::query()->where('status', '!=', 'finished')->pluck('otp')->contains(
-            fn ($hash) => Hash::check($otp, $hash)
-        ));
-
-        return $otp;
+        // OTP chỉ được so với hash của chính giao dịch đó lúc xác nhận, nên
+        // không cần unique toàn cục. Vòng quét Hash::check mọi giao dịch chưa
+        // finished trước đây chậm dần theo dữ liệu tích lũy (~100ms mỗi hash).
+        return (string) random_int(100000, 999999);
     }
 
     public function user2user_transaction_create(Request $request)
@@ -98,7 +97,17 @@ class User2userTransactionController extends Controller
         $transaction->expires_at = now()->addMinutes(10);
         $transaction->attempts = 0;
         $transaction->save();
-        Mail::to(Auth::user()->email)->send(new user2user_trans_otp($transaction, $otp));
+
+        // Gửi OTP hỏng thì giao dịch thành mồ côi (không có mã để xác nhận,
+        // không có nút gửi lại) — xóa giao dịch và báo người dùng thử lại.
+        try {
+            Mail::to(Auth::user()->email)->send(new user2user_trans_otp($transaction, $otp));
+        } catch (Throwable $e) {
+            $transaction->delete();
+            Log::error('OTP mail failed (user2user): '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Không gửi được email chứa mã OTP. Vui lòng thử lại.');
+        }
 
         return redirect()->route('user2user_transaction_verify_view', $transaction->id)->with('success', 'Mã OTP đã được gửi tới email của bạn.');
     }

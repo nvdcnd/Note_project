@@ -42,6 +42,10 @@ it('renders every queued mailable through the worker path: serialize, unserializ
         new UserEmail($sender, $note),
         new Mail40account('chuadangky@example.com', $note, $token),
         new OrganizationInvitation($organization, 'chuadangky@example.com', $token),
+        new user_accept_organization(1),
+        new change_host_organization(1),
+        new user_accept_host_organization(1),
+        new Password_change('ma-doi-mat-khau'),
     ];
 
     foreach ($queued as $mailable) {
@@ -65,9 +69,9 @@ it('shows the sharer name and the note link in the shared-note email', function 
 });
 
 // ---------------------------------------------------------------------------
-// Mail gửi đồng bộ không đi qua serialize, chỉ cần render không nổ.
+// Năm mail OTP gửi đồng bộ không đi qua serialize, chỉ cần render không nổ.
 // View transaction_notification chỉ đọc $transaction->id nên model chưa lưu
-// là đủ; các mail còn lại nhận id / chuỗi qua tham số with.
+// là đủ.
 // ---------------------------------------------------------------------------
 
 it('renders every synchronous mailable', function () {
@@ -77,10 +81,6 @@ it('renders every synchronous mailable', function () {
         new organization2user_trans_otp(new Organization2userTransaction, '123456'),
         new user2theme4_trans_otp(new User2theme4Transaction, '123456'),
         new Theme4org_trans_otp(new Theme4orgTransaction, '123456'),
-        new Password_change('ma-doi-mat-khau'),
-        new user_accept_organization(1),
-        new change_host_organization(1),
-        new user_accept_host_organization(1),
     ];
 
     foreach ($mailables as $mailable) {

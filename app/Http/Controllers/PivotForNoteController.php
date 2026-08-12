@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Mail;
 
 class PivotForNoteController extends Controller
 {
+    public const MAX_RECIPIENTS_PER_REQUEST = 20;
+
     /**
      * Gửi lời mời cho các email chưa có tài khoản.
      *
@@ -35,7 +37,9 @@ class PivotForNoteController extends Controller
     public function share_note(Request $request, $noteid)
     {
         $request->validate([
-            'shared_with' => ['required', 'array'],
+            // Mỗi email là một bản ghi invitation cộng một job mail — chặn trần
+            // để một request không thể tỏa ra hàng trăm email.
+            'shared_with' => ['required', 'array', 'max:'.self::MAX_RECIPIENTS_PER_REQUEST],
             'shared_with.*' => ['email'],
         ]);
 

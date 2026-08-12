@@ -32,7 +32,7 @@ class PivotChangeHostOrganizationController extends Controller
             $pivot->save();
             $hostUser = User::find($organization->hostID);
             if ($hostUser) {
-                Mail::to($hostUser->email)->send(new change_host_organization($pivot->id));
+                Mail::to($hostUser->email)->queue(new change_host_organization($pivot->id));
             }
 
             return redirect()->route('organization', $id)->with('success', 'Đã tạo yêu cầu đổi chủ sở hữu.');
@@ -54,7 +54,7 @@ class PivotChangeHostOrganizationController extends Controller
                 $pivot->new_host_ID = $user->id;
                 $pivot->new_host_acceptance_status = false;
                 $pivot->save();
-                Mail::to($user->email)->send(new user_accept_host_organization($pivot->id));
+                Mail::to($user->email)->queue(new user_accept_host_organization($pivot->id));
 
                 return redirect()->route('organization', $pivot->organizationID)->with('success', 'Đã gửi yêu cầu đổi chủ sở hữu.');
             }

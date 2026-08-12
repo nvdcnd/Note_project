@@ -16,13 +16,10 @@ class PasswordChangeRequestController extends Controller
 
     public function one_time_password_generator($length = 6)
     {
-        do {
-            $pass = (string) random_int(10 ** ($length - 1), (10 ** $length) - 1);
-        } while (PasswordChangeRequest::query()->where('used', false)->get()->contains(
-            fn (PasswordChangeRequest $requestModel) => Hash::check($pass, $requestModel->token)
-        ));
-
-        return $pass;
+        // Passkey chỉ được so với hash của chính yêu cầu đó (tra theo id trên
+        // URL) lúc đổi mật khẩu, nên không cần unique toàn cục. Vòng quét
+        // Hash::check mọi yêu cầu chưa dùng trước đây chậm dần theo dữ liệu.
+        return (string) random_int(10 ** ($length - 1), (10 ** $length) - 1);
     }
 
     public function forgot_password_view(Request $request)
@@ -51,7 +48,9 @@ class PasswordChangeRequestController extends Controller
         $password_change_request->attempts = 0;
         $password_change_request->save();
 
-        Mail::to($user->email)->send(new Password_change($passkey));
+        // Không ai ngồi chờ response này (thông báo chung chống dò email), nên
+        // mail đi qua queue để hưởng retry thay vì chặn request bằng SMTP.
+        Mail::to($user->email)->queue(new Password_change($passkey));
 
         return redirect()->route('password.forgot')->with('status', 'If that email exists, a reset link has been sent');
     }

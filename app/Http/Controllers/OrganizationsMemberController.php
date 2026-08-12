@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Mail;
 
 class OrganizationsMemberController extends Controller
 {
+    public const MAX_RECIPIENTS_PER_REQUEST = 20;
+
     public function add_member(Request $request, $organizationID)
     {
         $organization = Organization::query()->find($organizationID);
@@ -42,6 +44,13 @@ class OrganizationsMemberController extends Controller
             ->unique()
             ->values()
             ->all();
+
+        // Chặn trần sau khi gộp cả hai đường nhập (user_list[] lẫn
+        // user_list_text), vì validate ở trên không nhìn thấy đường text.
+        if (count($user_list) > self::MAX_RECIPIENTS_PER_REQUEST) {
+            return redirect()->route('organization', $organizationID)
+                ->with('error', 'Mỗi lần chỉ có thể mời tối đa '.self::MAX_RECIPIENTS_PER_REQUEST.' email.');
+        }
 
         $addedCount = 0;
         $skippedExisting = 0;
@@ -75,7 +84,7 @@ class OrganizationsMemberController extends Controller
             $organization_member->userID = $targetUser->id;
             $organization_member->status = false;
             $organization_member->save();
-            Mail::to($targetUser->email)->send(new user_accept_organization($organization_member->id));
+            Mail::to($targetUser->email)->queue(new user_accept_organization($organization_member->id));
             $addedCount++;
         }
 

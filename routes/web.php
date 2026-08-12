@@ -84,7 +84,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/create/note/organization/{id}', [NoteController::class, 'create_note_in_organization'])->name('create.note.organization');
     Route::post('/edit/note/{id}', [NoteController::class, 'edit_note'])->name('edit.note');
     Route::delete('/delete/note/{id}', [NoteController::class, 'delete_note'])->name('delete.note');
-    Route::post('/share/note/{id}', [PivotForNoteController::class, 'share_note'])->name('share.note');
+    // Mỗi request share có thể tỏa ra nhiều email mời — throttle như các route giao dịch.
+    Route::post('/share/note/{id}', [PivotForNoteController::class, 'share_note'])
+        ->middleware('throttle:5,1')
+        ->name('share.note');
     Route::delete('/unshare/note/{id}', [PivotForNoteController::class, 'undo_shared_note'])->name('unshare.note');
 
     // Reply
@@ -106,7 +109,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/organization/{id}/balance', [OrganizationsController::class, 'balance'])->name('organization.balance');
     Route::post('/edit/organization/{id}', [OrganizationsController::class, 'edit_organization'])->name('edit.organization');
     Route::delete('/delete/organization/{id}', [OrganizationsController::class, 'delete_organization'])->name('delete.organization');
-    Route::post('/share/organization/{id}', [OrganizationsMemberController::class, 'add_member'])->name('share.organization');
+    // Mỗi request mời có thể tỏa ra nhiều email — throttle như các route giao dịch.
+    Route::post('/share/organization/{id}', [OrganizationsMemberController::class, 'add_member'])
+        ->middleware('throttle:5,1')
+        ->name('share.organization');
     Route::post('/leave/organization/{id}', [OrganizationsMemberController::class, 'member_leave'])->name('leave.organization');
 
     // Organization members
