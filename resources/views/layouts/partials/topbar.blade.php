@@ -16,7 +16,7 @@
             </a>
             <a href="{{ route('settings') }}" class="btn btn-primary rounded-circle" style="width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden;" title="Cài đặt">
                 @if (auth()->user()->avatar_image_url)
-                    <img src="{{ asset('storage/'.auth()->user()->avatar_image_url) }}" style="width: 40px; height: 40px; object-fit: cover;" alt="Avatar của {{ auth()->user()->name }}" class="rounded-circle">
+                    <img src="{{ $user->avatar_image_url }}" style="width: 40px; height: 40px; object-fit: cover;" alt="Avatar của {{ auth()->user()->name }}" class="rounded-circle">
                 @else
                     <span style="font-size: 1.4rem; font-weight: bold; color: #000;">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                 @endif

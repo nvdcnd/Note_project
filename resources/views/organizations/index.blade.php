@@ -21,7 +21,10 @@
         @foreach ($hostedOrganizations as $organization)
             <div class="col-lg-4 col-md-6 col-12">
                 <div class="card h-100">
-                    <div class="card-body">
+                    <div class="card-body" style="width: 18rem;height: auto;">
+                        @if ($organization->banner_url)
+                        <img src="{{organization->banner_url}}" class="card-img-top" alt="...">
+                        @endif
                         <a href="{{ route('organization', $organization->id) }}" style="text-decoration: none; color: #000;">
                             <h5 class="card-title" style="font-size: 1.6rem;">{{ $organization->name }}</h5>
                         </a>
@@ -36,7 +39,10 @@
         @foreach ($memberOrganizations as $organization)
             <div class="col-lg-4 col-md-6 col-12">
                 <div class="card h-100">
-                    <div class="card-body">
+                    <div class="card-body" style="width: 18rem;height: auto;">
+                        @if ($organization->banner_url)
+                        <img src="{{organization->banner_url}}" class="card-img-top" alt="...">
+                        @endif
                         <a href="{{ route('organization', $organization->id) }}" style="text-decoration: none; color: #000;">
                             <h5 class="card-title" style="font-size: 1.6rem;">{{ $organization->name }}</h5>
                         </a>

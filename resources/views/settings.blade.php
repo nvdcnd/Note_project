@@ -34,7 +34,7 @@
                 <div class="card-body" style="background-color: var(--nk-sticky);">
                     <div class="text-center mb-3">
                         @if ($user->avatar_image_url)
-                            <img src="{{ asset('storage/' . $user->avatar_image_url) }}" class="rounded-circle" style="width: 90px; height: 90px; object-fit: cover;" alt="Avatar">
+                            <img src="{{ $user->avatar_image_url }}" class="rounded-circle" style="width: 90px; height: 90px; object-fit: cover;" alt="Avatar">
                         @else
                             <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 90px; height: 90px; background: var(--nk-yellow); font-size: 2.5rem;">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
                         @endif
