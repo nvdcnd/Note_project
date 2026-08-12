@@ -32,30 +32,31 @@ class SettingsController extends Controller
         return redirect()->route('settings')->with('success', 'Đã cập nhật thông tin cá nhân.');
     }
 
-    public function AvatarUpload(Request $request, Imagekit $imagekit){
+    public function AvatarUpload(Request $request, ImageKit $imagekit)
+    {
         $user = User::find(Auth::user()->id);
         $request->validate([
-            "avatar"=>'required'
+            'avatar' => 'required',
         ]);
 
         $image = $request->avatar;
         $save_image = $imagekit->uploadFile([
-            'file' => fopen($image->getRealPath(),'r'),
-            'fileName'=>"Avatar_of_". (string)$user->id,
-            'folder'=>'/user/avatar',
-            'useUniqueFilename'=> true
+            'file' => fopen($image->getRealPath(), 'r'),
+            'fileName' => 'Avatar_of_'.(string) $user->id,
+            'folder' => '/user/avatar',
+            'useUniqueFilename' => true,
         ]);
 
-        //dd($save_image);
+        // dd($save_image);
 
-        if(isset($save_image->error)){
-            return redirect()->route('settings')->with('error','Please upload the image again');
+        if (isset($save_image->error)) {
+            return redirect()->route('settings')->with('error', 'Please upload the image again');
         } else {
-            //dd($save_image->result);
+            // dd($save_image->result);
             $user->avatar_image_url = $save_image->result->url;
             $user->save();
-            dump($user->avatar_image_url);
-            return redirect()->route('settings')->with('success','Your avatar has changed');
+
+            return redirect()->route('settings')->with('success', 'Your avatar has changed');
         }
     }
 

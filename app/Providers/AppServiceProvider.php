@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-
 use App\Models\Organization;
 use App\Models\User;
 use App\Support\ThemeStyle;
@@ -10,8 +9,8 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use ImageKit\ImageKit;
 use Illuminate\View\View as ViewInstance;
+use ImageKit\ImageKit;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,8 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(Imagekit::class, function ($app) {
-            return new Imagekit(
+        $this->app->singleton(ImageKit::class, function ($app) {
+            return new ImageKit(
                 publicKey: config('services.imagekit.public_key'),
                 privateKey: config('services.imagekit.private_key'),
                 urlEndpoint: config('services.imagekit.url_endpoint'),

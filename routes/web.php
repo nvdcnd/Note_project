@@ -1,5 +1,6 @@
 <?php
-//use App\Http\Controllers\Controller;
+
+// use App\Http\Controllers\Controller;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\InvitationController;
@@ -68,11 +69,11 @@ Route::post('/reset-password/{id}', [PasswordChangeRequestController::class, 'ch
 Route::middleware(['auth'])->group(function () {
 
     // Avatar
-    //Route::post('/upload/avatar',[Controller::class, 'AvatarUplaod'])->name('avatar.upload');
+    // Route::post('/upload/avatar',[Controller::class, 'AvatarUplaod'])->name('avatar.upload');
 
     // Orrganization Upload
-    Route::post('/organization/{id}/upload/logo',[OrgnizationController::class, "OrgLogoUpload"])->name('organization.logo.upload');
-    Route::post('/organization/{id}/upload/banner',[OrganizationController::class, "OrgBannerUpload"])->name('organization.banner.upload');
+    Route::post('/organization/{id}/upload/logo', [OrganizationsController::class, 'OrgLogoUpload'])->name('organization.logo.upload');
+    Route::post('/organization/{id}/upload/banner', [OrganizationsController::class, 'OrgBannerUpload'])->name('organization.banner.upload');
 
     // Auth
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');

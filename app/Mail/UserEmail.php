@@ -18,8 +18,11 @@ class UserEmail extends Mailable implements ShouldQueue
 
     /**
      * Create a new message instance.
+     *
+     * Hai thuộc tính này bắt buộc phải public: view email đọc $user và $notes,
+     * mà Laravel chỉ truyền thuộc tính public của mailable vào view.
      */
-    public function __construct(private $user, private $notes)
+    public function __construct(public $user, public $notes)
     {
         // Accept either model instances or ids and resolve to models here so job serialization stays small
         if ($user instanceof User) {
