@@ -14,7 +14,9 @@
         "hernol/uploadthing-php": "^2.0",
         "imagekit/imagekit": "^4.0",
         "laravel/framework": "^13.8",
-        "laravel/tinker": "^3.0"
+        "laravel/socialite": "^5.29",
+        "laravel/tinker": "^3.0",
+        "payos/payos": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

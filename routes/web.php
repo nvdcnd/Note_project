@@ -22,51 +22,71 @@ use App\Http\Controllers\ThemeRequestController;
 use App\Http\Controllers\User2organizationTransactionController;
 use App\Http\Controllers\User2userTransactionController;
 use App\Models\ThemeRequest;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controller\OauthAuthenticationController;
 
 // ---------------------------------------------------------------------------
 // Public
 // ---------------------------------------------------------------------------
 
-Route::get('/', [NoteController::class, 'home'])->name('home');
+RateLimiter::for('smart', function (Request $request){
+    return $request->user()
+        ? Limit::perMinute(300)->by($request->user()->id) // Đã login: 300 req/phút
+        : Limit::perMinute(60)->by($request->ip());
+});
 
-Route::get('/login', function () {
-    return view('login');
-})->name('login');
+RateLimiter::for('authentication', function (Request $request){
+    return Limit::perMinute(10)->by($request->ip());
+});
 
-Route::post('/login', [AuthenticationController::class, 'login'])
-    ->middleware('throttle:5,1')
-    ->name('login.post');
+RateLimiter::for('transaction', function (Request $request){
+    return Limit::perMinute(30)->by($request->user->id);
+});
 
-Route::get('/signup', function () {
-    return view('signup');
-})->name('signup');
+Route::middleware(['throttle:authentication'])->group(function (){
+    // OAUTH2
+    Route::get('oauth/redirect/{provider}', [OauthAuthenticationController::class, 'oauth_redirect'])->name('oauth.redirect');
+    Route::get('oauth/callback/{provider}', [OauthAuthenticationController::class, 'oauth_callback'])->name('oauth.callback');
 
-Route::post('/signup', [AuthenticationController::class, 'signup'])
-    ->middleware('throttle:5,1')
-    ->name('signup.post');
+    // AUTHENTICATION
+    Route::get('/login', function () {
+        return view('login');
+    })->name('login');
 
-// Nhận lời mời (công khai — người được mời chưa có tài khoản)
-Route::get('/invite/{token}', [InvitationController::class, 'show'])->name('invitation.show');
-Route::post('/invite/{token}', [InvitationController::class, 'accept'])
-    ->middleware('throttle:5,1')
-    ->name('invitation.accept');
+    Route::post('/login', [AuthenticationController::class, 'login'])
+        ->name('login.post');
 
-// Password reset (public)
-Route::get('/forgot-password', [PasswordChangeRequestController::class, 'forgot_password_view'])->name('password.forgot');
-Route::post('/forgot-password', [PasswordChangeRequestController::class, 'forgot_password'])
-    ->middleware('throttle:5,1')
-    ->name('password.forgot.post');
-Route::get('/reset-password/{id}', [PasswordChangeRequestController::class, 'change_password_view'])->name('password.reset.view');
-Route::post('/reset-password/{id}', [PasswordChangeRequestController::class, 'change_password'])
-    ->middleware('throttle:5,1')
-    ->name('password.reset');
+    Route::get('/signup', function () {
+        return view('signup');
+    })->name('signup');
 
-// ---------------------------------------------------------------------------
-// Authenticated
-// ---------------------------------------------------------------------------
+    Route::post('/signup', [AuthenticationController::class, 'signup'])
+        ->name('signup.post');
 
-Route::middleware(['auth'])->group(function () {
+    // Password reset (public)
+    Route::get('/forgot-password', [PasswordChangeRequestController::class, 'forgot_password_view'])->name('password.forgot');
+    Route::post('/forgot-password', [PasswordChangeRequestController::class, 'forgot_password'])
+        
+        ->name('password.forgot.post');
+    Route::get('/reset-password/{id}', [PasswordChangeRequestController::class, 'change_password_view'])->name('password.reset.view');
+    Route::post('/reset-password/{id}', [PasswordChangeRequestController::class, 'change_password'])
+        ->name('password.reset');
+});
+
+
+Route::middleware(['throttle:smart'])->group(function (){
+    // HOME
+    Route::get('/', [NoteController::class, 'home'])->name('home');
+
+    // Nhận lời mời (công khai — người được mời chưa có tài khoản)
+    Route::get('/invite/{token}', [InvitationController::class, 'show'])->name('invitation.show');
+    Route::post('/invite/{token}', [InvitationController::class, 'accept'])
+        ->name('invitation.accept');
+});
+
+ 
+Route::middleware(['auth', 'throttle:smart'])->group(function () {
 
     // Avatar
     // Route::post('/upload/avatar',[Controller::class, 'AvatarUplaod'])->name('avatar.upload');
@@ -86,7 +106,6 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/delete/note/{id}', [NoteController::class, 'delete_note'])->name('delete.note');
     // Mỗi request share có thể tỏa ra nhiều email mời — throttle như các route giao dịch.
     Route::post('/share/note/{id}', [PivotForNoteController::class, 'share_note'])
-        ->middleware('throttle:5,1')
         ->name('share.note');
     Route::delete('/unshare/note/{id}', [PivotForNoteController::class, 'undo_shared_note'])->name('unshare.note');
 
@@ -111,7 +130,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/delete/organization/{id}', [OrganizationsController::class, 'delete_organization'])->name('delete.organization');
     // Mỗi request mời có thể tỏa ra nhiều email — throttle như các route giao dịch.
     Route::post('/share/organization/{id}', [OrganizationsMemberController::class, 'add_member'])
-        ->middleware('throttle:5,1')
+        
         ->name('share.organization');
     Route::post('/leave/organization/{id}', [OrganizationsMemberController::class, 'member_leave'])->name('leave.organization');
 
@@ -134,43 +153,52 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/settings/avatar', [SettingsController::class, 'AvatarUpload'])->name('settings.avatar');
     Route::post('/settings/password', [SettingsController::class, 'changePassword'])->name('settings.password');
 
-    // User2user transaction
-    Route::get('/user2user/create/transaction', [User2userTransactionController::class, 'create_view'])->name('user2user_transaction_view');
-    Route::get('/user2user/verify/transaction/{id}', [User2userTransactionController::class, 'verify_view'])->name('user2user_transaction_verify_view');
-    Route::get('/user2user/{id}/transaction/history', [User2userTransactionController::class, 'history_view'])->name('user2user_transaction_history_view');
-    // Tạo giao dịch cũng phải bị giới hạn tần suất, không chỉ bước verify:
-    // mỗi lần tạo đều sinh OTP và gửi email, nên là đường spam rất rẻ (E7).
-    Route::post('/user2user/create/transaction', [User2userTransactionController::class, 'user2user_transaction_create'])
-        ->middleware('throttle:5,1')
-        ->name('user2user_transaction_create');
-    Route::post('/user2user/verify/transaction/{id}', [User2userTransactionController::class, 'user2user_transaction_verify'])
-        ->middleware('throttle:5,1')
-        ->name('user2user_transaction_verify');
-    Route::post('/user2user/cancel/transaction/{id}', [User2userTransactionController::class, 'user2user_transaction_cancel'])->name('user2user_transaction_cancel');
+    Route::middleware(['throttle:transaction'])->group(function (){
+        // User2user transaction
+        Route::get('/user2user/create/transaction', [User2userTransactionController::class, 'create_view'])->name('user2user_transaction_view');
+        Route::get('/user2user/verify/transaction/{id}', [User2userTransactionController::class, 'verify_view'])->name('user2user_transaction_verify_view');
+        Route::get('/user2user/{id}/transaction/history', [User2userTransactionController::class, 'history_view'])->name('user2user_transaction_history_view');
+        // Tạo giao dịch cũng phải bị giới hạn tần suất, không chỉ bước verify:
+        // mỗi lần tạo đều sinh OTP và gửi email, nên là đường spam rất rẻ (E7).
+        Route::post('/user2user/create/transaction', [User2userTransactionController::class, 'user2user_transaction_create'])
+            ->name('user2user_transaction_create');
+        Route::post('/user2user/verify/transaction/{id}', [User2userTransactionController::class, 'user2user_transaction_verify'])
+            ->name('user2user_transaction_verify');
+        Route::post('/user2user/cancel/transaction/{id}', [User2userTransactionController::class, 'user2user_transaction_cancel'])->name('user2user_transaction_cancel');
 
-    // User2organization transaction
-    Route::get('/user2organization/create/transaction', [User2organizationTransactionController::class, 'create_view'])->name('user2organization_transaction_view');
-    Route::get('/user2organization/verify/transaction/{id}', [User2organizationTransactionController::class, 'verify_view'])->name('user2organization_transaction_verify_view');
-    Route::get('/user2organization/{id}/transaction/history', [User2organizationTransactionController::class, 'history_view'])->name('user2organization_transaction_history_view');
-    Route::post('/user2organization/create/transaction', [User2organizationTransactionController::class, 'user2organization_transaction_create'])
-        ->middleware('throttle:5,1')
-        ->name('user2organization_transaction_create');
-    Route::post('/user2organization/verify/transaction/{id}', [User2organizationTransactionController::class, 'user2organization_transaction_verify'])
-        ->middleware('throttle:5,1')
-        ->name('user2organization_transaction_verify');
-    Route::post('/user2organization/cancel/transaction/{id}', [User2organizationTransactionController::class, 'user2organization_transaction_cancel'])->name('user2organization_transaction_cancel');
+        // User2organization transaction
+        Route::get('/user2organization/create/transaction', [User2organizationTransactionController::class, 'create_view'])->name('user2organization_transaction_view');
+        Route::get('/user2organization/verify/transaction/{id}', [User2organizationTransactionController::class, 'verify_view'])->name('user2organization_transaction_verify_view');
+        Route::get('/user2organization/{id}/transaction/history', [User2organizationTransactionController::class, 'history_view'])->name('user2organization_transaction_history_view');
+        Route::post('/user2organization/create/transaction', [User2organizationTransactionController::class, 'user2organization_transaction_create'])
+            ->name('user2organization_transaction_create');
+        Route::post('/user2organization/verify/transaction/{id}', [User2organizationTransactionController::class, 'user2organization_transaction_verify'])
+            ->name('user2organization_transaction_verify');
+        Route::post('/user2organization/cancel/transaction/{id}', [User2organizationTransactionController::class, 'user2organization_transaction_cancel'])->name('user2organization_transaction_cancel');
 
-    // Organization2user transaction
-    Route::get('/organization2user/{id}/create/transaction', [Organization2userTransactionController::class, 'create_view'])->name('organization2user_transaction_view');
-    Route::get('/organization2user/verify/transaction/{id}', [Organization2userTransactionController::class, 'verify_view'])->name('organization2user_transaction_verify_view');
-    Route::get('/organization2user/{id}/transaction/history', [Organization2userTransactionController::class, 'history_view'])->name('organization2user_transaction_history_view');
-    Route::post('/organization2user/{id}/create/transaction', [Organization2userTransactionController::class, 'organization2user_transaction_create'])
-        ->middleware('throttle:5,1')
-        ->name('organization2user_transaction_create');
-    Route::post('/organization2user/{id}/verify/transaction', [Organization2userTransactionController::class, 'organization2user_transaction_verify'])
-        ->middleware('throttle:5,1')
-        ->name('organization2user_transaction_verify');
-    Route::post('/organization2user/{id}/cancel/transaction', [Organization2userTransactionController::class, 'organization2user_transaction_cancel'])->name('organization2user_transaction_cancel');
+        // Organization2user transaction
+        Route::get('/organization2user/{id}/create/transaction', [Organization2userTransactionController::class, 'create_view'])->name('organization2user_transaction_view');
+        Route::get('/organization2user/verify/transaction/{id}', [Organization2userTransactionController::class, 'verify_view'])->name('organization2user_transaction_verify_view');
+        Route::get('/organization2user/{id}/transaction/history', [Organization2userTransactionController::class, 'history_view'])->name('organization2user_transaction_history_view');
+        Route::post('/organization2user/{id}/create/transaction', [Organization2userTransactionController::class, 'organization2user_transaction_create'])
+            ->name('organization2user_transaction_create');
+        Route::post('/organization2user/{id}/verify/transaction', [Organization2userTransactionController::class, 'organization2user_transaction_verify'])
+            ->name('organization2user_transaction_verify');
+        Route::post('/organization2user/{id}/cancel/transaction', [Organization2userTransactionController::class, 'organization2user_transaction_cancel'])->name('organization2user_transaction_cancel');
+
+        // Theme buy (user)
+        Route::post('/theme/user/buy/{themeID}', [Theme4userWalletController::class, 'user_buy_theme'])
+            ->name('theme.user.buy');
+        Route::post('/theme/user/buy/verify/{id}', [Theme4userWalletController::class, 'user_buy_theme_verify_otp'])
+            ->name('theme.user.buy.verify');
+
+        // Theme buy (org)
+        Route::post('/theme/org/buy/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme'])
+            ->name('theme.org.buy');
+        Route::post('/theme/org/buy/verify/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme_verify_otp'])
+             ->name('theme.org.buy.verify');
+
+    });
 
     // Theme store
     // LƯU Ý THỨ TỰ: '/themes/org' phải đứng TRƯỚC '/themes/{id}', nếu không Laravel
@@ -206,20 +234,5 @@ Route::middleware(['auth'])->group(function () {
         return view('themes.request_success', compact('theme'));
     })->name('create_theme_request_success_view');
 
-    // Theme buy (user)
-    Route::post('/theme/user/buy/{themeID}', [Theme4userWalletController::class, 'user_buy_theme'])
-        ->middleware('throttle:5,1')
-        ->name('theme.user.buy');
-    Route::post('/theme/user/buy/verify/{id}', [Theme4userWalletController::class, 'user_buy_theme_verify_otp'])
-        ->middleware('throttle:5,1')
-        ->name('theme.user.buy.verify');
-
-    // Theme buy (org)
-    Route::post('/theme/org/buy/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme'])
-        ->middleware('throttle:5,1')
-        ->name('theme.org.buy');
-    Route::post('/theme/org/buy/verify/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme_verify_otp'])
-        ->middleware('throttle:5,1')
-        ->name('theme.org.buy.verify');
 
 });

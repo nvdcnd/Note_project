@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View as ViewInstance;
 use ImageKit\ImageKit;
+use PayOS\PayOS;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +28,14 @@ class AppServiceProvider extends ServiceProvider
                 publicKey: config('services.imagekit.public_key'),
                 privateKey: config('services.imagekit.private_key'),
                 urlEndpoint: config('services.imagekit.url_endpoint'),
+            );
+        });
+
+        $this->app->singleton(PayOS::class, function($app){
+            return new PayOS(
+                clientId: config('services.payOS.clientId'),
+                apiKey: config('services.payOS.apiKey'),
+                checksumKey: config('services.payOS.checksumKey')
             );
         });
     }
