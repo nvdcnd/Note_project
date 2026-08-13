@@ -23,8 +23,9 @@ class PivotForNoteController extends Controller
      * đăng ký thật sự dùng được — trước đây email được gửi đi mà không kèm
      * đường dẫn nào nên người nhận không có cách nào vào ứng dụng.
      *
+     /*
      * @param  array<int, string>  $users
-     */
+
     public function mail_for_no_account($users, Note $noteid)
     {
         foreach ($users as $email) {
@@ -107,6 +108,7 @@ class PivotForNoteController extends Controller
 
         return redirect()->route('note', $noteModel->id)->with('success', $message);
     }
+        */
 
     public function undo_shared_note(Request $request, $id)
     {
@@ -122,4 +124,39 @@ class PivotForNoteController extends Controller
 
         return redirect()->route('note', $note->id)->with('success', 'Đã hủy chia sẻ ghi chú.');
     }
+
+    public function share_note_link(Request $request, $id){
+        $org = Note::findOrFail($id);
+        // $user = auth()->user();
+        $member = PivotForNote::where('noteID',$id)->where('userID',$request->user->id)->first();
+        if($request->user){
+            if ($request->user->id == $org->userID){
+                return redirect()->route("home")->with("Error","Bạn đang là chủ của tổ chức này");
+            } else if ($member){
+                return redirect()->route("home")->with("Error","Bạn đã được share note này trước đó");
+            } else {
+                $member = new PivotForNote([
+                    'noteID'=>$org->id,
+                    'userID'=>$request->user->id,
+                ]);
+                $member->save();
+                return redirect()->route('note',$org->id)->with('success','Note này đã được chia sẻ cho bạn');
+            }
+        } else {
+            return redirect()->route('home')->with('Error','bạn chưa có tài khoản');
+        }
+    }
+
+    public function delete_share_note(Request $request, $id){
+        $note = Note::findOrFail($id);
+        $member = PivotForNote::where('noteID',$id)->where('userID',$request->user->id)->first();
+        if($member){
+            $member->delete();
+            return redirect()->route('home')->with('success','Bạn đã gỡ note'.(string)$id.'khỏi danh mục note đã được chia sẻ với bạn');
+        } else {
+            return redirect()->route('home')->with('Error','Đã có lỗi xảy ra');
+        }
+    }
+
+
 }

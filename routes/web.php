@@ -23,8 +23,10 @@ use App\Http\Controllers\User2organizationTransactionController;
 use App\Http\Controllers\User2userTransactionController;
 use App\Models\ThemeRequest;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
+use App\Http\Controllers\OauthAuthenticationController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controller\OauthAuthenticationController;
+use Illuminate\Http\Request;
 
 // ---------------------------------------------------------------------------
 // Public
@@ -67,7 +69,7 @@ Route::middleware(['throttle:authentication'])->group(function (){
     // Password reset (public)
     Route::get('/forgot-password', [PasswordChangeRequestController::class, 'forgot_password_view'])->name('password.forgot');
     Route::post('/forgot-password', [PasswordChangeRequestController::class, 'forgot_password'])
-        
+
         ->name('password.forgot.post');
     Route::get('/reset-password/{id}', [PasswordChangeRequestController::class, 'change_password_view'])->name('password.reset.view');
     Route::post('/reset-password/{id}', [PasswordChangeRequestController::class, 'change_password'])
@@ -85,7 +87,7 @@ Route::middleware(['throttle:smart'])->group(function (){
         ->name('invitation.accept');
 });
 
- 
+
 Route::middleware(['auth', 'throttle:smart'])->group(function () {
 
     // Avatar
@@ -130,7 +132,7 @@ Route::middleware(['auth', 'throttle:smart'])->group(function () {
     Route::delete('/delete/organization/{id}', [OrganizationsController::class, 'delete_organization'])->name('delete.organization');
     // Mỗi request mời có thể tỏa ra nhiều email — throttle như các route giao dịch.
     Route::post('/share/organization/{id}', [OrganizationsMemberController::class, 'add_member'])
-        
+
         ->name('share.organization');
     Route::post('/leave/organization/{id}', [OrganizationsMemberController::class, 'member_leave'])->name('leave.organization');
 

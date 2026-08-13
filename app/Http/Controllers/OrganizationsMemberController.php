@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 
 class OrganizationsMemberController extends Controller
 {
+    /*
     public const MAX_RECIPIENTS_PER_REQUEST = 20;
 
     public function add_member(Request $request, $organizationID)
@@ -100,6 +101,24 @@ class OrganizationsMemberController extends Controller
         }
 
         return $response;
+    }
+        */
+
+    public function share_add_member_link(Request $request, $id){
+        $org = Organization::findOrFail($id);
+        // $user = auth()->user();
+        $member = OrganizationsMember::where('orgID',$id)->where('userID',$request->user->id)->first();
+        if($request->user){
+            if ($request->user->id == $org->hostID){
+                return redirect()->route("organization.home", $id)->with("Error","Bạn đang là chủ của tổ chức này");
+            } else if ($member){
+                return redirect()->route("organization.home", $id)->with("Error","Bạn đã là thành viên của tổ chức này");
+            }
+            $user = User::findOrFail($request->user->id);
+            return view('organization.invite', compact('org','user'));
+        } else {
+            return redirect()->route('index')->with('Error','bạn chưa có tài khoản');
+        }
     }
 
     public function accept_member(Request $request, $id)

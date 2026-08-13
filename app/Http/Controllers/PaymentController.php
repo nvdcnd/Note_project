@@ -17,7 +17,7 @@ class PaymentController extends Controller
     ) {}
     public function payment_for_point(PayOS $payos, Request $request){
         $request->validate([
-            'points' => 'required',
+            'points' => 'required|integer|min:1',
         ]);
         $data = $request->all();
         $points = $data['point'];
@@ -26,7 +26,6 @@ class PaymentController extends Controller
             $actual_money = $points * 1000;
 
             $new_payment = new Payment([
-                'orderCode' => $user->id.'-'.$points.'-'.time(),
                 'amount' => $actual_money,
                 'points' => $points,
                 'userID' => $user->id,
@@ -34,9 +33,9 @@ class PaymentController extends Controller
             ]);
             $new_payment->save();
             $transfer_data = [
-                'orderCode' => $user->id.'-'.$points.'-'.time(),
+                'orderCode' => $new_payment->id,
                 'amount' => $actual_money,
-                'description' => 'Noteket Thanh toan: Mua'.$points.'-'.$user->id,
+                'description' => 'Noteket Thanh toan: Mua'. (string)$points.'-'. (string)$user->id,
                 'returnUrl' => route('payment.success'),
                 'cancelUrl' => route('payment.cancel')
             ];
@@ -46,12 +45,14 @@ class PaymentController extends Controller
             } catch (\Exception $e) {
                 return back()->with('error', $e->getMessage());
             }
+        } else {
+            return back()->with('error','số tiền ko dc bé hơn 0');
         }
     }
 
-    public function payment_verify(PayOS $payos, Request $request,string $orderCode){
-        $order = Payment::where('orderCode', $orderCode)->first();
-        $user = User::query()->lockForUpdate()->where('id', $order->user_id);
+    public function payment_verify(PayOS $payos, Request $request, $id){
+        $order = Payment::find($id)->first();
+        $user = User::find('id', $order->user_id)->first();
 
         try{
             $webhook = $this->payOS->webhooks->verify($request->all());
@@ -61,7 +62,8 @@ class PaymentController extends Controller
 
             if($code == '00' && $ordercode == $order->orderCode && $order->status == "Pending"){
                 DB::transaction(function () use ($ordercode, $user, $amount, $code){
-                   $payment = Payment::query()->lockForUpdate()->where('orderCode', $ordercode);
+                   $payment = Payment::query()->lockForUpdate()->where('orderCode', $ordercode)->first();
+                   $user = User::query()->lockForUpdate()->where('id', $user->id)->first();
                    $user->balance += $payment->point;
                    $user->save();
                    $payment->status = 'Done';
