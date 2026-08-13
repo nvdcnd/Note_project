@@ -393,3 +393,97 @@ Nếu ứng viên nộp hồ sơ mà tôi tìm thấy hai key này trước khi 
 **AI Integration Engineer:** mời phỏng vấn.
 
 Điều kiện chung cho mọi vị trí: hai API key ở mục 9 phải được revoke trước buổi phỏng vấn, và tôi sẽ hỏi ứng viên đã xử lý thế nào.
+
+---
+
+# Phụ lục — Chấm lại sau khi biết ứng viên là ai
+
+Bổ sung ngày 12/08/2026, sau khi đọc kỹ metadata của cả ba repo.
+
+## P.1 Thông tin tôi đã bỏ sót
+
+Toàn bộ báo cáo phía trên viết trên giả định "ứng viên có 3 năm kinh nghiệm nghề". Giả định đó sai, và tôi đáng ra phải kiểm tra trước khi chấm. Bằng chứng nằm ngay trong repo:
+
+- Git author email: `30067814@st.buv.edu.vn` — sinh viên British University Vietnam, mã 30067814.
+- README của DermAI: bản quyền thuộc Hoàng Hùng Anh, Phạm Đức Mạnh và Trường Tiểu học, THCS & THPT FPT Bắc Ninh.
+- DermAI đạt Giải Ba ViSEF 2026 — cuộc thi dành cho học sinh THCS, THPT. Đầu năm 2026 ứng viên còn là học sinh lớp 12. Trước đó có Giải Nhất Tin học Trẻ tỉnh Bắc Ninh 2025 và Giải Nhì Khoa học Kỹ thuật tỉnh Bắc Ninh 2026.
+- BDTeen khởi tạo 18/11/2023, thư mục dự án tên `stempetion` — dự án đi thi khoa học kỹ thuật, viết khi ứng viên khoảng lớp 10.
+
+Ứng viên là **sinh viên năm nhất, khoảng 18 tuổi**. "Ba năm Django" là ba năm tự học từ lớp 10, xen giữa việc học phổ thông và các kỳ thi, không phải ba năm đi làm.
+
+Nhịp commit khớp: BDTeen rải rác 2023–2024, im lặng suốt 2025 (lớp 12), rồi Note_project dồn 60 commit trong 12 ngày đầu tháng 8/2026, ngày nào cũng có, cao điểm 12 commit một ngày. Đó là nhịp nghỉ hè.
+
+## P.2 Phần nào của báo cáo vẫn đúng, phần nào phải bỏ
+
+**Vẫn đúng nguyên vẹn — toàn bộ mục 3 và mục 9.** Race condition vẫn là race condition. Lỗ hổng `Signup` cho phép đăng nhập vào tài khoản người khác vẫn là lỗi critical. Hai API key public trên GitHub vẫn phải revoke hôm nay. Tuổi tác không sửa được lỗi nào trong số đó, và một hệ thống có tiền chạy trong nó thì người dùng bị mất tiền không quan tâm tác giả bao nhiêu tuổi.
+
+Điều thay đổi là **cách đọc** những lỗi ấy. Trước: "lỗ hổng nền tảng đáng lo ở một dev mid-level, sau ba năm mà chưa vá là dấu hỏi về khả năng học". Giờ: "những thứ chưa ai dạy, và chưa có môi trường nào bắt phải học". Không ai review code cho ứng viên trong ba năm qua. Không có production thật sập lúc 2 giờ sáng để dạy bài học về `DEBUG=True`. Phần lớn danh sách ở mục 3 là thứ người ta học trong hai tháng đầu đi làm, chứ không phải thứ tự nghĩ ra được khi ngồi một mình.
+
+**Phải bỏ — thang điểm ở mục 5.** Tôi chấm "Middle yếu", "Fresher+", "Junior+" theo thước của thị trường lao động. Với sinh viên năm nhất thì thước đúng là so với sinh viên cùng khóa, và so với chính hồ sơ thực tập sinh tôi nhận hàng năm.
+
+Chấm lại:
+
+| Hạng mục | Xếp hạng so với sinh viên năm nhất | Ghi chú |
+| --- | --- | --- |
+| Năng lực kỹ thuật tổng thể | Trên hẳn mặt bằng | Vượt phần lớn hồ sơ thực tập sinh năm 3 tôi nhận |
+| Khả năng hoàn thành sản phẩm | Hiếm | Ba sản phẩm chạy được, một cái có người dùng thật |
+| Nền tảng CS (concurrency, security, SQL) | Yếu, đúng như tuổi nghề | Chưa học chính quy phần này |
+| Kỷ luật kỹ thuật | Yếu | Thiếu môi trường team, không phải thiếu ý thức |
+| Product sense | Rất tốt | Chọn bài toán khó, làm tới sản phẩm giao được |
+| Thái độ học | Tốt nhất trong hồ sơ | 20 file audit tự đặt hàng soi lỗi mình |
+
+Về DermAI, tôi tách riêng vì nó không cùng hạng mục với hai dự án kia: một công cụ được bác sĩ da liễu ở 4 bệnh viện và phòng khám thẩm định, độ chính xác lâm sàng 86,1%, giải quốc gia. Đưa được sản phẩm ra khỏi máy mình đến tay người dùng thật là việc phần lớn kỹ sư đi làm 5 năm chưa từng làm.
+
+**Phải viết lại — mục 7.**
+
+## P.3 Django hay Laravel, trả lời lại
+
+Lập luận cũ của tôi dựa trên một tiền đề: "ba năm Django là tài sản duy nhất để thương lượng lương, chuyển hẳn là vứt nó đi". Tiền đề đó không còn đứng được. Ở tuổi 18, chưa đi làm ngày nào, không có lịch sử lương để bảo vệ, cũng không có chi phí chìm. Rủi ro chuyển stack gần như bằng không.
+
+Nên câu hỏi "chuyển hẳn hay ở lại" tự nó là câu hỏi sai ở giai đoạn này. Cưới một framework năm 18 tuổi là cách chắc chắn nhất để 25 tuổi trở thành người chỉ biết một thứ. Trong bốn năm đại học phía trước, Laravel 13 sẽ thành Laravel 15, Django 4 thành Django 6, và có thể cả hai đều không phải thứ ứng viên dùng để kiếm sống.
+
+Thứ không đổi trong bốn năm đó, và cũng đúng là thứ danh sách lỗi ở mục 3 đang chỉ vào: khóa dòng và cô lập giao dịch trong CSDL, cách lưu và xác minh mật khẩu, validate dữ liệu ở biên, chỉ mục và N+1, viết test có ý nghĩa, đọc lại diff trước khi commit. Không có mục nào trong đó thuộc về Django hay Laravel. Học xong một lần thì mang đi đâu cũng dùng, và học sớm thì rẻ.
+
+Nên khuyến nghị đổi thành: **đừng chọn stack, chọn nền.** Còn về mặt chiến thuật cho 6 tháng tới thì phần cũ vẫn giữ — đi thực tập bằng Django, vì đó là thứ có sản phẩm để chứng minh; Laravel để trong CV như stack thứ hai đang học, đừng khai là thành thạo.
+
+Điều kiện đổi ý ở bản cũ (chờ 6 tháng, chờ chênh lệch lương 30%) bỏ luôn. Nó được viết cho một người có sự nghiệp cần bảo vệ.
+
+## P.4 Đã nên đi xin việc chưa
+
+**Thực tập hoặc part-time: nên, trong 2–3 tháng tới.**
+
+Lý do không phải vì kỹ năng đã đủ. Mà vì nhìn lại mục 3, phần lớn thứ còn thiếu chỉ có môi trường làm việc mới cho được. `dump()` sót trong commit, Dockerfile chưa từng chạy thử, commit message `"Hello"` — đây đều là những thứ chết ngay trong hai tuần đầu ở một team có code review, và tự học ở nhà thì ba năm nữa vẫn còn, vì không ai nói cho mà biết. Ứng viên đang ở đúng điểm mà mỗi tháng trong môi trường có mentor bằng sáu tháng tự học.
+
+**Full-time: không.** Năm nhất, học phí BUV, bỏ học đi làm là đánh đổi tệ. Part-time 15–20 giờ một tuần là đủ.
+
+**Cái bẫy phải tránh trong CV.** Đừng viết "3 năm kinh nghiệm Django". Người tuyển đọc câu đó là hiểu ba năm đi làm, có hợp đồng, có chịu trách nhiệm production. Khi họ phát hiện ra thực tế, thứ mất đi không phải là ấn tượng về kỹ năng mà là niềm tin — và mất niềm tin ở vòng lọc CV thì phần còn lại của hồ sơ không được đọc nữa. Với hồ sơ này thì đó là thiệt hại lớn, vì phần còn lại rất mạnh.
+
+Cách viết đúng lại mạnh hơn:
+
+> Tự học Django từ năm lớp 10 (2023). Tác giả DermAI — công cụ chẩn đoán da liễu qua ảnh, Giải Ba ViSEF Quốc gia 2026, thẩm định bởi bác sĩ da liễu tại 4 bệnh viện và phòng khám, độ chính xác lâm sàng 86,1%. Giải Nhất Tin học Trẻ Bắc Ninh 2025. Sinh viên năm nhất British University Vietnam.
+
+Không con số nào bị thổi, và đọc lên nặng ký hơn "3 năm kinh nghiệm" nhiều. Giải ViSEF mở được cửa mà code không mở được, đặc biệt ở nhóm công ty health-tech và AI.
+
+**Ba việc trước khi nộp đơn**, gói gọn trong một cuối tuần:
+
+1. Revoke hai API key ở mục 9. Việc này chặn mọi thứ phía sau — nhà tuyển dụng mở GitHub thấy `sk-` hardcode thì dừng đọc ở đó.
+2. Vá lỗ hổng `Signup` trong `BDTeen` (mục 3.2).
+3. Viết README cho `Note_project`, ghi rõ phần nào AI hỗ trợ.
+
+**Nộp vào đâu:** startup AI hoặc health-tech, công ty sản phẩm có mảng ML, agency Laravel nhận part-time. Tránh DevOps và Infra, lý do đã nêu ở mục 4.3.
+
+## P.5 Kết luận tuyển dụng, bản sửa
+
+Bỏ toàn bộ phần "Kết luận tuyển dụng" phía trên. Thay bằng:
+
+**Thực tập sinh Backend (Django) — nhận, ưu tiên cao.** Trong nhóm hồ sơ thực tập tôi nhận năm nay, hồ sơ này nằm ở nhóm trên cùng, và khoảng cách chủ yếu đến từ DermAI chứ không phải từ code.
+
+**Part-time Backend Django — nhận, có mentor kèm.**
+
+**Part-time Laravel — nhận ở mức fresher.** Với tốc độ hiện tại, ba tháng nữa là làm được việc thật.
+
+**Full-time bất kỳ vị trí nào — không xét, vì đang học năm nhất.** Nói lại sau khi tốt nghiệp, và tôi muốn được liên lạc lại lúc đó.
+
+Câu hỏi tôi sẽ hỏi trong buổi phỏng vấn, để ứng viên chuẩn bị trước: đưa đoạn code thanh toán trong `BDTeen` ở [views.py:372](social_learning/views.py:372) và hỏi "hai người cùng bấm mua một lúc thì chuyện gì xảy ra". Không trả lời được cũng không sao ở tuổi này. Nhưng nếu trả lời được, hoặc tự nhận ra trước khi tôi hỏi, thì tôi ký ngay.
+
+Ghi chú cuối, ngoài vai trò người tuyển dụng: phần lớn báo cáo phía trên là một danh sách lỗi dài. Đọc liền một mạch thì nản. Nên nói rõ một lần cho khỏi hiểu nhầm — tôi viết dài như vậy vì hồ sơ này đáng để viết dài. Hồ sơ không đáng thì tôi gạch một dòng rồi chuyển sang cái tiếp theo, và tôi làm thế với đa số hồ sơ trong tuần này.
