@@ -71,7 +71,7 @@ class PaymentController extends Controller
                    }
 
                    User::whereKey($user->id)->increment('balance',$payment->amount);
-                   $transaction->update(['status'=>"Finished"]);
+                   $payment->update(['status'=>"Finished"]);
                    
                    /*$user->incrment('balanced',$user->balanced+$payment->amount);
                    $payment->status = 'Done';
