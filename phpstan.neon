@@ -12,7 +12,6 @@ parameters:
   ignoreErrors:
     - '#Access to an undefined property App\\Models\\.*::\$[A-Za-z0-9_]+#'
     - '#Call to an undefined static method App\\Models\\.*::.*#'
-    - '#Call to an undefined method Illuminate\\Contracts\\Auth\\Authenticatable::save\(\)#'
     - '#Access to an undefined property Illuminate\\Contracts\\Auth\\Authenticatable::\$.*#'
     - '#Access to an undefined property Illuminate\\Http\\Request::\$.*#'
   excludePaths:

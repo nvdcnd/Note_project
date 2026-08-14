@@ -14,5 +14,12 @@ class ThemeRequest extends Model
         'style',
         'drag_type',
         'price',
+        'catalog_link',
+        'status',
+        'email',
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
     ];
 }

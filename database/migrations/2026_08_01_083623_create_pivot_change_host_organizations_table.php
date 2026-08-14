@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pivot_change_host_organizations', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique();
+            $table->id()->autoIncrement()->unique()->primary();
             $table->foreignId('organizationID')->constrained('organizations')->onDelete('cascade');
             $table->foreignId('current_host_ID')->constrained('users')->onDelete('cascade');
             $table->foreignId('new_host_ID')->nullable()->constrained('users')->onDelete('cascade');

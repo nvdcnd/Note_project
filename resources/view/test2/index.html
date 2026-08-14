@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+    <title>Noteket - Đăng nhập</title> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: 'Caveat', cursive;
+            width: 100%;
+            height: 100vh;
+            background-image: url('https://img.magnific.com/premium-vector/bulletin-board_689076-482.jpg?semt=ais_hybrid&w=740&q=80');
+            background-size: cover;
+            background-position: center;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+        .card {
+            border: none;
+        }
+        .card-title {
+            font-size: 5rem;
+            font-weight: bold;
+        }
+        label {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #FACC15;
+            border-color: #FACC15;
+            color: #000;
+        }
+        .btn-primary:hover {
+            background-color: #EAB308;
+            border-color: #EAB308;
+        }
+        .btn-primary:focus {
+            box-shadow: 0 0 0 0.2rem rgba(250, 204, 21, 0.5);
+            background-color: #EAB308;
+            border-color: #EAB308;
+        }
+        .card-text{
+            font-size: 1.4rem;
+        }
+        input[type="email"], input[type="password"] {
+            font-size: 1.2rem;
+        }
+        .form-control {
+            background-color: transparent;
+            border:none;
+            border-bottom: 2px solid #000;
+            outline: none;
+        }
+        .form-control:focus {
+            background-color: transparent;
+            outline: none;
+        }
+        .form-label {
+            font-size: 1.2rem;
+        }
+        @media (min-width: 576px) and (max-width: 768px) {
+            .card-title {
+                font-size: 4rem;
+            }
+            .card-text {
+                font-size: 1.2rem;
+            }
+            label {
+                font-size: 1rem;
+            }
+            input[type="email"], input[type="password"] {
+                font-size: 1rem;
+            }
+            .mobile-line {
+                display: none;
+            }
+        }
+        @media (max-width: 576px) {
+            .card-title {
+                font-size: 3rem;
+            }
+            .card-text {
+                font-size: 1.2rem;
+            }
+            label {
+                font-size: 1rem;
+            }
+            input[type="email"], input[type="password"] {
+                font-size: 1rem;
+            }
+            .mobile-line {
+                display: block;
+                margin: 20px 0;
+            }
+        }
+        .modal-body {
+            background-color: #FFE86E;
+            font-size: 1.2rem;
+        }
+        .modal-header {
+            background-color: #FACC15;
+        }
+        .form-check-label {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            font-size: 1.2rem;
+        }
+        .form-check-input {
+            background-color: transparent;
+            border: #000 solid 2px;
+            border-radius: 50px;
+            outline: none;
+            margin-top:6px;
+        }
+        .form-check-input:focus {
+            background-color: black;
+            outline: none;
+            color: #FACC15;
+        }
+        /* Empty state: hiển thị khi danh sách không có dữ liệu (bỏ class để hiện) */
+    .empty-state { display: none; }
+</style>
+</head>
+<body>
+    <div class="d-flex vh-100 align-items-center justify-content-center">
+       <div class="container">
+            <div class="card w-75 mx-auto rounded shadow">
+                <div class="card-header" style="background-color: #FACC15;">
+                    <h3 class="text-center" style="color: transparent;">Noteket</h3>
+                </div>
+                <div class="card-body rounded p-5" style="background-color: #FFE86E;">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg" style="display: flex; flex-direction: column; justify-content: center; align-items: center;margin-bottom: 20px;">
+                                <h1 class="card-title">Noteket</h1>
+                                <p class="card-text">Phiên bản ghi chú dán của Locket Widget</p>
+                            </div>
+                            <div class="col-lg-1">
+                                <div style="border-radius:20px;height: 90%;width:3px;background-color: #000;"></div>
+                            </div>
+                            <div class="mobile-line" style="border-radius:20px;height: 90%;width:3px;background-color: #000;"></div>
+                            <div class="col-lg">
+                                <form action="/login" method="POST">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Mật khẩu</label>
+                                        <input type="password" class="form-control" id="password" name="password" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+                                        <label class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100" style="margin-bottom:10px;">Đăng nhập</button>
+                                    <p>Chưa có tài khoản, <a style="text-decoration: underline;" data-bs-toggle="modal" data-bs-target="#exampleModal">Đăng ký</a></p>
+                                    <a href="/forgot-password" style="text-decoration: underline;color: #000;margin-top:-15px;">Quên mật khẩu?</a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </div>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body rounded">
+                <h2 class="text-center">Đăng ký</h2>
+                <form action="/signup" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="email-2" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email-2" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Tên đăng nhập</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password-2" class="form-label">Mật khẩu</label>
+                        <input type="password" class="form-control" id="password-2" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="checkbox" class="form-check-input" id="rememberMe-2" name="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
+                </form>
+            </div>
+            
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+</body>
+</html>

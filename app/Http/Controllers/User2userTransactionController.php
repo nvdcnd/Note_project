@@ -6,150 +6,196 @@ use App\Mail\user2user_trans_otp;
 use App\Models\User;
 use App\Models\User2userTransaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class User2userTransactionController extends Controller
 {
-    public function user2user_transaction_OTP_generator()
-    {
-        $otp = rand(100000, 999999);
-        $existing = User2userTransaction::query()->where('status', '!=', 'finished')->get();
+    public const MAX_ATTEMPTS = 5;
 
-        foreach ($existing as $transaction) {
-            if (Hash::check((string) $otp, $transaction->otp)) {
-                return $this->user2user_transaction_OTP_generator();
-            }
+    public function create_view()
+    {
+        return view('transactions.user2user.create');
+    }
+
+    public function verify_view($id)
+    {
+        $transaction = User2userTransaction::query()->where('id', $id)->first();
+        if (! $transaction) {
+            return redirect()->route('home')->with('error', 'Giao dịch không hợp lệ.');
         }
 
-        return (string) $otp;
+        if (Auth::id() !== $transaction->from) {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền xác nhận giao dịch này.');
+        }
+
+        return view('transactions.user2user.verify', compact('transaction'));
+    }
+
+    public function history_view($id)
+    {
+        $userId = Auth::id();
+        $allTransactions = User2userTransaction::query()
+            ->where(function ($q) use ($userId) {
+                $q->where('from', $userId)->orWhere('to', $userId);
+            })
+            ->latest()
+            ->get();
+        $fromTransactions = User2userTransaction::query()->where('from', $userId)->latest()->get();
+        $toTransactions = User2userTransaction::query()->where('to', $userId)->latest()->get();
+
+        return view('transactions.user2user.history', compact('allTransactions', 'fromTransactions', 'toTransactions'));
+    }
+
+    public function user2user_transaction_OTP_generator()
+    {
+        // OTP chỉ được so với hash của chính giao dịch đó lúc xác nhận, nên
+        // không cần unique toàn cục. Vòng quét Hash::check mọi giao dịch chưa
+        // finished trước đây chậm dần theo dữ liệu tích lũy (~100ms mỗi hash).
+        return (string) random_int(100000, 999999);
     }
 
     public function user2user_transaction_create(Request $request)
     {
-        $request->validate([
-            'password' => 'required',
-            'to' => 'required',
-            'amount' => 'required',
+        $validated = $request->validate([
+            'password' => ['required', 'string'],
+            'amount' => ['required', 'numeric', 'min:1'],
+            'recipient_email' => ['required_without:to', 'nullable', 'email'],
+            'to' => ['required_without:recipient_email', 'nullable', 'integer', 'exists:users,id'],
         ]);
 
-        $data = $request->all();
-        $User2userTransaction = new User2userTransaction;
-
-        if (Auth::user()->id == $data['to']) {
-            return response()->json(['error' => 'You cannot send money to yourself']);
+        if (! empty($validated['recipient_email'])) {
+            $recipient = User::query()->where('email', strtolower(trim($validated['recipient_email'])))->first();
+            if (! $recipient) {
+                return redirect()->back()->with('error', 'Không tìm thấy tài khoản với email đó.');
+            }
+            $validated['to'] = $recipient->id;
         }
 
-        if (! Hash::check((string) $data['password'], Auth::user()->password)) {
-            return response()->json(['error' => 'Invalid password']);
+        $data = $validated;
+
+        if (Auth::id() === (int) $data['to']) {
+            return redirect()->back()->with('error', 'Bạn không thể chuyển điểm cho chính mình.');
         }
 
-        $User2userTransaction->from = Auth::user()->id;
-        $User2userTransaction->to = $data['to'];
-        $User2userTransaction->amount = $data['amount'];
-        $User2userTransaction->status = 'pending';
-        $User2userTransaction->otp = Hash::make($this->user2user_transaction_OTP_generator());
-        $User2userTransaction->expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
-        $User2userTransaction->save();
-        Mail::to(Auth::user()->email)->send(new user2user_trans_otp($User2userTransaction));
+        if (! Hash::check($data['password'], Auth::user()->password)) {
+            return redirect()->back()->with('error', 'Mật khẩu không đúng.');
+        }
 
-        return redirect()->route('user2user_transaction_verify_view', $User2userTransaction->id);
+        $otp = $this->user2user_transaction_OTP_generator();
+
+        $transaction = new User2userTransaction;
+        $transaction->from = Auth::id();
+        $transaction->to = $data['to'];
+        $transaction->amount = $data['amount'];
+        $transaction->status = User2userTransaction::STATUS_PENDING;
+        $transaction->otp = Hash::make($otp);
+        $transaction->expires_at = now()->addMinutes(10);
+        $transaction->attempts = 0;
+        $transaction->save();
+
+        // Gửi OTP hỏng thì giao dịch thành mồ côi (không có mã để xác nhận,
+        // không có nút gửi lại) — xóa giao dịch và báo người dùng thử lại.
+        try {
+            Mail::to(Auth::user()->email)->send(new user2user_trans_otp($transaction, $otp));
+        } catch (Throwable $e) {
+            $transaction->delete();
+            Log::error('OTP mail failed (user2user): '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Không gửi được email chứa mã OTP. Vui lòng thử lại.');
+        }
+
+        return redirect()->route('user2user_transaction_verify_view', $transaction->id)->with('success', 'Mã OTP đã được gửi tới email của bạn.');
     }
 
     public function user2user_transaction_verify(Request $request, $id)
     {
-        /** @var User2userTransaction|null $transaction */
-        $transaction = User2userTransaction::query()->where('id', $id)->where('status', 'pending')->first();
-        $request->validate([
-            'passkey' => 'required',
+        $validated = $request->validate([
+            'passkey' => ['required', 'string'],
         ]);
 
-        $data = $request->all();
-        $user = Auth::user();
-        $passkey = (string) $data['passkey'];
+        /** @var User2userTransaction|null $transaction */
+        $transaction = User2userTransaction::query()
+            ->where('id', $id)
+            ->where('status', User2userTransaction::STATUS_PENDING)
+            ->first();
 
         if (! $transaction) {
-            return redirect()->route('home')->with('error', 'Invalid transaction');
+            return redirect()->route('home')->with('error', 'Giao dịch không hợp lệ.');
         }
 
-        $time = Carbon::parse($transaction->expires_at);
-
-        if (! Hash::check($passkey, $transaction->otp)) {
-            User2userTransaction::destroy($transaction->id);
-
-            return redirect()->route('home')->with('error', 'Invalid passkey');
+        if (Auth::id() !== $transaction->from) {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền xác nhận giao dịch này.');
         }
 
-        if (now()->greaterThan($time)) {
-            User2userTransaction::destroy($transaction->id);
+        $user = Auth::user();
+        $passkey = $validated['passkey'];
 
-            return redirect()->route('home')->with('error', 'The transaction has expired. Please create a new transaction');
-        }
+        return DB::transaction(function () use ($transaction, $passkey, $user) {
+            // Lock the sender + recipient rows to prevent double-spend (BE-6 / E11).
+            $lockedSender = User::query()->lockForUpdate()->find($transaction->from);
+            $lockedRecipient = User::query()->lockForUpdate()->find($transaction->to);
 
-        $recipient = User::query()->find($transaction->to);
-        if (! $recipient) {
-            User2userTransaction::destroy($transaction->id);
+            if (! $lockedRecipient) {
+                $transaction->update(['status' => User2userTransaction::STATUS_FAILED]);
 
-            return redirect()->route('home')->with('error', 'Recipient not found');
-        }
+                return redirect()->route('user2user_transaction_verify_view', $transaction->id)->with('error', 'Không tìm thấy người nhận.');
+            }
 
-        if ($user->balance < $transaction->amount) {
-            return redirect()->route('home')->with('error', 'Insufficient balance');
-        }
+            if ($transaction->attempts >= self::MAX_ATTEMPTS) {
+                $transaction->update(['status' => User2userTransaction::STATUS_FAILED]);
 
-        $recipient->balance += $transaction->amount;
-        $recipient->save();
+                return redirect()->route('home')->with('error', 'Nhập sai quá nhiều lần. Giao dịch đã bị hủy.');
+            }
 
-        $user->balance -= $transaction->amount;
-        $user->save();
+            if (now()->greaterThan($transaction->expires_at)) {
+                $transaction->update(['status' => User2userTransaction::STATUS_EXPIRED]);
 
-        $transaction->status = 'finished';
-        $transaction->save();
+                return redirect()->route('user2user_transaction_history_view', $user->id)->with('error', 'Giao dịch đã hết hạn. Vui lòng tạo giao dịch mới.');
+            }
 
-        return redirect()->route('user2user_transaction_history_view', $user->id)->with('success', 'Transaction completed successfully');
+            if (! Hash::check($passkey, $transaction->otp)) {
+                User2userTransaction::whereKey($transaction->id)->increment('attempts');
+                $transaction->refresh();
+
+                return redirect()->route('user2user_transaction_verify_view', $transaction->id)
+                    ->with('error', 'Mã OTP không đúng. '.($transaction->attempts).' lần nhập sai trên tổng số '.self::MAX_ATTEMPTS);
+            }
+
+            if ($lockedSender->balance < $transaction->amount) {
+                return redirect()->route('user2user_transaction_verify_view', $transaction->id)->with('error', 'Số dư không đủ.');
+            }
+
+            User::whereKey($lockedRecipient->id)->increment('balance', $transaction->amount);
+            User::whereKey($lockedSender->id)->decrement('balance', $transaction->amount);
+
+            $transaction->update(['status' => User2userTransaction::STATUS_FINISHED]);
+
+            return redirect()->route('user2user_transaction_history_view', $user->id)->with('success', 'Giao dịch thành công.');
+        });
     }
-
-    /*
 
     public function user2user_transaction_cancel(Request $request, $id)
     {
-        $User2userTransaction = User2userTransaction::where('id', $id)->where('status', '!=', 'declined')->where('status', '!=', 'accepted')->first();
-        if ($User2userTransaction) {
-            if (Auth::user()->id == $User2userTransaction->from) {
-                $User2userTransaction->status = 'declined';
-                $User2userTransaction->save();
-            } else {
-                return response()->json(['error' => 'You are not authorized to cancel this transaction']);
-            }
+        $transaction = User2userTransaction::query()
+            ->where('id', $id)
+            ->where('status', User2userTransaction::STATUS_PENDING)
+            ->first();
 
-            return response()->json($User2userTransaction);
-        } else {
-            return response()->json(['error' => 'You are not authorized to cancel this transaction']);
+        if (! $transaction) {
+            return redirect()->route('user2user_transaction_history_view', Auth::id())->with('error', 'Không tìm thấy giao dịch, hoặc giao dịch đã được xử lý.');
         }
-    }
 
-    public function user2user_transaction_verify(Request $request, $id)
-    {
-        $data = $request->all();
-        $User2userTransaction = User2userTransaction::where('id', $id)->where('status', '!=', 'declined')->where('status', '!=', 'accepted')->first();
-        if ($User2userTransaction && ($User2userTransaction->otp == $data['otp'])) {
-            $User2userTransaction->status = 'accepted';
-            $User2userTransaction->save();
-            $from = User::where('id', $User2userTransaction->from)->first();
-            $to = User::where('id', $User2userTransaction->to)->first();
-            if ($from && $to) {
-                $from->balance -= $User2userTransaction->amount;
-                $to->balance += $User2userTransaction->amount;
-                $from->save();
-                $to->save();
-            }
-
-            return response()->json($User2userTransaction);
-        } else {
-            return response()->json(['error' => 'Invalid OTP']);
+        if (Auth::id() !== $transaction->from) {
+            return redirect()->route('user2user_transaction_history_view', Auth::id())->with('error', 'Bạn không có quyền hủy giao dịch này.');
         }
+
+        $transaction->update(['status' => User2userTransaction::STATUS_CANCELLED]);
+
+        return redirect()->route('user2user_transaction_history_view', Auth::id())->with('success', 'Đã hủy giao dịch.');
     }
-        */
 }

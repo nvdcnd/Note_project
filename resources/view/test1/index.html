@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NoteBoard - Welcome</title>
+  <style>
+    body { margin: 0; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(180deg, #fff8e8 0%, #f2e4ca 100%); color: #3d3025; }
+    .page { min-height: 100vh; display: grid; place-items: center; padding: 1rem; }
+    .card { width: min(680px, 100%); background: rgba(255,255,255,0.94); border-radius: 28px; border: 1px solid rgba(146, 104, 38, 0.18); box-shadow: 0 18px 32px rgba(72, 50, 18, 0.16); overflow: hidden; }
+    .card-inner { display: grid; gap: 1.2rem; padding: 1.5rem; }
+    .lang-switch { display: flex; justify-content: flex-end; }
+    select { border-radius: 999px; border: 1px solid #d6c4a2; background: #fff; padding: 0.75rem 1rem; outline: none; }
+    .hero { display: grid; gap: 1rem; text-align: center; padding: 1.5rem 0; }
+    .hero h1 { margin: 0; font-size: clamp(2.2rem, 4vw, 3.2rem); letter-spacing: 0.12em; }
+    .hero p { margin: 0; color: #6d5d4f; line-height: 1.6; }
+    .divider { width: 75%; height: 1px; margin: 0 auto; border-radius: 999px; background: rgba(112, 81, 37, 0.18); }
+    .action-row { display: grid; gap: 1rem; justify-items: center; }
+    .button-primary, .button-secondary { padding: 0.95rem 1.3rem; border: none; border-radius: 999px; font-weight: 700; }
+    .button-primary { background: linear-gradient(180deg, #c99734, #a56519); color: #fff; box-shadow: 0 12px 22px rgba(115, 72, 23, 0.24); }
+    .button-secondary { background: linear-gradient(180deg, #fff4da, #f5e1b1); color: #3c2b13; border: 1px solid rgba(156, 110, 36, 0.18); }
+    .modal, .overlay { position: fixed; inset: 0; display: grid; place-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .overlay { background: rgba(31, 18, 5, 0.28); z-index: 100; }
+    .modal.open, .overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-card { width: min(500px, 100%); background: #fffdf6; border-radius: 26px; border: 1px solid rgba(145, 95, 29, 0.16); box-shadow: 0 18px 30px rgba(67, 40, 15, 0.15); padding: 1.25rem; }
+    .modal-card header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .modal-card h2 { margin: 0; font-size: 1.2rem; }
+    .modal-close { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(148, 106, 46, 0.2); background: #fff; display: grid; place-items: center; }
+    .form-group { display: grid; gap: 1rem; }
+    input[type=email], input[type=password], input[type=text] { width: 100%; border: 1px solid rgba(164, 122, 57, 0.2); border-radius: 18px; padding: 0.95rem 1rem; background: #fbf2dd; }
+    .form-row { display: flex; gap: 1rem; align-items: center; }
+    .form-row label { display: flex; align-items: center; gap: 0.4rem; color: #5f4e40; }
+    @media (min-width: 768px) {
+      .card-inner { grid-template-columns: 1fr 1fr; align-items: center; }
+      .hero { text-align: left; }
+      .action-row { grid-auto-flow: column; }
+      .lang-switch { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <article class="card">
+      <div class="card-inner">
+        <section class="hero">
+          <div class="lang-switch">
+            <select aria-label="Language selector">
+              <option>Tiếng Việt</option>
+              <option>English</option>
+            </select>
+          </div>
+          <div>
+            <h1>NoteBoard</h1>
+            <p>Đăng nhập hoặc đăng ký để bắt đầu quản lý các note, tổ chức và theme của bạn trong một giao diện nhẹ nhàng và dễ nhìn.</p>
+          </div>
+          <div class="divider"></div>
+          <div class="action-row">
+            <button class="button-primary" onclick="openModal('signInModal')">Đăng nhập</button>
+            <button class="button-secondary" onclick="openModal('signUpModal')">Đăng ký</button>
+          </div>
+        </section>
+      </div>
+    </article>
+  </main>
+  <div class="overlay" onclick="closeModal('signInModal'); closeModal('signUpModal')"></div>
+  <div class="modal" id="signInModal">
+    <div class="modal-card">
+      <header>
+        <h2>Sign in</h2>
+        <button class="modal-close" onclick="closeModal('signInModal')">X</button>
+      </header>
+      <form action="/login" method="post" class="form-group">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <label class="form-row"><input type="checkbox"> Remember me</label>
+        <button class="button button-full">Submit</button>
+      </form>
+    </div>
+  </div>
+  <div class="modal" id="signUpModal">
+    <div class="modal-card">
+      <header>
+        <h2>Sign up</h2>
+        <button class="modal-close" onclick="closeModal('signUpModal')">X</button>
+      </header>
+      <form action="/signup" method="post" class="form-group">
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <label class="form-row"><input type="checkbox"> Remember me</label>
+        <button class="button button-full">Submit</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    function openModal(id) {
+      document.getElementById(id)?.classList.add('open');
+      document.querySelector('.overlay')?.classList.add('open');
+    }
+    function closeModal(id) {
+      document.getElementById(id)?.classList.remove('open');
+      document.querySelector('.overlay')?.classList.remove('open');
+    }
+  </script>
+</body>
+</html>

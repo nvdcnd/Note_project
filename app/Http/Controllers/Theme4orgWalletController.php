@@ -6,102 +6,165 @@ use App\Mail\Theme4org_trans_otp;
 use App\Models\Organization;
 use App\Models\Theme4org;
 use App\Models\Theme4orgTransaction;
+use App\Models\Theme4orgWallet;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class Theme4orgWalletController extends Controller
 {
+    public const MAX_ATTEMPTS = 5;
+
     public function Theme4org_otp_generator()
     {
-        $otp = rand(100000, 999999);
-        $existing = Theme4orgTransaction::query()->where('status', '!=', 'finished')->get();
-
-        foreach ($existing as $transaction) {
-            if (Hash::check((string) $otp, $transaction->otp)) {
-                return $this->Theme4org_otp_generator();
-            }
-        }
-
-        return (string) $otp;
+        // OTP chỉ được so với hash của chính giao dịch đó lúc xác nhận, nên
+        // không cần unique toàn cục. Vòng quét Hash::check mọi giao dịch chưa
+        // finished trước đây chậm dần theo dữ liệu tích lũy (~100ms mỗi hash).
+        return (string) random_int(100000, 999999);
     }
 
     public function Organization_buy_theme(Request $request, $id)
     {
         $theme = Theme4org::query()->find($id);
-        $org = Organization::query()->find(Auth::user()->organizationID);
 
-        if (! $theme || ! $org) {
-            return redirect()->back()->with('error', 'Invalid theme or organization');
+        // The org is passed explicitly to the route.
+        $organization = Organization::query()->find($request->integer('organizationID'));
+        if (! $organization) {
+            return redirect()->back()->with('error', 'Chủ đề hoặc tổ chức không hợp lệ.');
         }
 
-        if ($org->balance < $theme->price) {
-            return redirect()->back()->with('error', 'You not have enough balance to buy this theme');
+        // Only the host can spend the organization's balance.
+        if ($organization->hostID !== Auth::id()) {
+            return redirect()->back()->with('error', 'Chỉ chủ sở hữu tổ chức mới có thể mua chủ đề.');
+        }
+
+        if (! $theme) {
+            return redirect()->back()->with('error', 'Không tìm thấy chủ đề.');
+        }
+
+        $alreadyOwned = Theme4orgWallet::query()
+            ->where('organizationID', $organization->id)
+            ->where('theme4ID', $theme->id)
+            ->exists();
+
+        if ($alreadyOwned) {
+            return redirect()->back()->with('error', 'Tổ chức đã sở hữu chủ đề này.');
+        }
+
+        if ($organization->balance < $theme->price) {
+            return redirect()->back()->with('error', 'Số dư của bạn không đủ để mua chủ đề này.');
         }
 
         $request->validate([
-            'password' => 'required',
+            'password' => ['required', 'string'],
         ]);
 
-        if (Hash::check($request->password, Auth::user()->password) && $org->hostID == Auth::id()) {
-            $transaction = new Theme4orgTransaction;
-            $transaction->organizationID = $org->id;
-            $transaction->themeID = $theme->id;
-            $transaction->amount = $theme->price;
-            $transaction->status = 'pending';
-            $transaction->otp = Hash::make($this->Theme4org_otp_generator());
-            $transaction->expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
-            $transaction->save();
-            Mail::to(Auth::user()->email)->send(new Theme4org_trans_otp($transaction));
-        } else {
-            return redirect()->back()->with('error', 'Incorrect password');
+        if (! Hash::check($request->password, Auth::user()->password)) {
+            return redirect()->back()->with('error', 'Mật khẩu không đúng.');
         }
 
-        return redirect()->back()->with('success', 'Transaction request sent to your email');
+        $otp = $this->Theme4org_otp_generator();
+
+        $transaction = new Theme4orgTransaction;
+        $transaction->organizationID = $organization->id;
+        $transaction->themeID = $theme->id;
+        $transaction->amount = $theme->price;
+        $transaction->status = Theme4orgTransaction::STATUS_PENDING;
+        $transaction->current_hostID = Auth::id();
+        $transaction->otp = Hash::make($otp);
+        $transaction->expires_at = now()->addMinutes(10);
+        $transaction->attempts = 0;
+        $transaction->save();
+
+        // Gửi OTP hỏng thì giao dịch thành mồ côi (không có mã để xác nhận,
+        // không có nút gửi lại) — xóa giao dịch và báo người dùng thử lại.
+        try {
+            Mail::to(Auth::user()->email)->send(new Theme4org_trans_otp($transaction, $otp));
+        } catch (Throwable $e) {
+            $transaction->delete();
+            Log::error('OTP mail failed (theme4org): '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Không gửi được email chứa mã OTP. Vui lòng thử lại.');
+        }
+
+        return redirect()->back()->with('success', 'Yêu cầu giao dịch đã được gửi tới email của bạn.');
     }
 
     public function Organization_buy_theme_verify_otp(Request $request, $id)
     {
-        $transaction = Theme4orgTransaction::query()->find($id);
+        $request->validate([
+            'passkey' => ['required', 'string'],
+        ]);
 
-        if (! $transaction) {
-            return redirect()->back()->with('error', 'Invalid transaction');
-        }
+        return DB::transaction(function () use ($request, $id) {
+            /** @var Theme4orgTransaction|null $transaction */
+            $transaction = Theme4orgTransaction::query()
+                ->where('id', $id)
+                ->where('status', Theme4orgTransaction::STATUS_PENDING)
+                ->first();
 
-        $org = Organization::query()->find($transaction->organizationID);
-        if (! $org) {
-            return redirect()->back()->with('error', 'Organization not found');
-        }
+            if (! $transaction) {
+                return redirect()->back()->with('error', 'Giao dịch không hợp lệ.');
+            }
 
-        $theme = Theme4org::query()->find($transaction->themeID);
-        if (! $theme) {
-            return redirect()->back()->with('error', 'Theme not found');
-        }
+            $org = Organization::query()->lockForUpdate()->find($transaction->organizationID);
+            if (! $org) {
+                return redirect()->back()->with('error', 'Không tìm thấy tổ chức.');
+            }
 
-        if ($org->balance < $theme->price) {
-            return redirect()->back()->with('error', 'Insufficient balance');
-        }
+            if ($org->hostID !== Auth::id()) {
+                return redirect()->back()->with('error', 'Chỉ chủ sở hữu tổ chức mới có thể xác nhận giao dịch này.');
+            }
 
-        $time = Carbon::parse($transaction->expires_at);
+            $theme = Theme4org::query()->find($transaction->themeID);
+            if (! $theme) {
+                return redirect()->back()->with('error', 'Không tìm thấy chủ đề.');
+            }
 
-        if (! Hash::check((string) $request->passkey, $transaction->otp)) {
-            return redirect()->back()->with('error', 'Invalid passkey');
-        }
+            if ($transaction->attempts >= self::MAX_ATTEMPTS) {
+                $transaction->update(['status' => Theme4orgTransaction::STATUS_FAILED]);
 
-        if (now()->greaterThan($time)) {
-            $transaction->delete();
+                return redirect()->back()->with('error', 'Nhập sai quá nhiều lần. Giao dịch đã bị hủy.');
+            }
 
-            return redirect()->back()->with('error', 'OTP has expired. Please try again');
-        }
+            if (now()->greaterThan($transaction->expires_at)) {
+                $transaction->update(['status' => Theme4orgTransaction::STATUS_EXPIRED]);
 
-        $org->balance -= $theme->price;
-        $org->save();
+                return redirect()->back()->with('error', 'Mã OTP đã hết hạn. Vui lòng thử lại.');
+            }
 
-        $transaction->status = 'finished';
-        $transaction->save();
+            if (! Hash::check((string) $request->passkey, $transaction->otp)) {
+                Theme4orgTransaction::whereKey($transaction->id)->increment('attempts');
+                $transaction->refresh();
 
-        return redirect()->back()->with('success', 'Theme purchased successfully');
+                return redirect()->back()
+                    ->with('error', 'Mã OTP không đúng. '.($transaction->attempts).' lần nhập sai trên tổng số '.self::MAX_ATTEMPTS);
+            }
+
+            if ($org->balance < $theme->price) {
+                return redirect()->back()->with('error', 'Số dư không đủ.');
+            }
+
+            $alreadyOwned = Theme4orgWallet::query()
+                ->where('organizationID', $org->id)
+                ->where('theme4ID', $theme->id)
+                ->exists();
+
+            if (! $alreadyOwned) {
+                Theme4orgWallet::create([
+                    'organizationID' => $org->id,
+                    'theme4ID' => $theme->id,
+                ]);
+            }
+
+            Organization::whereKey($org->id)->decrement('balance', $theme->price);
+            $transaction->update(['status' => Theme4orgTransaction::STATUS_FINISHED]);
+
+            return redirect()->back()->with('success', 'Đã mua chủ đề thành công.');
+        });
     }
 }

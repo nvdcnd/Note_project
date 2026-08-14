@@ -4,149 +4,189 @@ namespace App\Http\Controllers;
 
 use App\Mail\user2organization_trans_otp;
 use App\Models\Organization;
+use App\Models\User;
 use App\Models\User2organizationTransaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class User2organizationTransactionController extends Controller
 {
-    public function user2organization_transaction_OTP_generator()
-    {
-        $otp = rand(100000, 999999);
-        $existing = User2organizationTransaction::query()->where('status', '!=', 'finished')->get();
+    public const MAX_ATTEMPTS = 5;
 
-        foreach ($existing as $transaction) {
-            if (Hash::check((string) $otp, $transaction->otp)) {
-                return $this->user2organization_transaction_OTP_generator();
-            }
+    public function create_view()
+    {
+        return view('transactions.user2organization.create');
+    }
+
+    public function verify_view($id)
+    {
+        $transaction = User2organizationTransaction::query()->where('id', $id)->first();
+        if (! $transaction) {
+            return redirect()->route('home')->with('error', 'Giao dịch không hợp lệ.');
         }
 
-        return (string) $otp;
+        if (Auth::id() !== $transaction->from) {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền xác nhận giao dịch này.');
+        }
+
+        return view('transactions.user2organization.verify', compact('transaction'));
+    }
+
+    public function history_view($id)
+    {
+        $userId = Auth::id();
+        $allTransactions = User2organizationTransaction::query()
+            ->where(function ($q) use ($userId) {
+                $q->where('from', $userId)->orWhere('organizationID', $userId);
+            })
+            ->latest()
+            ->get();
+        $fromTransactions = User2organizationTransaction::query()->where('from', $userId)->latest()->get();
+        $toTransactions = User2organizationTransaction::query()->where('organizationID', $userId)->latest()->get();
+
+        return view('transactions.user2organization.history', compact('allTransactions', 'fromTransactions', 'toTransactions'));
+    }
+
+    public function user2organization_transaction_OTP_generator()
+    {
+        // OTP chỉ được so với hash của chính giao dịch đó lúc xác nhận, nên
+        // không cần unique toàn cục. Vòng quét Hash::check mọi giao dịch chưa
+        // finished trước đây chậm dần theo dữ liệu tích lũy (~100ms mỗi hash).
+        return (string) random_int(100000, 999999);
     }
 
     public function user2organization_transaction_create(Request $request)
     {
-        $request->validate([
-            'password' => 'required',
-            'organizationID' => 'required',
-            'amount' => 'required',
+        $validated = $request->validate([
+            'password' => ['required', 'string'],
+            'organizationID' => ['required', 'integer', 'exists:organizations,id'],
+            'amount' => ['required', 'numeric', 'min:1'],
         ]);
 
-        $data = $request->all();
-        $User2organizationTransaction = new User2organizationTransaction;
-        $organization = Organization::query()->find($data['organizationID']);
-
+        $organization = Organization::query()->find($validated['organizationID']);
         if (! $organization) {
-            return response()->json(['error' => 'Organization not found']);
+            return redirect()->back()->with('error', 'Không tìm thấy tổ chức.');
         }
 
-        if (! Hash::check((string) $data['password'], Auth::user()->password)) {
-            return response()->json(['error' => 'Invalid password']);
+        if (! Hash::check($validated['password'], Auth::user()->password)) {
+            return redirect()->back()->with('error', 'Mật khẩu không đúng.');
         }
 
-        $User2organizationTransaction->from = Auth::user()->id;
-        $User2organizationTransaction->organizationID = $data['organizationID'];
-        $User2organizationTransaction->amount = $data['amount'];
-        $User2organizationTransaction->status = 'pending';
-        $User2organizationTransaction->current_hostID = $organization->hostID;
-        $User2organizationTransaction->otp = Hash::make($this->user2organization_transaction_OTP_generator());
-        $User2organizationTransaction->expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
-        $User2organizationTransaction->save();
-        Mail::to(Auth::user()->email)->send(new user2organization_trans_otp($User2organizationTransaction));
+        $otp = $this->user2organization_transaction_OTP_generator();
 
-        return redirect()->route('user2organization_transaction_verify_view', $User2organizationTransaction->id);
+        $transaction = new User2organizationTransaction;
+        $transaction->from = Auth::id();
+        $transaction->organizationID = $organization->id;
+        $transaction->amount = $validated['amount'];
+        $transaction->status = User2organizationTransaction::STATUS_PENDING;
+        $transaction->current_hostID = $organization->hostID;
+        $transaction->otp = Hash::make($otp);
+        $transaction->expires_at = now()->addMinutes(10);
+        $transaction->attempts = 0;
+        $transaction->save();
+
+        // Gửi OTP hỏng thì giao dịch thành mồ côi (không có mã để xác nhận,
+        // không có nút gửi lại) — xóa giao dịch và báo người dùng thử lại.
+        try {
+            Mail::to(Auth::user()->email)->send(new user2organization_trans_otp($transaction, $otp));
+        } catch (Throwable $e) {
+            $transaction->delete();
+            Log::error('OTP mail failed (user2organization): '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Không gửi được email chứa mã OTP. Vui lòng thử lại.');
+        }
+
+        return redirect()->route('user2organization_transaction_verify_view', $transaction->id)->with('success', 'Mã OTP đã được gửi tới email của bạn.');
     }
 
     public function user2organization_transaction_verify(Request $request, $id)
     {
-        /** @var User2organizationTransaction|null $transaction */
-        $transaction = User2organizationTransaction::query()->where('id', $id)->where('status', 'pending')->first();
-        $request->validate([
-            'passkey' => 'required',
+        $validated = $request->validate([
+            'passkey' => ['required', 'string'],
         ]);
 
-        $data = $request->all();
-        $user = Auth::user();
-        $passkey = (string) $data['passkey'];
+        /** @var User2organizationTransaction|null $transaction */
+        $transaction = User2organizationTransaction::query()
+            ->where('id', $id)
+            ->where('status', User2organizationTransaction::STATUS_PENDING)
+            ->first();
 
         if (! $transaction) {
-            return redirect()->route('home')->with('error', 'Invalid transaction');
+            return redirect()->route('home')->with('error', 'Giao dịch không hợp lệ.');
         }
 
-        $organization = Organization::query()->find($transaction->organizationID);
-        if (! $organization) {
-            User2organizationTransaction::destroy($transaction->id);
-
-            return redirect()->route('home')->with('error', 'Organization not found');
+        if (Auth::id() !== $transaction->from) {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền xác nhận giao dịch này.');
         }
 
-        $time = Carbon::parse($transaction->expires_at);
+        $user = Auth::user();
+        $passkey = $validated['passkey'];
 
-        if (! Hash::check($passkey, $transaction->otp)) {
-            User2organizationTransaction::destroy($transaction->id);
+        return DB::transaction(function () use ($user, $passkey, $transaction) {
+            $organization = Organization::query()->lockForUpdate()->find($transaction->organizationID);
+            $lockedSender = User::query()->lockForUpdate()->find($transaction->from);
 
-            return redirect()->route('organization', $organization->id)->with('error', 'Invalid passkey');
-        }
+            if (! $organization) {
+                $transaction->update(['status' => User2organizationTransaction::STATUS_FAILED]);
 
-        if (now()->greaterThan($time)) {
-            User2organizationTransaction::destroy($transaction->id);
-
-            return redirect()->route('organization', $organization->id)->with('error', 'The transaction has expired. Please create a new transaction');
-        }
-
-        if ($user->balance < $transaction->amount) {
-            return redirect()->route('organization', $organization->id)->with('error', 'Insufficient balance');
-        }
-
-        $organization->balance += $transaction->amount;
-        $organization->save();
-
-        $user->balance -= $transaction->amount;
-        $user->save();
-
-        $transaction->status = 'finished';
-        $transaction->save();
-
-        return redirect()->route('user2organization_transaction_history_view', $user->id)->with('success', 'Transaction completed successfully');
-    }
-
-    /*
-    public function user2organization_transaction_cancel(Request $request, $id){
-        $User2organizationTransaction = User2organizationTransaction::where('id', $id)->where('status', '!=', 'declined')->where('status', '!=', 'accepted')->first();
-        if($User2organizationTransaction){
-            if(Auth::user()->id == $User2organizationTransaction->from){
-                    $User2organizationTransaction->status = 'declined';
-                    //$User2organizationTransaction->otp = $this->user2organization_transaction_OTP_generator();
-                    $User2organizationTransaction->save();
-                    return response()->json($User2organizationTransaction);
-                }else{
-                    return response()->json(['error' => 'You are not authorized to cancel this transaction']);
-                }
-        }else{
-            return response()->json(['error' => 'Invalid transaction ID']);
-        }
-    }
-
-    public function user2organization_transaction_verify(Request $request, $id){
-        $User2organizationTransaction = User2organizationTransaction::where('id', $id)->where('status', '!=', 'declined')->where('status', '!=', 'accepted')->first();
-        if($User2organizationTransaction){
-            if(Auth::user()->id == $User2organizationTransaction->from || Auth::user()->id == $User2organizationTransaction->to){
-                if($User2organizationTransaction->otp == $request->otp){
-                    $User2organizationTransaction->status = 'accepted';
-                    $User2organizationTransaction->save();
-                    return response()->json($User2organizationTransaction);
-                }else{
-                    return response()->json(['error' => 'Invalid OTP']);
-                }
-            }else{
-                return response()->json(['error' => 'You are not authorized to verify this transaction']);
+                return redirect()->route('home')->with('error', 'Không tìm thấy tổ chức.');
             }
-        }else{
-            return response()->json(['error' => 'Invalid transaction ID']);
-        }
+
+            if ($transaction->attempts >= self::MAX_ATTEMPTS) {
+                $transaction->update(['status' => User2organizationTransaction::STATUS_FAILED]);
+
+                return redirect()->route('home')->with('error', 'Nhập sai quá nhiều lần. Giao dịch đã bị hủy.');
+            }
+
+            if (now()->greaterThan($transaction->expires_at)) {
+                $transaction->update(['status' => User2organizationTransaction::STATUS_EXPIRED]);
+
+                return redirect()->route('user2organization_transaction_history_view', $user->id)->with('error', 'Giao dịch đã hết hạn. Vui lòng tạo giao dịch mới.');
+            }
+
+            if (! Hash::check($passkey, $transaction->otp)) {
+                User2organizationTransaction::whereKey($transaction->id)->increment('attempts');
+                $transaction->refresh();
+
+                return redirect()->route('user2organization_transaction_verify_view', $transaction->id)
+                    ->with('error', 'Mã OTP không đúng. '.($transaction->attempts).' lần nhập sai trên tổng số '.self::MAX_ATTEMPTS);
+            }
+
+            if ($lockedSender->balance < $transaction->amount) {
+                return redirect()->route('organization', $organization->id)->with('error', 'Số dư không đủ.');
+            }
+
+            Organization::whereKey($organization->id)->increment('balance', $transaction->amount);
+            User::whereKey($lockedSender->id)->decrement('balance', $transaction->amount);
+
+            $transaction->update(['status' => User2organizationTransaction::STATUS_FINISHED]);
+
+            return redirect()->route('user2organization_transaction_history_view', $user->id)->with('success', 'Giao dịch thành công.');
+        });
     }
-        */
+
+    public function user2organization_transaction_cancel(Request $request, $id)
+    {
+        $transaction = User2organizationTransaction::query()
+            ->where('id', $id)
+            ->where('status', User2organizationTransaction::STATUS_PENDING)
+            ->first();
+
+        if (! $transaction) {
+            return redirect()->route('user2organization_transaction_history_view', Auth::id())->with('error', 'Không tìm thấy giao dịch, hoặc giao dịch đã được xử lý.');
+        }
+
+        if (Auth::id() !== $transaction->from) {
+            return redirect()->route('user2organization_transaction_history_view', Auth::id())->with('error', 'Bạn không có quyền hủy giao dịch này.');
+        }
+
+        $transaction->update(['status' => User2organizationTransaction::STATUS_CANCELLED]);
+
+        return redirect()->route('user2organization_transaction_history_view', Auth::id())->with('success', 'Đã hủy giao dịch.');
+    }
 }

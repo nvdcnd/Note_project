@@ -3,13 +3,14 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class Password_change extends Mailable
+class Password_change extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -37,7 +38,10 @@ class Password_change extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.Password_change',
+            view: 'emails.Password_change',
+            with: [
+                'passkey' => $this->passkey,
+            ],
         );
     }
 

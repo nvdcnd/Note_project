@@ -5,24 +5,37 @@ namespace App\Mail;
 use App\Models\Note;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class UserEmail extends Mailable
+class UserEmail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
+     *
+     * Hai thuộc tính này bắt buộc phải public: view email đọc $user và $notes,
+     * mà Laravel chỉ truyền thuộc tính public của mailable vào view.
      */
-    public function __construct(private $user, private $notes)
+    public function __construct(public $user, public $notes)
     {
-        $this->user = User::find($user->id);
-        $this->notes = Note::find($notes->id);
-        // $this->email = $email;
+        // Accept either model instances or ids and resolve to models here so job serialization stays small
+        if ($user instanceof User) {
+            $this->user = $user;
+        } else {
+            $this->user = User::find($user);
+        }
+
+        if ($notes instanceof Note) {
+            $this->notes = $notes;
+        } else {
+            $this->notes = Note::find($notes);
+        }
     }
 
     /**
@@ -31,7 +44,7 @@ class UserEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Note no.'.$this->notes->id.' has been shared with you by'.$this->user->username,
+            subject: 'Note no.'.$this->notes->id.' has been shared with you by '.$this->user->name,
         );
     }
 

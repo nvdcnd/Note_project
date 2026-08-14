@@ -32,6 +32,6 @@ class ThemeRequestController extends Controller
         }
         $theme_request->save();
 
-        return redirect()->back()->with('success', 'Theme request created successfully');
+        return redirect()->back()->with('success', 'Đã gửi yêu cầu tạo chủ đề.');
     }
 }

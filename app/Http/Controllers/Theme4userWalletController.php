@@ -4,104 +4,161 @@ namespace App\Http\Controllers;
 
 use App\Mail\user2theme4_trans_otp;
 use App\Models\Theme4user;
+use App\Models\Theme4userWallet;
+use App\Models\User;
 use App\Models\User2theme4Transaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-
-// use App\Mail\user2theme4_trans_verify;
-// use App\Models\User2theme4Transaction;
+use Throwable;
 
 class Theme4userWalletController extends Controller
 {
+    public const MAX_ATTEMPTS = 5;
+
     public function user2theme4_transaction_OTP_generator()
     {
-        $otp = rand(100000, 999999);
-        $existing = User2theme4Transaction::query()->where('status', '!=', 'finished')->get();
-
-        foreach ($existing as $transaction) {
-            if (Hash::check((string) $otp, $transaction->otp)) {
-                return $this->user2theme4_transaction_OTP_generator();
-            }
-        }
-
-        return (string) $otp;
+        // OTP chỉ được so với hash của chính giao dịch đó lúc xác nhận, nên
+        // không cần unique toàn cục. Vòng quét Hash::check mọi giao dịch chưa
+        // finished trước đây chậm dần theo dữ liệu tích lũy (~100ms mỗi hash).
+        return (string) random_int(100000, 999999);
     }
 
     public function user_buy_theme(Request $request, $themeID)
     {
         $user = Auth::user();
         $theme = Theme4user::query()->find($themeID);
+
         if (! $user) {
-            return redirect()->back()->with('error', 'You are not logged in');
+            return redirect()->back()->with('error', 'Bạn chưa đăng nhập.');
         }
-        // $theme = theme4::where('id', $themeID)->first();
+
         if (! $theme) {
-            return redirect()->back()->with('error', 'Theme not found');
+            return redirect()->back()->with('error', 'Không tìm thấy chủ đề.');
         }
+
+        // Prevent buying a theme you already own (BE-9 / E15).
+        $alreadyOwned = Theme4userWallet::query()
+            ->where('userID', $user->id)
+            ->where('theme4ID', $theme->id)
+            ->exists();
+
+        if ($alreadyOwned) {
+            return redirect()->back()->with('error', 'Bạn đã sở hữu chủ đề này.');
+        }
+
         if ($user->balance < $theme->price) {
-            return redirect()->back()->with('error', 'You not have enough balance to buy this theme');
+            return redirect()->back()->with('error', 'Số dư của bạn không đủ để mua chủ đề này.');
         }
+
         $request->validate([
-            'password' => 'required',
+            'password' => ['required', 'string'],
         ]);
 
         if (! Hash::check($request->password, $user->password)) {
-            return redirect()->back()->with('error', 'Incorrect password');
+            return redirect()->back()->with('error', 'Mật khẩu không đúng.');
         }
+
+        $otp = $this->user2theme4_transaction_OTP_generator();
 
         $transaction = new User2theme4Transaction;
         $transaction->userID = $user->id;
-        $transaction->themeID = $themeID;
+        $transaction->theme4ID = $theme->id;
         $transaction->amount = $theme->price;
-        $transaction->status = 'pending';
-        $transaction->otp = Hash::make($this->user2theme4_transaction_OTP_generator());
-        $transaction->expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
+        $transaction->status = User2theme4Transaction::STATUS_PENDING;
+        $transaction->otp = Hash::make($otp);
+        $transaction->expires_at = now()->addMinutes(10);
+        $transaction->attempts = 0;
         $transaction->save();
-        Mail::to($user->email)->send(new user2theme4_trans_otp($transaction));
 
-        return redirect()->back()->with('success', 'Transaction request sent to your email');
+        // Gửi OTP hỏng thì giao dịch thành mồ côi (không có mã để xác nhận,
+        // không có nút gửi lại) — xóa giao dịch và báo người dùng thử lại.
+        try {
+            Mail::to($user->email)->send(new user2theme4_trans_otp($transaction, $otp));
+        } catch (Throwable $e) {
+            $transaction->delete();
+            Log::error('OTP mail failed (user2theme4): '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Không gửi được email chứa mã OTP. Vui lòng thử lại.');
+        }
+
+        return redirect()->back()->with('success', 'Yêu cầu giao dịch đã được gửi tới email của bạn.');
     }
 
     public function user_buy_theme_verify_otp(Request $request, $id)
     {
         $user = Auth::user();
-        /** @var User2theme4Transaction|null $transaction */
-        $transaction = User2theme4Transaction::query()->where('id', $id)->first();
 
-        if (! $transaction) {
-            return redirect()->back()->with('error', 'Invalid transaction');
+        if (! $user) {
+            return redirect()->back()->with('error', 'Bạn chưa đăng nhập.');
         }
 
-        $theme = Theme4user::query()->find($transaction->themeID);
-        if (! $theme) {
-            return redirect()->back()->with('error', 'Theme not found');
-        }
+        $request->validate([
+            'passkey' => ['required', 'string'],
+        ]);
 
-        if ($user->balance < $theme->price) {
-            return redirect()->back()->with('error', 'Insufficient balance');
-        }
+        return DB::transaction(function () use ($request, $id, $user) {
+            /** @var User2theme4Transaction|null $transaction */
+            $transaction = User2theme4Transaction::query()
+                ->where('id', $id)
+                ->where('status', User2theme4Transaction::STATUS_PENDING)
+                ->where('userID', $user->id)
+                ->first();
 
-        $time = Carbon::parse($transaction->expires_at);
+            if (! $transaction) {
+                return redirect()->back()->with('error', 'Giao dịch không hợp lệ.');
+            }
 
-        if (! Hash::check((string) $request->passkey, $transaction->otp)) {
-            return redirect()->back()->with('error', 'Invalid passkey');
-        }
+            $theme = Theme4user::query()->find($transaction->theme4ID);
+            if (! $theme) {
+                return redirect()->back()->with('error', 'Không tìm thấy chủ đề.');
+            }
 
-        if (now()->greaterThan($time)) {
-            User2theme4Transaction::destroy($transaction->id);
+            if ($transaction->attempts >= self::MAX_ATTEMPTS) {
+                $transaction->update(['status' => User2theme4Transaction::STATUS_FAILED]);
 
-            return redirect()->back()->with('error', 'OTP has expired. Please try again');
-        }
+                return redirect()->back()->with('error', 'Nhập sai quá nhiều lần. Giao dịch đã bị hủy.');
+            }
 
-        $user->balance -= $theme->price;
-        $user->save();
+            if (now()->greaterThan($transaction->expires_at)) {
+                $transaction->update(['status' => User2theme4Transaction::STATUS_EXPIRED]);
 
-        $transaction->status = 'finished';
-        $transaction->save();
+                return redirect()->back()->with('error', 'Mã OTP đã hết hạn. Vui lòng thử lại.');
+            }
 
-        return redirect()->back()->with('success', 'Theme purchased successfully');
+            if (! Hash::check((string) $request->passkey, $transaction->otp)) {
+                User2theme4Transaction::whereKey($transaction->id)->increment('attempts');
+                $transaction->refresh();
+
+                return redirect()->back()
+                    ->with('error', 'Mã OTP không đúng. '.($transaction->attempts).' lần nhập sai trên tổng số '.self::MAX_ATTEMPTS);
+            }
+
+            $lockedUser = User::query()->lockForUpdate()->find($user->id);
+
+            if ($lockedUser->balance < $theme->price) {
+                return redirect()->back()->with('error', 'Số dư không đủ.');
+            }
+
+            $alreadyOwned = Theme4userWallet::query()
+                ->where('userID', $user->id)
+                ->where('theme4ID', $theme->id)
+                ->exists();
+
+            if (! $alreadyOwned) {
+                Theme4userWallet::create([
+                    'userID' => $user->id,
+                    'theme4ID' => $theme->id,
+                ]);
+            }
+
+            User::whereKey($lockedUser->id)->decrement('balance', $theme->price);
+            $transaction->update(['status' => User2theme4Transaction::STATUS_FINISHED]);
+
+            return redirect()->back()->with('success', 'Đã mua chủ đề thành công.');
+        });
     }
 }

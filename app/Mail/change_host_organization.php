@@ -3,13 +3,14 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class change_host_organization extends Mailable
+class change_host_organization extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -37,7 +38,10 @@ class change_host_organization extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.change_host_organization',
+            with: [
+                'pivotId' => $this->pivotId,
+            ],
         );
     }
 

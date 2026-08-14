@@ -15,7 +15,7 @@ class MarkAsDoneController extends Controller
         $user = Auth::user();
         $note = Note::find($noteID);
         if (! $note) {
-            return redirect()->route('home')->with('error', 'Note not found');
+            return redirect()->route('home')->with('error', 'Không tìm thấy ghi chú.');
         }
         $pivot = PivotForNote::where('note_id', $noteID)->where('shared_with', $user->id)->first();
         if ($pivot or ($note->creater_id == $user->id)) {
@@ -24,7 +24,7 @@ class MarkAsDoneController extends Controller
                 $mark_as_done->status = true;
                 $mark_as_done->save();
 
-                return redirect()->route('note', $noteID)->with('success', 'Note marked as done');
+                return redirect()->route('note', $noteID)->with('success', 'Đã đánh dấu ghi chú hoàn thành.');
             } else {
                 $mark_as_done = new MarkAsDone;
                 $mark_as_done->noteID = $noteID;
@@ -32,10 +32,10 @@ class MarkAsDoneController extends Controller
                 $mark_as_done->status = true;
                 $mark_as_done->save();
 
-                return redirect()->route('note', $noteID)->with('success', 'Note marked as done');
+                return redirect()->route('note', $noteID)->with('success', 'Đã đánh dấu ghi chú hoàn thành.');
             }
         } else {
-            return redirect()->route('note', $noteID)->with('error', 'You are not authorized to mark this note as done');
+            return redirect()->route('note', $noteID)->with('error', 'Bạn không có quyền đánh dấu ghi chú này.');
         }
     }
 
@@ -44,7 +44,7 @@ class MarkAsDoneController extends Controller
         $user = Auth::user();
         $note = Note::find($id);
         if (! $note) {
-            return redirect()->route('home')->with('error', 'Note not found');
+            return redirect()->route('home')->with('error', 'Không tìm thấy ghi chú.');
         }
         $pivot = PivotForNote::where('note_id', $id)->where('shared_with', $user->id)->first();
         if ($pivot or ($note->creater_id == $user->id)) {
@@ -53,7 +53,7 @@ class MarkAsDoneController extends Controller
                 $mark_as_done->status = false;
                 $mark_as_done->save();
 
-                return redirect()->route('note', $id)->with('success', 'Note unmarked as done');
+                return redirect()->route('note', $id)->with('success', 'Đã bỏ đánh dấu hoàn thành.');
             } else {
                 $mark_as_done = new MarkAsDone;
                 $mark_as_done->noteID = $id;
@@ -61,10 +61,10 @@ class MarkAsDoneController extends Controller
                 $mark_as_done->status = false;
                 $mark_as_done->save();
 
-                return redirect()->route('note', $id)->with('success', 'Note unmarked as done');
+                return redirect()->route('note', $id)->with('success', 'Đã bỏ đánh dấu hoàn thành.');
             }
         } else {
-            return redirect()->route('note', $id)->with('error', 'You are not authorized to unmark this note as done');
+            return redirect()->route('note', $id)->with('error', 'Bạn không có quyền bỏ đánh dấu ghi chú này.');
         }
     }
 }

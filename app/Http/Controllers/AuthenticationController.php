@@ -2,145 +2,65 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrganizationsMember;
-use App\Models\PivotChangeHostOrganization;
-use App\Models\PivotForNote;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthenticationController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-            'remember' => 'required',
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
         ]);
-        $data = $request->all();
-        $email = $data['email'];
-        $password = $data['password'];
+
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt(['email' => $email, 'password' => $password], $remember)) {
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            return redirect()->route('home')->with('success', 'User logged in successfully');
-        } else {
-            return redirect('login')->with('error', 'Invalid username or password');
+            return redirect()->route('home')->with('success', 'Đăng nhập thành công.');
         }
+
+        return redirect()->route('login')->with('error', 'Email hoặc mật khẩu không đúng.');
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->with('success', 'Bạn đã đăng xuất.');
     }
 
     public function signup(Request $request)
     {
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-            'remember' => 'required',
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'unique:users,email', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
-        $name = $request->name;
-        $email = $request->email;
-        $password = $request->password;
-        $remember = $request->boolean('remember');
 
-        $user = new User;
-        $user->name = $name;
-        $user->email = $email;
-        $user->password = Hash::make($password);
-        $user->save();
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+        ]);
 
-        Auth::login($user, $remember);
+        Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
-        return redirect()->route('home')->with('success', 'User logged in successfully');
+        return redirect()->route('home')->with('success', 'Tạo tài khoản thành công.');
     }
 
-    public function signup40acc_note(Request $request, $shareid)
-    {
-        $pivot = PivotForNote::where('id', $shareid)->first();
-        if (! $pivot) {
-            return redirect('login')->with('error', 'Invalid share id');
-        }
-        // $data = $request->all();
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-            'remember' => 'required',
-        ]);
-        $email = $pivot->shared_with;
-        $password = $request->password;
-        $name = $request->name;
-        $remember = $request->boolean('remember');
-
-        $user = new User;
-        $user->email = $email;
-        $user->password = Hash::make($password);
-        $user->name = $name;
-        $user->save();
-
-        Auth::login($user, $remember);
-        $request->session()->regenerate();
-
-        return redirect()->route('note', $pivot->noteID)->with('success', 'You have accepted the invitation');
-    }
-
-    public function signup40acc_host_org(Request $request, $shareid)
-    {
-        $pivot = PivotChangeHostOrganization::where('id', $shareid)->first();
-        if (! $pivot) {
-            return redirect('login')->with('error', 'Invalid share id');
-        }
-        // $data = $request->all();
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-            'remember' => 'required',
-        ]);
-        $email = $pivot->shared_with;
-        $password = $request->password;
-        $name = $request->name;
-        $remember = $request->boolean('remember');
-
-        $user = new User;
-        $user->email = $email;
-        $user->password = Hash::make($password);
-        $user->name = $name;
-        $user->save();
-
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        return redirect()->route('home')->with('success', 'You have accepted the invitation');
-    }
-
-    public function signup40acc_member_org(Request $request, $shareid)
-    {
-        $pivot = OrganizationsMember::where('id', $shareid)->first();
-        if (! $pivot) {
-            return redirect('login')->with('error', 'Invalid share id');
-        }
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-            'remember' => 'required',
-        ]);
-        // $data = $request->all();
-        $email = $pivot->email;
-        $password = $request->password;
-        $name = $request->name;
-        $remember = $request->boolean('remember');
-
-        $user = new User;
-        $user->email = $email;
-        $user->password = Hash::make($password);
-        $user->name = $name;
-        $user->save();
-
-        Auth::login($user, $remember);
-        $request->session()->regenerate();
-
-        return redirect()->route('home')->with('success', 'You have accepted the invitation');
-    }
+    // Đăng ký qua lời mời được xử lý ở App\Http\Controllers\InvitationController.
+    //
+    // Ba method signup40acc_note / signup40acc_host_org / signup40acc_member_org
+    // trước đây nằm ở đây đã được gỡ: chúng không có route, và đều đọc email từ
+    // một cột không chứa email (`pivot_for_note.shared_with` là khóa ngoại tới
+    // `users.id`), nên không thể chạy đúng. Cơ chế thay thế là bảng `invitations`
+    // với token dùng một lần, xem InvitationController.
 }

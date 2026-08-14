@@ -19,7 +19,7 @@ class Theme4org_trans_otp extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(Theme4orgTransaction $transaction)
+    public function __construct(Theme4orgTransaction $transaction, public string $otp)
     {
         $this->transaction = $transaction;
     }
@@ -40,9 +40,10 @@ class Theme4org_trans_otp extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.transaction_notification',
             with: [
                 'transaction' => $this->transaction,
+                'otp' => $this->otp,
             ],
         );
     }

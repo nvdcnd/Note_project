@@ -1,0 +1,575 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NoteBoard - Home</title>
+  <style>
+    
+:root {
+  --bg: #f4efe5;
+  --card: #fff4db;
+  --card-dark: #d4b26f;
+  --panel: #f1e7d3;
+  --shadow: rgba(42, 28, 12, 0.18);
+  --text: #2a2430;
+  --muted: #6d656a;
+  --accent: #ae7d2f;
+  --accent-strong: #9e611e;
+  --danger: #ce2a20;
+  --success: #2f5b35;
+  --border: rgba(76, 56, 20, 0.18);
+}
+* {
+  box-sizing: border-box;
+}
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: radial-gradient(circle at top left, #fffdf3 0%, var(--bg) 40%);
+  color: var(--text);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+button, input, select, textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+.container {
+  width: min(1200px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+.page-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar,
+.page-header,
+.card-header,
+.note-header,
+.modal-card {
+  display: flex;
+  align-items: center;
+}
+.topbar {
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+}
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.note-card,
+.panel-card,
+.overlay-card,
+.theme-card,
+.transaction-card,
+.org-card,
+.table-card,
+.profile-card {
+  background: linear-gradient(180deg, #fff7da 0%, #f6e5bb 100%);
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow: 0 12px 30px var(--shadow);
+}
+.paper {
+  background: var(--card);
+  border-radius: 28px;
+  border: 1px solid rgba(138, 116, 77, 0.18);
+  box-shadow: inset 0 4px 10px rgba(122, 92, 44, 0.12), 0 16px 28px rgba(38, 25, 10, 0.18);
+}
+.note-header {
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(110, 75, 24, 0.16);
+  border-radius: 24px 24px 0 0;
+  background: linear-gradient(180deg, #d6b874 0%, #b78932 100%);
+  color: white;
+}
+.note-body {
+  padding: 1rem 1.25rem;
+}
+.note-footer {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.75rem 1rem 1rem;
+}
+.note-footer::after {
+  content: '';
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  bottom: 2px;
+  right: 10px;
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.8), transparent 35%), linear-gradient(135deg, rgba(186, 134, 42, 0.8) 0%, rgba(158, 103, 18, 0.9) 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  border-radius: 0 0 0 20px;
+}
+.pin-button {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.7);
+  background: #f6d276;
+  color: #65513d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+.small-pill,
+.badge-pill,
+.menu-pill {
+  border-radius: 999px;
+}
+.small-pill {
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.55);
+  padding: 0.6rem 1rem;
+}
+.navbar-mobile,
+.navbar-desktop {
+  display: grid;
+  gap: 0.75rem;
+}
+.navbar-mobile {
+  grid-template-columns: repeat(4, 1fr);
+  position: fixed;
+  bottom: 0;
+  width: calc(100% - 2rem);
+  left: 1rem;
+  right: 1rem;
+  padding: 0.5rem;
+  margin: 0 0 1rem;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.68);
+  box-shadow: 0 18px 35px rgba(10, 6, 4, 0.12);
+  backdrop-filter: blur(12px);
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: 18px;
+  text-align: center;
+  color: var(--text);
+  background: rgba(255,255,255,0.85);
+}
+.nav-item.active {
+  background: linear-gradient(180deg, #e8d09f, #d0aa6f);
+  color: #2f1f09;
+}
+.nav-item span {
+  font-size: 0.82rem;
+}
+.avatar-button {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.9);
+  background: linear-gradient(180deg, #f9f1d5 0%, #f6d276 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 22px rgba(0,0,0,0.16);
+}
+.avatar-button img,
+.avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.slidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(420px, 100%);
+  height: 100vh;
+  transform: translateX(110%);
+  transition: transform 0.3s ease;
+  background: linear-gradient(180deg, #fff9e8 0%, #f7e5cb 100%);
+  box-shadow: -12px 0 34px rgba(26, 22, 12, 0.25);
+  z-index: 1200;
+  padding: 1.25rem;
+}
+.slidebar.open {
+  transform: translateX(0);
+}
+.slidebar .close-button {
+  margin-left: auto;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.72);
+  display: grid;
+  place-items: center;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(17, 15, 9, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 1300;
+}
+.modal.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-card {
+  width: min(520px, 100%);
+  background: #fffef8;
+  border-radius: 26px;
+  padding: 1rem;
+  box-shadow: 0 24px 56px rgba(13, 11, 7, 0.18);
+  border: 1px solid rgba(112, 83, 43, 0.14);
+  flex-direction: column;
+}
+.modal-card header {
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(206,163,99,0.18);
+}
+.modal-card .modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.modal-card .modal-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(143, 104, 49, 0.2);
+  background: rgba(255,255,255,0.75);
+  display: grid;
+  place-items: center;
+}
+.field-row {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.field-row input,
+.field-row select,
+.field-row textarea {
+  width: 100%;
+  border: 1px solid rgba(137, 100, 33, 0.16);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.92);
+  padding: 0.95rem 1rem;
+  outline: none;
+}
+.field-row input:focus,
+.field-row textarea:focus,
+.field-row select:focus {
+  box-shadow: 0 0 0 4px rgba(174, 125, 47, 0.12);
+}
+.button,
+.button-secondary,
+.button-ghost {
+  border: none;
+  border-radius: 999px;
+  padding: 0.95rem 1.25rem;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: white;
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+  box-shadow: 0 12px 22px rgba(52, 34, 12, 0.14);
+}
+.button-secondary {
+  background: linear-gradient(180deg, #fcfcfc, #f0e7d5);
+  color: #41302d;
+  border: 1px solid rgba(132, 93, 25, 0.15);
+  box-shadow: inset 0 1px 2px rgba(99, 58, 12, 0.12);
+}
+.button-danger {
+  background: linear-gradient(180deg, #e54d4d, #d12d2a);
+}
+.button-full {
+  width: 100%;
+}
+.section {
+  margin: 1rem 0 2rem;
+}
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.section-title h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+.card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+@media (max-width: 768px) {
+  .topbar,
+  .section-title {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .slidebar {
+    width: 100%;
+  }
+}
+@media (max-width: 576px) {
+  .page-shell {
+    padding-bottom: 5.5rem;
+  }
+  .topbar {
+    padding: 0.75rem;
+  }
+  .note-card,
+  .theme-card,
+  .org-card,
+  .transaction-card,
+  .panel-card,
+  .table-card {
+    border-radius: 24px;
+  }
+  .navbar-desktop {
+    display: none;
+  }
+}
+@media (min-width: 577px) {
+  .navbar-mobile {
+    display: none;
+  }
+}
+
+    .layout { display: grid; grid-template-columns: 1fr; gap: 1rem; padding: 1rem 0; }
+    .workspace { display: grid; gap: 1rem; }
+    .panel-card { padding: 1rem; }
+    .note-card { max-width: 640px; margin: 0 auto; }
+    .note-card .note-body p { margin: 0.65rem 0; line-height: 1.65; }
+    .note-footer button { background: rgba(255,255,255,0.95); border: 1px solid rgba(143, 104, 49, 0.18); color: #633f1a; }
+    .pin-menu { display: none; position: absolute; right: 1rem; top: 1.1rem; background: rgba(255,255,255,0.96); border-radius: 18px; border: 1px solid rgba(136, 100, 42, 0.14); box-shadow: 0 14px 24px rgba(36, 25, 12, 0.18); padding: 0.75rem; }
+    .pin-menu.open { display: grid; gap: 0.4rem; }
+    .pin-menu button { width: 100%; text-align: left; background: none; border: none; padding: 0.75rem 0.85rem; border-radius: 14px; }
+    .note-pin { position: relative; }
+    .note-pin:hover .pin-menu { display: grid; }
+    .create-card { min-height: 320px; padding: 0; overflow: hidden; }
+    .create-card .note-header { background: linear-gradient(180deg, #d8c387, #c69c3d); }
+    .create-card .note-body { display: grid; gap: 0.85rem; }
+    .create-card input, .create-card textarea { background: transparent; border: none; border-bottom: 1px solid rgba(132, 92, 32, 0.3); }
+    .create-card textarea { resize: none; min-height: 140px; }
+    .floating-action { position: fixed; bottom: 6.2rem; right: 1.2rem; width: 58px; height: 58px; border-radius: 50%; border: 3px solid #fff; background: linear-gradient(180deg, #f2c256, #d3911f); color: #fff; display: grid; place-items: center; box-shadow: 0 18px 30px rgba(76, 44, 9, 0.26); z-index: 100; }
+    .floating-action.open { background: linear-gradient(180deg, #d23636, #b21919); }
+    .note-grid { display: grid; gap: 1rem; }
+    .desktop-layout { display: grid; grid-template-columns: 1.2fr 1.4fr; gap: 1.2rem; align-items: start; }
+    .create-placeholder { min-height: 100%; display: grid; align-items: stretch; }
+    @media (max-width: 768px) {
+      .desktop-layout { grid-template-columns: 1fr; }
+      .floating-action { position: fixed; bottom: 5.5rem; right: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    
+<div class="topbar page-header">
+  <div class="brand">NoteBoard</div>
+  <div class="topbar-right" style="display:flex; align-items:center; gap:0.75rem;">
+    <div class="small-pill">All notes</div>
+    <button class="avatar-button open-slidebar"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=64&q=80" alt="avatar"></button>
+  </div>
+</div>
+<div class="slidebar" aria-hidden="true">
+  <div class="profile-card paper" style="padding: 1rem;">
+    <div style="display:flex; align-items:center; gap: 0.9rem;">
+      <div class="avatar-circle" style="width:50px; height:50px; overflow:hidden; border-radius:50%; border:2px solid #fff;"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80"></div>
+      <div>
+        <strong>Nguyễn Minh</strong>
+        <div style="font-size:0.9rem; color:#7b6d63;">minh.nguyen@example.com</div>
+      </div>
+      <button class="modal-close close-button">X</button>
+    </div>
+    <div style="margin-top:1rem; display:grid; gap:0.85rem;">
+      <button class="button-secondary button-full">Profile</button>
+      <button class="button-secondary button-full">Setting</button>
+      <button class="button-secondary button-full">Your theme</button>
+      <button class="button-secondary button-full">Log out</button>
+    </div>
+  </div>
+</div>
+<div class="overlay"></div>
+
+    <div class="container layout">
+      <div class="section-title">
+        <h2>Xin chào Nguyễn Minh</h2>
+        <div class="small-pill">Choose note type: All</div>
+      </div>
+      <div class="desktop-layout">
+        <article class="note-card paper create-card">
+          <div class="note-header"><strong>create note</strong></div>
+          <div class="note-body">
+            <input value="Ghi chú ngắn" aria-label="Title">
+            <textarea>Đây là nội dung demo note. Bạn có thể chỉnh sửa thử để thấy hiệu ứng.</textarea>
+          </div>
+          <div class="note-footer"><button class="button button-secondary button-full">Send ✈</button></div>
+        </article>
+        <article class="note-card paper">
+          <div class="note-header">
+            <div><a href="#">Người dùng</a> - 09-08-2026 15:12:42</div>
+            <button class="pin-button" onclick="togglePinMenu(event)">📌</button>
+          </div>
+          <div class="note-body">
+            <h3>Note demo</h3>
+            <p>Giao diện note demo thể hiện thiết kế note vàng với header màu khác biệt và góc gập.</p>
+            <p>Nội dung dài sẽ cắt bớt bằng CSS nếu quá nhiều, điều này giúp giao diện giữ được sự gọn gàng.</p>
+          </div>
+          <div class="note-footer note-pin">
+            <button class="button-secondary">View more</button>
+            <div class="pin-menu" id="pinMenu">
+              <button>Edit</button>
+              <button>Mark as done</button>
+              <button>Delete</button>
+              <button>Reply</button>
+              <button>Share note</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+    <button class="floating-action" id="actionButton" onclick="toggleCreateNote()">+</button>
+    
+<div class="navbar-mobile">
+  <a class="nav-item active"><span>🏠</span><span>Home</span></a>
+  <a class="nav-item"><span>🏢</span><span>Organization</span></a>
+  <a class="nav-item"><span>🎨</span><span>Theme</span></a>
+  <a class="nav-item"><span>💰</span><span>Balance</span></a>
+</div>
+
+  </div>
+  <div class="overlay"></div>
+  <script>
+    
+function openSlidebar() {
+  document.querySelector('.slidebar')?.classList.add('open');
+  document.querySelector('.overlay')?.classList.add('visible');
+}
+function closeSlidebar() {
+  document.querySelector('.slidebar')?.classList.remove('open');
+  document.querySelector('.overlay')?.classList.remove('visible');
+}
+function openModal(id) {
+  document.getElementById(id)?.classList.add('open');
+  document.querySelector('.overlay')?.classList.add('visible');
+}
+function closeModal(id) {
+  document.getElementById(id)?.classList.remove('open');
+  document.querySelector('.overlay')?.classList.remove('visible');
+}
+function setupModalClose() {
+  document.querySelectorAll('.modal-close, .overlay').forEach((item) => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.modal.open').forEach((modal) => modal.classList.remove('open'));
+      document.querySelector('.slidebar')?.classList.remove('open');
+      document.querySelector('.overlay')?.classList.remove('visible');
+    });
+  });
+}
+function addListItem(inputSelector, listSelector) {
+  const input = document.querySelector(inputSelector);
+  const list = document.querySelector(listSelector);
+  if (!input || !list) return;
+  const value = input.value.trim();
+  if (!value) return;
+  const item = document.createElement('li');
+  item.textContent = value;
+  item.style.marginBottom = '0.5rem';
+  list.appendChild(item);
+  input.value = '';
+}
+function initShowPassword() {
+  document.querySelectorAll('.show-password').forEach((button) => {
+    button.addEventListener('click', () => {
+      const target = button.closest('.field-row')?.querySelector('input[type=password]');
+      if (target) {
+        target.type = target.type === 'password' ? 'text' : 'password';
+      }
+    });
+  });
+}
+function initCarousel(carouselId) {
+  const carousel = document.getElementById(carouselId);
+  if (!carousel) return;
+  const slides = carousel.querySelectorAll('.carousel-slide');
+  let index = 0;
+  setInterval(() => {
+    slides[index].classList.remove('active');
+    index = (index + 1) % slides.length;
+    slides[index].classList.add('active');
+  }, 5000);
+}
+function setupSlidebarButtons() {
+  document.querySelectorAll('.open-slidebar').forEach((button) => {
+    button.addEventListener('click', openSlidebar);
+  });
+}
+function init() {
+  setupModalClose();
+  initShowPassword();
+  setupSlidebarButtons();
+  document.querySelectorAll('[data-add-email]').forEach((button) => {
+    button.addEventListener('click', () => addListItem(button.dataset.targetInput, button.dataset.targetList));
+  });
+  document.querySelectorAll('.carousel-root').forEach((root) => {
+    initCarousel(root.id);
+  });
+}
+window.addEventListener('DOMContentLoaded', init);
+
+    let noteVisible = true;
+    function toggleCreateNote() {
+      const action = document.getElementById('actionButton');
+      noteVisible = !noteVisible;
+      action.textContent = noteVisible ? '+' : 'X';
+      action.classList.toggle('open', !noteVisible);
+    }
+    function togglePinMenu(event) {
+      event.stopPropagation();
+      document.getElementById('pinMenu').classList.toggle('open');
+    }
+    document.addEventListener('click', () => {
+      document.getElementById('pinMenu')?.classList.remove('open');
+    });
+  </script>
+</body>
+</html>

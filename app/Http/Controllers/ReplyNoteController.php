@@ -2,49 +2,57 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MarkAsDone;
 use App\Models\Note;
+use App\Models\PivotForNote;
+use App\Models\Replynote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ReplyNoteController extends Controller
 {
-    public function reply_note(Request $request, $noteid)
-    {
-        $replied_note = Note::find($noteid);
-        if ($replied_note) {
-            $request->validate([
-                'title' => 'required',
-                'description' => 'required',
-            ]);
-            $data = $request->all();
-            $note = new Note;
-            $note->title = $data['title'];
-            $note->description = $data['description'];
-            $note->creater_id = Auth::user()->id;
-            $note->replied_note_id = $replied_note->id;
-            $note->save();
-
-            $mark_as_done = new MarkAsDone;
-            $mark_as_done->noteID = $note->id;
-            $mark_as_done->userID = Auth::user()->id;
-            $mark_as_done->status = false;
-            $mark_as_done->save();
-
-            return redirect()->route('note', $replied_note->id)->with('success', 'Note replied successfully');
-        } else {
-            return redirect()->route('home')->with('error', 'Note not replied');
-        }
-    }
-
-    public function unreply_note(Request $request, $id)
+    public function reply_note(Request $request, $id)
     {
         $note = Note::find($id);
-        if (! $note || $note->creater_id != Auth::user()->id) {
-            return redirect()->route('home')->with('error', 'You are not authorized to delete this note');
+        if (! $note) {
+            return redirect()->route('home')->with('error', 'Không tìm thấy ghi chú.');
         }
-        $note->delete();
 
-        return redirect()->route('home')->with('success', 'Note deleted successfully');
+        $canReply = $note->creater_id === Auth::id()
+            || PivotForNote::query()
+                ->where('note_id', $note->id)
+                ->where('shared_with', Auth::id())
+                ->exists();
+
+        if (! $canReply) {
+            return redirect()->route('note', $note->id)->with('error', 'Bạn không có quyền trả lời ghi chú này.');
+        }
+
+        $validated = $request->validate([
+            'description' => ['required', 'string'],
+        ]);
+
+        Replynote::create([
+            'description' => $validated['description'],
+            'noteID' => $note->id,
+            'userID' => Auth::id(),
+        ]);
+
+        return redirect()->route('note', $note->id)->with('success', 'Đã gửi trả lời.');
+    }
+
+    public function delete_reply(Request $request, $id)
+    {
+        $reply = Replynote::find($id);
+        if (! $reply) {
+            return redirect()->route('home')->with('error', 'Không tìm thấy trả lời.');
+        }
+
+        if ($reply->userID !== Auth::id()) {
+            return redirect()->route('note', $reply->noteID)->with('error', 'Chỉ người viết mới có thể xóa trả lời này.');
+        }
+
+        $reply->delete();
+
+        return redirect()->route('note', $reply->noteID)->with('success', 'Đã xóa trả lời.');
     }
 }

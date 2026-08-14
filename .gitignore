@@ -7,12 +7,18 @@
 .phpunit.result.cache
 /.codex
 /.cursor/
+/.freebuff
+/.claude
 /.idea
 /.nova
 /.phpunit.cache
 /.vscode
 /.zed
 /auth.json
+# Chứa cookie phiên đăng nhập thật — không bao giờ commit
+cookies.txt
+# Báo cáo PHPStan sinh ra tại máy local, không phải nguồn sự thật
+phpstan-report.json
 /node_modules
 /public/build
 /public/fonts-manifest.dev.json

@@ -2,11 +2,59 @@
 
 namespace App\Models;
 
+use Database\Factories\OrganizationFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Organization extends Model
 {
+    /** @use HasFactory<OrganizationFactory> */
+    use HasFactory;
+
     protected $table = 'organizations';
 
-    //
+    protected $fillable = [
+        'name',
+        'description',
+        'logo_url',
+        'banner_url',
+        'balance',
+        'hostID',
+        'themeID',
+    ];
+
+    protected $casts = [
+        'balance' => 'decimal:2',
+    ];
+
+    public function host()
+    {
+        return $this->belongsTo(User::class, 'hostID');
+    }
+
+    public function members()
+    {
+        return $this->hasMany(OrganizationsMember::class, 'organizationID');
+    }
+
+    public function activeMembers()
+    {
+        return $this->members()->where('status', true);
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(Note::class, 'organizationID');
+    }
+
+    public function themeWallets()
+    {
+        return $this->hasMany(Theme4orgWallet::class, 'organizationID');
+    }
+
+    /** Chủ đề đang được áp dụng cho tổ chức (null nếu dùng giao diện mặc định). */
+    public function appliedTheme()
+    {
+        return $this->belongsTo(Theme4org::class, 'themeID');
+    }
 }

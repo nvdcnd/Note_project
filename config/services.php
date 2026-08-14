@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+    'imagekit' => [
+        'public_key' => env('IMAGEKIT_PUBLIC'),
+        'private_key' => env('IMAGEKIT_PRIVATE'),
+        'url_endpoint' => env('IMAGEKIT_ENDPOINT'),
+    ],
+
+    'payOS' => [
+        'clientId' =>env('PAYOS_CLIENT_ID') ,
+        'apiKey' => env('PAYOS_API_KEY'),
+        'checksumKey'=> env('PAYOS_CHECKSUM_KEY'),
+    ],
+
+    'google' => [
+        'client_id' => env("GOOGLE_CLIENT_ID"),
+        'client_secret' => env("GOOGLE_CLIENT_SECRET"),
+        'redirect_url' => env("GOOGLE_REDIRECT_URI")
+    ]
+
 ];
