@@ -191,8 +191,8 @@
                 });
             } else if (mode === 'SHARE') {
                 if (headerTitle) headerTitle.innerHTML = '🔗 Chia sẻ ghi chú';
-                const shareUrl = `${window.location.origin}/note/${noteId}`;
-                let inlineEmails = [];
+                const shareUrl = `${window.location.origin}/invite/share/note/${noteId}`;
+                //let inlineEmails = [];
                 cardBody.innerHTML = `
                     <div class="mb-2">
                         <label class="form-label" style="font-weight: bold;">Liên kết chia sẻ</label>
@@ -202,27 +202,36 @@
                         </div>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label" style="font-weight: bold;">Chia sẻ qua email</label>
-                        <div class="input-group mb-1">
-                            <input type="email" class="form-control inline-email-input" placeholder="Nhập email..." />
-                            <button class="btn btn-secondary btn-add-email" type="button">Thêm</button>
-                        </div>
                         <div class="table-responsive style-scroll" style="max-height: 70px; overflow-y: auto;">
                             <table class="table table-sm mb-0">
-                                <thead><tr><th>#</th><th>Email</th></tr></thead>
+                                <thead><tr><th>#</th><th>Email</th><th>Hành động</th></tr></thead>
                                 <tbody class="inline-email-tbody"></tbody>
                             </table>
                         </div>
                     </div>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-secondary w-50 btn-cancel-swap">Quay lại</button>
-                        <button type="button" class="btn btn-primary w-50 btn-submit-share">Chia sẻ</button>
                     </div>`;
                 cardBody.querySelector('.btn-copy-share')?.addEventListener('click', () => copyToClipboard(shareUrl));
-                const addEmailBtn = cardBody.querySelector('.btn-add-email');
-                const emailInput = cardBody.querySelector('.inline-email-input');
-                const tbody = cardBody.querySelector('.inline-email-tbody');
-                addEmailBtn?.addEventListener('click', () => {
+                // const addEmailBtn = cardBody.querySelector('.btn-add-email');
+                // const emailInput = cardBody.querySelector('.inline-email-input');
+                try{
+                    //const list_url =
+                    const shared_user = await fetch(`/shared/note/list/${noteId}`);
+                    const shared_user = JSON.parse(shared_user);
+                    const tbody = cardBody.querySelector('.inline-email-tbody');
+                    if(shared_user != null) {
+                        async function show_list_email(shared_user=shared_user){
+                            for(var user in shared_user);{
+                                let info_obj = user['user']
+                                tbody.innerHTML = Object.values(info_obj).map(info => `<tr><td>${info.id}</td><td>${info.email}</td><td><a href="/undo/share/note/${noteId}" class="btn btn-danger w-100">Xóa quyền</a></td></tr>`).join('');
+                            }
+                        }
+                    }
+                } catch {
+                    alert("There're the error when loading the shared list");
+                }
+                /* addEmailBtn?.addEventListener('click', () => {
                     const em = emailInput?.value.trim();
                     if (validEmail(em)) {
                         if (inlineEmails.includes(em)) {
@@ -261,7 +270,7 @@
                     });
                     document.body.appendChild(form);
                     form.submit();
-                });
+                });*/
             } else if (mode === 'REPLY') {
                 if (headerTitle) headerTitle.innerHTML = '💬 Trả lời ghi chú';
                 cardBody.innerHTML = `
@@ -576,6 +585,26 @@
             }
         });
     }
+
+    function convert_point_to_vnd(){
+        const point = document.getElementId('points_input').value;
+        const text = document.getElementById('convert_text').value;
+        text.innerHTML = `<p class="text-center text-secondary">${point} = ${point*1000}</p>`;
+    }
+
+    document.addEventListener('payment_submit', function (){
+        const point = document.getElementId('points_input').value;
+        try{
+            const api = fetch(`/point/payment/create/`, {
+                method: "POST",
+                body: JSON.stringify({"points":point}),
+            });
+        } catch {
+            alert();
+        }
+    });
+
+
 
     document.addEventListener('DOMContentLoaded', () => {
         // Bỏ qua .note-card-static (card ở trang chi tiết ghi chú): nó chỉ để

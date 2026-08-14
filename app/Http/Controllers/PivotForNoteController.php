@@ -158,5 +158,9 @@ class PivotForNoteController extends Controller
         }
     }
 
+    public function shared_note_list(Request $request, $id){
+        $shared_list = PivotForNote::with('user:id,email')->where('noteID',$id)->get();
+        return response()->json($shared_list);
+    }
 
 }

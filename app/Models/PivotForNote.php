@@ -23,6 +23,6 @@ class PivotForNote extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'shared_with');
+        return $this->belongsTo(User::class, 'shared_with', 'id');
     }
 }

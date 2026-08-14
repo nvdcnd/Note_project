@@ -182,4 +182,5 @@ class OrganizationsMemberController extends Controller
 
         return redirect()->route('organization', $organizationid)->with('error', 'Không tìm thấy thành viên, hoặc bạn không phải chủ sở hữu.');
     }
+
 }
