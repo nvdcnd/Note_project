@@ -15,12 +15,13 @@ class PaymentController extends Controller
     public function __construct(
         private PayOS $payOS   // Laravel tự inject singleton
     ) {}
+    
     public function payment_for_point(PayOS $payos, Request $request){
         $request->validate([
-            'points' => 'required|integer|min:1',
+            'points' => 'required|numeric|min:1',
         ]);
-        $data = $request->all();
-        $points = $data['point'];
+        //$data = $request->all();
+        $points = $request->points;
         $user = Auth::user();
         if($points > 0){
             $actual_money = $points * 1000;
@@ -41,7 +42,7 @@ class PaymentController extends Controller
             ];
             try {
                 $payment = $payos->paymentRequests->create($transfer_data);
-                return redirect($payment['checkoutUrl']);
+                return redirect()->to($payment['checkoutUrl']);
             } catch (\Exception $e) {
                 return back()->with('error', $e->getMessage());
             }

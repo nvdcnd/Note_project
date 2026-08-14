@@ -85,6 +85,27 @@
         }, 280);
     }
 
+    async function show_list_email(shared_user,tbody){
+        for(var user in shared_user);{
+            let info_obj = user['user']
+            tbody.innerHTML = Object.values(info_obj).map(info => `<tr><td>${info.id}</td><td>${info.email}</td><td><a href="/undo/share/note/${noteId}" class="btn btn-danger w-100">Xóa quyền</a></td></tr>`).join('');
+        }
+    }
+
+    async function shared_note_listing(noteId, cardBody){
+        try{
+            //const list_url =
+            const api = await fetch(`/shared/note/list/${noteId}`);
+            const shared_user = JSON.parse(api);
+            const tbody = cardBody.querySelector('.inline-email-tbody');
+            if(shared_user != null) {
+                show_list_email(shared_user,tbody);
+            }
+        } catch {
+            alert("There're the error when loading the shared list");
+        }
+    }
+
     // --- Inline Card Swap Engine ---
     function swapCardMode(card, mode, options = {}) {
         if (!card) return;
@@ -213,24 +234,9 @@
                         <button type="button" class="btn btn-secondary w-50 btn-cancel-swap">Quay lại</button>
                     </div>`;
                 cardBody.querySelector('.btn-copy-share')?.addEventListener('click', () => copyToClipboard(shareUrl));
+                shared_note_listing(noteId, cardBody);
                 // const addEmailBtn = cardBody.querySelector('.btn-add-email');
                 // const emailInput = cardBody.querySelector('.inline-email-input');
-                try{
-                    //const list_url =
-                    const shared_user = await fetch(`/shared/note/list/${noteId}`);
-                    const shared_user = JSON.parse(shared_user);
-                    const tbody = cardBody.querySelector('.inline-email-tbody');
-                    if(shared_user != null) {
-                        async function show_list_email(shared_user=shared_user){
-                            for(var user in shared_user);{
-                                let info_obj = user['user']
-                                tbody.innerHTML = Object.values(info_obj).map(info => `<tr><td>${info.id}</td><td>${info.email}</td><td><a href="/undo/share/note/${noteId}" class="btn btn-danger w-100">Xóa quyền</a></td></tr>`).join('');
-                            }
-                        }
-                    }
-                } catch {
-                    alert("There're the error when loading the shared list");
-                }
                 /* addEmailBtn?.addEventListener('click', () => {
                     const em = emailInput?.value.trim();
                     if (validEmail(em)) {
@@ -587,28 +593,55 @@
     }
 
     function convert_point_to_vnd(){
-        const point = document.getElementId('points_input').value;
-        const text = document.getElementById('convert_text').value;
-        text.innerHTML = `<p class="text-center text-secondary">${point} = ${point*1000}</p>`;
-    }
+        const points = document.getElementById('point_input').value;
+        const text = document.getElementById('convert_text');
 
-    document.addEventListener('payment_submit', function (){
-        const point = document.getElementId('points_input').value;
-        try{
-            const api = fetch(`/point/payment/create/`, {
-                method: "POST",
-                body: JSON.stringify({"points":point}),
-            });
-        } catch {
-            alert();
+        if (!points || !text) return;
+
+        if (points > 0 && points != ''){
+            const point = Number(points);
+            // Format định dạng tiền tệ cho đẹp (ví dụ: 10,000 VNĐ)
+            const vnd = (point * 1000).toLocaleString('vi-VN');
+
+            text.innerHTML = `<p class="text-center text-secondary">${point} points = ${vnd} VND</p>`;
+        } else {
+            text.innerHTML = `<p class="text-center text-secondary">Vui lòng nhập số point muốn nạp</p>`;
         }
-    });
-
+    }
 
 
     document.addEventListener('DOMContentLoaded', () => {
+        const updatePointsCovert = document.getElementById('point_input');
+        if(updatePointsCovert){
+           updatePointsCovert.addEventListener('input', convert_point_to_vnd);
+        }
+
+        const PaymentButton = document.getElementById('payment_submit');
+        if(PaymentButton){
+            PaymentButton.addEventListener('click',async function (){
+                const point = document.getElementId('points_input').value;
+                try{
+                    const api = await fetch(`/point/payment/create/`, {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json",
+                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({"points":point}),
+                    });
+
+                    // Nếu Backend thực hiện Redirect 302, thuộc tính này sẽ bằng true
+                    if (response.redirected) {
+                        window.location.href = response.url; // Bắt trình duyệt chuyển hướng hẳn sang URL mới đó
+                        return;
+                    }
+                } catch {
+                    alert("Error: We can't handle your payment right now!");
+                }
+            });
+        }
         // Bỏ qua .note-card-static (card ở trang chi tiết ghi chú): nó chỉ để
         // hiển thị, không có menu ghim và không kéo thả được.
+        
         document.querySelectorAll('.note-card:not(.note-card-static)').forEach(initNoteCard);
         document.querySelectorAll('.note-deck').forEach(reflowDeck);
     });
