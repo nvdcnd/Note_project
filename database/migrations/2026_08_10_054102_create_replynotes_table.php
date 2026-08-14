@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('replynotes', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique();
+            $table->id()->autoIncrement()->unique()->primary();
             $table->foreignId('noteID')->constrained('note')->cascadeOnDelete();
             $table->foreignId('userID')->constrained('users')->cascadeOnDelete();
             $table->string('description');

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user2user_transactions', function (Blueprint $table) {
-            $table->id();
+            $table->id()->autoIncrement()->unique()->primary();
             $table->foreignId('from')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('to')->references('id')->on('users')->onDelete('cascade');
             $table->float('amount');

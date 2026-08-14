@@ -20,7 +20,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('invitations', function (Blueprint $table) {
-            $table->id();
+            $table->id()->autoIncrement()->unique()->primary();
             $table->string('email')->index();
             $table->string('token', 64)->unique();
             $table->string('invitable_type');

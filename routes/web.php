@@ -82,9 +82,9 @@ Route::middleware(['throttle:smart'])->group(function (){
     Route::get('/', [NoteController::class, 'home'])->name('home');
 
     // Nhận lời mời (công khai — người được mời chưa có tài khoản)
-    Route::get('/invite/{token}', [InvitationController::class, 'show'])->name('invitation.show');
-    Route::post('/invite/{token}', [InvitationController::class, 'accept'])
-        ->name('invitation.accept');
+    //Route::get('/invite/{token}', [InvitationController::class, 'show'])->name('invitation.show');
+    //Route::post('/invite/{token}', [InvitationController::class, 'accept'])
+    //    ->name('invitation.accept');
 });
 
 

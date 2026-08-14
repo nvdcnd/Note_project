@@ -16,6 +16,19 @@ class PaymentController extends Controller
         private PayOS $payOS   // Laravel tự inject singleton
     ) {}
 
+    public function history_view($id)
+    {
+        $userId = Auth::id();
+        $allTransactions = Payment::query()
+            ->where('userID',$userId)
+            ->latest()
+            ->get();
+        //$fromTransactions = User2userTransaction::query()->where('from', $userId)->latest()->get();
+       // $toTransactions = User2userTransaction::query()->where('to', $userId)->latest()->get();
+
+        return view('transactions.user2user.history', compact('allTransactions', 'fromTransactions', 'toTransactions'));
+    }
+
     public function payment_for_point(PayOS $payos, Request $request){
         $request->validate([
             'points' => 'required|numeric|min:1',
@@ -76,7 +89,7 @@ class PaymentController extends Controller
                    /*$user->incrment('balanced',$user->balanced+$payment->amount);
                    $payment->status = 'Done';
                    $payment->save();*/
-                   return redirect()->route("Payment.complete.bill",$payment->id)->with("success","");
+                   return redirect()->route('user2user_transaction_history_view', $user->id)->with('success', 'Nạp tiền thành công.');
                 });
             } else {
                 return back()->with("error","");
