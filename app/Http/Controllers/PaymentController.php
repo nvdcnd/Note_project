@@ -26,7 +26,7 @@ class PaymentController extends Controller
         //$fromTransactions = User2userTransaction::query()->where('from', $userId)->latest()->get();
        // $toTransactions = User2userTransaction::query()->where('to', $userId)->latest()->get();
 
-        return view('transactions.user2user.history', compact('allTransactions', 'fromTransactions', 'toTransactions'));
+        return view('transactions.user2user.history', compact('allTransactions'));
     }
 
     public function payment_for_point(PayOS $payos, Request $request){
