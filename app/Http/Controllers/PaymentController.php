@@ -15,7 +15,7 @@ class PaymentController extends Controller
     public function __construct(
         private PayOS $payOS   // Laravel tự inject singleton
     ) {}
-    
+
     public function payment_for_point(PayOS $payos, Request $request){
         $request->validate([
             'points' => 'required|numeric|min:1',
@@ -62,7 +62,7 @@ class PaymentController extends Controller
             $code = $webhook->code;
 
             if($code == '00' && $ordercode == $order->orderCode && $order->status == "Pending"){
-                DB::transaction(function () use ($ordercode, $user, $amount, $code){
+                DB::transaction(function () use ($ordercode, $user){
                    $payment = Payment::query()->lockForUpdate()->where('orderCode', $ordercode)->first();
                    $user = User::query()->lockForUpdate()->where('id', $user->id)->first();
                    $user->balance += $payment->point;

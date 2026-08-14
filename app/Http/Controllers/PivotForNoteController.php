@@ -16,7 +16,7 @@ class PivotForNoteController extends Controller
 {
     public const MAX_RECIPIENTS_PER_REQUEST = 20;
 
-    /**
+    /*
      * Gửi lời mời cho các email chưa có tài khoản.
      *
      * Mỗi email được cấp một lời mời có token riêng, nhờ đó email chứa link

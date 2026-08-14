@@ -19,11 +19,11 @@ class OauthAuthenticationController extends Controller
 
         $new_user = User::updateOrCreate(
             [
-                "provider_id" => $user->id,
+                "provider_id" => $user->getId(),
                 "provider_name" => $provider
             ],[
-                'email'=>$user->email,
-                'name'=>$user->name,
+                'email'=>$user->getEmail(),
+                'name'=>$user->getName(),
             ]
             );
 
