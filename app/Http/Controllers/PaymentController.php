@@ -61,9 +61,9 @@ class PaymentController extends Controller
             $amount = $webhook->amount;
             $code = $webhook->code;
 
-            if($code == '00' && $ordercode == $order->orderCode && $order->status == "Pending"){
+            if($code == '00' && $ordercode == $order->id && $order->status == "Pending"){
                 DB::transaction(function () use ($ordercode, $user){
-                   $payment = Payment::query()->lockForUpdate()->where('orderCode', $ordercode)->first();
+                   $payment = Payment::query()->lockForUpdate()->where('id',$ordercode)->first();
                    $user = User::query()->lockForUpdate()->where('id', $user->id)->first();
                    
                    if (!$user || !$payment){
@@ -71,7 +71,7 @@ class PaymentController extends Controller
                    }
 
                    User::whereKey($user->id)->increment('balance',$payment->amount);
-                   $payment->update(['status'=>"Finished"]);
+                   Payment::where('id',$ordercode)->update(['status'=>"Finished"]);
                    
                    /*$user->incrment('balanced',$user->balanced+$payment->amount);
                    $payment->status = 'Done';
