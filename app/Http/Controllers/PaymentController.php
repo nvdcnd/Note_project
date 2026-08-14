@@ -65,10 +65,17 @@ class PaymentController extends Controller
                 DB::transaction(function () use ($ordercode, $user){
                    $payment = Payment::query()->lockForUpdate()->where('orderCode', $ordercode)->first();
                    $user = User::query()->lockForUpdate()->where('id', $user->id)->first();
-                   $user->balance += $payment->point;
-                   $user->save();
+                   
+                   if (!$user || !$payment){
+                    return back()->with("Error");
+                   }
+
+                   User::whereKey($user->id)->increment('balance',$payment->amount);
+                   $transaction->update(['status'=>"Finished"]);
+                   
+                   /*$user->incrment('balanced',$user->balanced+$payment->amount);
                    $payment->status = 'Done';
-                   $payment->save();
+                   $payment->save();*/
                    return redirect()->route("Payment.complete.bill",$payment->id)->with("success","");
                 });
             } else {
