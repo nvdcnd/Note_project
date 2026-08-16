@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('organizations_member', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique()->primary();
+            $table->id();
             $table->foreignId('organizationID')->constrained('organizations')->onDelete('cascade');
             $table->foreignId('userID')->constrained('users')->onDelete('cascade');
             $table->boolean('status')->default(false);

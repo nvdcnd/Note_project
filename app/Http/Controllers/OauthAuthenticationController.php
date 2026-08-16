@@ -11,22 +11,34 @@ use Laravel\Socialite\Facades\Socialite;
 class OauthAuthenticationController extends Controller
 {
     public function auth_redirect(Request $request, $provider){
-        return Socialite::driver($provider)->redirect();
+        $providers = ['google','facebook','apple','github'];
+        if(in_array($provider, $providers)){
+            return Socialite::driver($provider)->redirect();
+        } else {
+            return redirect()->route('home')->with('error','Can not create account with'.$provider.', please try agian with normal login');
+        }
     }
 
     public function auth_callback(Request $request, $provider){
-        $user = Socialite::driver($provider)->user();
+        $providers = ['google','facebook','apple','github'];
+        if(in_array($provider, $providers)){
+            $user = Socialite::driver($provider)->user();
 
-        $new_user = User::updateOrCreate(
-            [
-                "provider_id" => $user->getId(),
-                "provider_name" => $provider
-            ],[
-                'email'=>$user->getEmail(),
-                'name'=>$user->getName(),
-            ]
-            );
+            $new_user = User::updateOrCreate(
+                [
+                    "provider_id" => $user->getId(),
+                    "provider_name" => $provider
+                ],[
+                    'email'=>$user->getEmail(),
+                    'name'=>$user->getName(),
+                ]
+                );
 
-        Auth::login($new_user);
+            Auth::login($new_user);
+            $request->session()->regenerate();
+            return redirect()->route('home')->with('success','Create account successfull');
+        } else {
+            return redirect()->route('home')->with('error','Can not create account with'.$provider.', please try agian with normal login');
+        }
     }
 }

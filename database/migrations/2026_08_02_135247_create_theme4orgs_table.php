@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('theme4orgs', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique()->primary();
+            $table->id();
             // $table->id();
             $table->string('name');
             $table->text('description');

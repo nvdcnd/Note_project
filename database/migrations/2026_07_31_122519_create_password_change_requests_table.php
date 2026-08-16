@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('password_change_requests', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique()->primary();
+            $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('token');
             $table->timestamp('expires_at');

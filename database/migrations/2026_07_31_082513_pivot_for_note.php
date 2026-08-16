@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pivot_for_note', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique()->primary();
+            $table->id();
             $table->foreignId('note_id')->constrained('note')->onDelete('cascade');
             $table->foreignId('shared_with')->constrained('users')->onDelete('cascade');
             $table->timestamps();

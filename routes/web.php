@@ -3,7 +3,8 @@
 // use App\Http\Controllers\Controller;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BalanceController;
-use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\PaymentController;
+// use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\MarkAsDoneController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\Organization2userTransactionController;
@@ -43,13 +44,13 @@ RateLimiter::for('authentication', function (Request $request){
 });
 
 RateLimiter::for('transaction', function (Request $request){
-    return Limit::perMinute(30)->by($request->user->id);
+    return Limit::perMinute(30)->by($request->user()->id);
 });
 
 Route::middleware(['throttle:authentication'])->group(function (){
     // OAUTH2
-    Route::get('oauth/redirect/{provider}', [OauthAuthenticationController::class, 'oauth_redirect'])->name('oauth.redirect');
-    Route::get('oauth/callback/{provider}', [OauthAuthenticationController::class, 'oauth_callback'])->name('oauth.callback');
+    Route::get('oauth/redirect/{provider}', [OauthAuthenticationController::class, 'auth_redirect'])->name('oauth.redirect');
+    Route::get('oauth/callback/{provider}', [OauthAuthenticationController::class, 'auth_callback'])->name('oauth.callback');
 
     // AUTHENTICATION
     Route::get('/login', function () {
@@ -196,12 +197,19 @@ Route::middleware(['auth', 'throttle:smart'])->group(function () {
 
         // Theme buy (org)
         Route::post('/theme/org/buy/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme'])
-            ->name('theme.org.buy');
+             ->name('theme.org.buy');
         Route::post('/theme/org/buy/verify/{id}', [Theme4orgWalletController::class, 'Organization_buy_theme_verify_otp'])
              ->name('theme.org.buy.verify');
 
+        // Points payment
+        Route::post('/point/payment/verify/{id}', [PaymentController::class, 'payment_verify'])->name('point.payment.verify');
+        Route::post('/point/payment/create', [PaymentController::class, 'payment_for_point'])
+             ->name('point.payment.create');
+
     });
 
+    // Points payment history view
+    Route::get('/point/payment/history', [PaymentController::class, 'history_view'])->name('point.history');
     // Theme store
     // LƯU Ý THỨ TỰ: '/themes/org' phải đứng TRƯỚC '/themes/{id}', nếu không Laravel
     // sẽ khớp '/themes/org' vào route show với $id = 'org' và trả 404.

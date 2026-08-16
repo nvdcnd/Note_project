@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('note', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique()->primary();
+            $table->id();
             $table->string('title');
             $table->text('description');
             $table->foreignId('creater_id')->references('id')->on('users')->onDelete('cascade');

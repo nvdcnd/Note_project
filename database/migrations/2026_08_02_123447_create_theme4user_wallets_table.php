@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('theme4user_wallets', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique()->primary();
+            $table->id();
             $table->foreignId('userID')->constrained('users')->onDelete('cascade');
             $table->foreignId('theme4ID')->nullable()->constrained('theme4users')->onDelete('cascade');
             $table->timestamps();

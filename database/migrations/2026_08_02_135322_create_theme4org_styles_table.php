@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('theme4org_styles', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique()->primary();
+            $table->id();
             $table->foreignId('theme4ID')->references('id')->on('theme4orgs')->onDelete('cascade');
             $table->json('homepage_style');
             $table->json('note_page_style');

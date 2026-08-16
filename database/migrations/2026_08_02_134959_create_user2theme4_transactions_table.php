@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user2theme4_transactions', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique()->primary();
+            $table->id();
             $table->foreignId('userID')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('theme4ID')->references('id')->on('theme4orgs')->onDelete('cascade');
             $table->foreignId('current_hostID')->references('id')->on('users')->onDelete('cascade');

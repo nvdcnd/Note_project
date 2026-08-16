@@ -128,7 +128,7 @@ class PivotForNoteController extends Controller
     public function share_note_link(Request $request, $id){
         $org = Note::findOrFail($id);
         // $user = auth()->user();
-        $member = PivotForNote::where('noteID',$id)->where('userID',$request->user->id)->first();
+        $member = PivotForNote::where('noteID',$id)->where('userID',$request->user()->id)->first();
         if($request->user){
             if ($request->user->id == $org->userID){
                 return redirect()->route("home")->with("Error","Bạn đang là chủ của tổ chức này");
@@ -149,7 +149,7 @@ class PivotForNoteController extends Controller
 
     public function delete_share_note(Request $request, $id){
         $note = Note::findOrFail($id);
-        $member = PivotForNote::where('noteID',$id)->where('userID',$request->user->id)->first();
+        $member = PivotForNote::where('noteID',$id)->where('userID',$request->user()->id)->first();
         if($member){
             $member->delete();
             return redirect()->route('home')->with('success','Bạn đã gỡ note'.(string)$id.'khỏi danh mục note đã được chia sẻ với bạn');

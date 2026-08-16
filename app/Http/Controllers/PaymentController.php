@@ -16,7 +16,7 @@ class PaymentController extends Controller
         private PayOS $payOS   // Laravel tự inject singleton
     ) {}
 
-    public function history_view($id)
+    public function history_view(Request $request)
     {
         $userId = Auth::id();
         $allTransactions = Payment::query()
@@ -41,7 +41,7 @@ class PaymentController extends Controller
 
             $new_payment = new Payment([
                 'amount' => $actual_money,
-                'points' => $points,
+                'point' => $points,
                 'userID' => $user->id,
                 'status'=>'Pending'
             ]);
@@ -65,34 +65,36 @@ class PaymentController extends Controller
     }
 
     public function payment_verify(PayOS $payos, Request $request, $id){
-        $order = Payment::find($id)->first();
-        $user = User::find('id', $order->user_id)->first();
+        $order = Payment::find($id);
+        $user = User::find($order->user_id);
 
         try{
             $webhook = $this->payOS->webhooks->verify($request->all());
             $ordercode = $webhook->orderCode;
-            $amount = $webhook->amount;
+            //$amount = $webhook->amount;
             $code = $webhook->code;
 
-            if($code == '00' && $ordercode == $order->id && $order->status == "Pending"){
-                DB::transaction(function () use ($ordercode, $user){
-                   $payment = Payment::query()->lockForUpdate()->where('id',$ordercode)->first();
-                   $user = User::query()->lockForUpdate()->where('id', $user->id)->first();
-                   
-                   if (!$user || !$payment){
-                    return back()->with("Error");
-                   }
+            if($code == '00'){
+                if($ordercode == $order->id && $order->status == "Pending"){
+                    DB::transaction(function () use ($ordercode, $user){
+                    $payment = Payment::query()->lockForUpdate()->where('id',$ordercode)->first();
+                    $user = User::query()->lockForUpdate()->where('id', $user->id)->first();
 
-                   User::whereKey($user->id)->increment('balance',$payment->amount);
-                   Payment::where('id',$ordercode)->update(['status'=>"Finished"]);
-                   
-                   /*$user->incrment('balanced',$user->balanced+$payment->amount);
-                   $payment->status = 'Done';
-                   $payment->save();*/
-                   return redirect()->route('user2user_transaction_history_view', $user->id)->with('success', 'Nạp tiền thành công.');
-                });
-            } else {
-                return back()->with("error","");
+                    if (!$user || !$payment){
+                        return back()->with("Error");
+                    }
+
+                    User::whereKey($user->id)->increment('balance',$payment->point);
+                    Payment::where('id',$ordercode)->update(['status'=>"Finished"]);
+
+                    /*$user->incrment('balanced',$user->balanced+$payment->amount);
+                    $payment->status = 'Done';
+                    $payment->save();*/
+                    });
+                    return redirect()->route('user2user_transaction_history_view', $user->id)->with('success', 'Nạp tiền thành công.');
+                } else {
+                    return back()->with('error');
+                }
             }
         } catch (\Exception $e) {
             return back()->with("error", $e->getMessage());
@@ -101,7 +103,7 @@ class PaymentController extends Controller
 
     public function payment_complete_bill(Request $request,int $id){
         $order = Payment::find($id);
-        if ($order->user_id != $request->user->id){
+        if ($order->user_id != $request->user()->id){
             return redirect()->route('home')->with("error","");
         } else {
             return view("payment.bill")->with("Success", $order);

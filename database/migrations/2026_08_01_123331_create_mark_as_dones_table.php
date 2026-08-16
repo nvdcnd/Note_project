@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('mark_as_dones', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique()->primary();
+            $table->id();
             $table->foreignId('noteID')->constrained('note')->onDelete('cascade');
             $table->foreignId('userID')->constrained('users')->onDelete('cascade');
             $table->boolean('status')->default(false);

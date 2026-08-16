@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('theme4org_transactions', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unique()->primary();
+            $table->id();
             // $table->foreignId('from')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('organizationID')->references('id')->on('organizations')->onDelete('cascade');
             $table->float('amount');

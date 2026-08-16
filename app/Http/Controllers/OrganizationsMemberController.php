@@ -107,7 +107,7 @@ class OrganizationsMemberController extends Controller
     public function share_add_member_link(Request $request, $id){
         $org = Organization::findOrFail($id);
         // $user = auth()->user();
-        $member = OrganizationsMember::where('orgID',$id)->where('userID',$request->user->id)->first();
+        $member = OrganizationsMember::where('orgID',$id)->where('userID',$request->user()->id)->first();
         if($request->user){
             if ($request->user->id == $org->hostID){
                 return redirect()->route("organization.home", $id)->with("Error","Bạn đang là chủ của tổ chức này");
