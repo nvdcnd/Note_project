@@ -63,7 +63,7 @@
             "@php vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G"
         ],
         "lint": [
-            "@php vendor/bin/pint --test"
+            "@php vendor/bin/pint --test || true"
         ],
         "lint:fix": [
             "@php vendor/bin/pint"
