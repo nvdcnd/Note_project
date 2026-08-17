@@ -26,7 +26,7 @@ class PaymentController extends Controller
         //$fromTransactions = User2userTransaction::query()->where('from', $userId)->latest()->get();
        // $toTransactions = User2userTransaction::query()->where('to', $userId)->latest()->get();
 
-        return view('transactions.user2user.history', compact('allTransactions'));
+        return view('payment.history', compact('allTransactions'));
     }
 
     public function payment_for_point(PayOS $payos, Request $request){
@@ -108,7 +108,7 @@ class PaymentController extends Controller
         if ($order->userID != $request->user()->id){
             return redirect()->route('home')->with("error","");
         } else {
-            return view("payment.bill")->with("Success", $order);
+            return view("payment.bill", compact('order'));
         }
     }
 
