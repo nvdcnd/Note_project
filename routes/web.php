@@ -108,13 +108,14 @@ Route::middleware(['auth', 'throttle:smart'])->group(function () {
     Route::post('/edit/note/{id}', [NoteController::class, 'edit_note'])->name('edit.note');
     Route::delete('/delete/note/{id}', [NoteController::class, 'delete_note'])->name('delete.note');
     // Mỗi request share có thể tỏa ra nhiều email mời — throttle như các route giao dịch.
-    Route::post('/share/note/{id}', [PivotForNoteController::class, 'share_note'])
+    Route::get('/share/note/{id}', [PivotForNoteController::class, 'share_note_link'])
         ->name('share.note');
-    Route::delete('/unshare/note/{id}', [PivotForNoteController::class, 'undo_shared_note'])->name('unshare.note');
+    Route::delete('/unshare/note/{id}', [PivotForNoteController::class, 'delete_share_note'])->name('unshare.note');
+    Route::get('/shared/note/list/{id}', [PivotForNoteController::class, 'shared_note_list'])->name('share.note.list');
 
     // Reply
     Route::post('/reply/note/{id}', [ReplyNoteController::class, 'reply_note'])->name('reply.note');
-    Route::delete('/reply/{id}', [ReplyNoteController::class, 'delete_reply'])->name('delete.reply');
+    Route::delete('/delete/reply/{id}', [ReplyNoteController::class, 'delete_reply'])->name('delete.reply');
 
     // Mark as done
     Route::post('/mark/note/{id}', [MarkAsDoneController::class, 'mark_as_done'])->name('mark.done');
@@ -132,8 +133,7 @@ Route::middleware(['auth', 'throttle:smart'])->group(function () {
     Route::post('/edit/organization/{id}', [OrganizationsController::class, 'edit_organization'])->name('edit.organization');
     Route::delete('/delete/organization/{id}', [OrganizationsController::class, 'delete_organization'])->name('delete.organization');
     // Mỗi request mời có thể tỏa ra nhiều email — throttle như các route giao dịch.
-    Route::post('/share/organization/{id}', [OrganizationsMemberController::class, 'add_member'])
-
+    Route::post('/share/organization/{id}', [OrganizationsMemberController::class, 'share_add_member_link'])
         ->name('share.organization');
     Route::post('/leave/organization/{id}', [OrganizationsMemberController::class, 'member_leave'])->name('leave.organization');
 

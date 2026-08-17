@@ -14,105 +14,15 @@ use Illuminate\Support\Facades\Mail;
 
 class OrganizationsMemberController extends Controller
 {
-    /*
-    public const MAX_RECIPIENTS_PER_REQUEST = 20;
-
-    public function add_member(Request $request, $organizationID)
-    {
-        $organization = Organization::query()->find($organizationID);
-        if (! $organization) {
-            return redirect()->route('organizations.index')->with('error', 'Không tìm thấy tổ chức.');
-        }
-
-        if ($organization->hostID !== Auth::id()) {
-            return redirect()->route('organization', $organization->id)->with('error', 'Chỉ chủ sở hữu mới có thể thêm thành viên.');
-        }
-
-        // Accept either user_list[] (array) or user_list_text (comma separated).
-        $rawList = $request->input('user_list', []);
-        if (empty($rawList) && $request->filled('user_list_text')) {
-            $rawList = array_map('trim', explode(',', $request->input('user_list_text')));
-        }
-
-        $request->validate([
-            'user_list' => ['nullable', 'array'],
-            'user_list.*' => ['email'],
-        ]);
-
-        $user_list = collect($rawList)
-            ->filter(fn ($value) => is_string($value) && trim($value) !== '')
-            ->map(fn ($value) => strtolower(trim($value)))
-            ->unique()
-            ->values()
-            ->all();
-
-        // Chặn trần sau khi gộp cả hai đường nhập (user_list[] lẫn
-        // user_list_text), vì validate ở trên không nhìn thấy đường text.
-        if (count($user_list) > self::MAX_RECIPIENTS_PER_REQUEST) {
-            return redirect()->route('organization', $organizationID)
-                ->with('error', 'Mỗi lần chỉ có thể mời tối đa '.self::MAX_RECIPIENTS_PER_REQUEST.' email.');
-        }
-
-        $addedCount = 0;
-        $skippedExisting = 0;
-        $invitedCount = 0;
-
-        foreach ($user_list as $email) {
-            $targetUser = User::where('email', $email)->first();
-            if (! $targetUser) {
-                // Email chưa có tài khoản: gửi lời mời có link đăng ký thay vì
-                // im lặng bỏ qua như trước.
-                $issued = Invitation::issueFor($organization, $email, Auth::id());
-                Mail::to($email)->queue(new OrganizationInvitation($organization, $email, $issued['token']));
-                $invitedCount++;
-
-                continue;
-            }
-
-            $alreadyMember = OrganizationsMember::query()
-                ->where('organizationID', $organizationID)
-                ->where('userID', $targetUser->id)
-                ->exists();
-
-            if ($alreadyMember) {
-                $skippedExisting++;
-
-                continue;
-            }
-
-            $organization_member = new OrganizationsMember;
-            $organization_member->organizationID = $organizationID;
-            $organization_member->userID = $targetUser->id;
-            $organization_member->status = false;
-            $organization_member->save();
-            Mail::to($targetUser->email)->queue(new user_accept_organization($organization_member->id));
-            $addedCount++;
-        }
-
-        if ($addedCount === 0 && $invitedCount === 0) {
-            return redirect()->route('organization', $organizationID)->with('warning', 'Không có thành viên mới nào được thêm.');
-        }
-
-        $response = redirect()->route('organization', $organizationID)->with('success', 'Đã thêm thành viên.');
-        if ($skippedExisting > 0) {
-            $response->with('warning', 'Một số lời mời đã bị bỏ qua vì không hợp lệ hoặc đang chờ xử lý.');
-        } elseif ($invitedCount > 0 && $addedCount === 0) {
-            $response->with('warning', 'Đã gửi lời mời đăng ký tới '.$invitedCount.' email chưa có tài khoản.');
-        }
-
-        return $response;
-    }
-        */
-
     public function share_add_member_link(Request $request, $id){
         $org = Organization::findOrFail($id);
         // $user = auth()->user();
         $member = OrganizationsMember::where('orgID',$id)->where('userID',$request->user()->id)->first();
         if($request->user){
             if ($request->user->id == $org->hostID){
-                return redirect()->route("organization.home", $id)->with("Error","Bạn đang là chủ của tổ chức này");
+                return redirect()->route("organization.home", $id)->with("error","Bạn đang là chủ của tổ chức này");
             } else if ($member){
-                return redirect()->route("organization.home", $id)->with("Error","Bạn đã là thành viên của tổ chức này");
+                return redirect()->route("organization.home", $id)->with("error","Bạn đã là thành viên của tổ chức này");
             }
             $user = User::findOrFail($request->user->id);
             return view('organization.invite', compact('org','user'));

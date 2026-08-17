@@ -81,7 +81,7 @@ class PaymentController extends Controller
                     $user = User::query()->lockForUpdate()->where('id', $user->id)->first();
 
                     if (!$user || !$payment){
-                        return back()->with("Error");
+                        return back()->with("error");
                     }
 
                     User::whereKey($user->id)->increment('balance',$payment->point);
@@ -103,7 +103,7 @@ class PaymentController extends Controller
 
     public function payment_complete_bill(Request $request,int $id){
         $order = Payment::find($id);
-        if ($order->user_id != $request->user()->id){
+        if ($order->userID != $request->user()->id){
             return redirect()->route('home')->with("error","");
         } else {
             return view("payment.bill")->with("Success", $order);

@@ -95,7 +95,7 @@
     async function shared_note_listing(noteId, cardBody){
         try{
             //const list_url =
-            const api = await fetch(`/shared/note/list/${noteId}`);
+            const api = await fetch(`${window.location.origin}/shared/note/list/${noteId}`);
             const shared_user = JSON.parse(api);
             const tbody = cardBody.querySelector('.inline-email-tbody');
             if(shared_user != null) {
@@ -212,7 +212,7 @@
                 });
             } else if (mode === 'SHARE') {
                 if (headerTitle) headerTitle.innerHTML = '🔗 Chia sẻ ghi chú';
-                const shareUrl = `${window.location.origin}/invite/share/note/${noteId}`;
+                const shareUrl = `${window.location.origin}/share/note/${noteId}`;
                 //let inlineEmails = [];
                 cardBody.innerHTML = `
                     <div class="mb-2">
@@ -641,7 +641,7 @@
         }
         // Bỏ qua .note-card-static (card ở trang chi tiết ghi chú): nó chỉ để
         // hiển thị, không có menu ghim và không kéo thả được.
-        
+
         document.querySelectorAll('.note-card:not(.note-card-static)').forEach(initNoteCard);
         document.querySelectorAll('.note-deck').forEach(reflowDeck);
     });
