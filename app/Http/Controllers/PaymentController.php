@@ -38,16 +38,18 @@ class PaymentController extends Controller
         $user = Auth::user();
         if($points > 0){
             $actual_money = $points * 1000;
+            $o_code = $user->id + random_int(1,200);
 
             $new_payment = new Payment([
                 'amount' => $actual_money,
+                'orderCode' => $o_code,
                 'point' => $points,
                 'userID' => $user->id,
                 'status'=>'Pending'
             ]);
             $new_payment->save();
             $transfer_data = [
-                'orderCode' => $new_payment->id,
+                'orderCode' => $new_payment->orderCode,
                 'amount' => $actual_money,
                 'description' => 'Noteket Thanh toan: Mua'. (string)$points.'-'. (string)$user->id,
                 'returnUrl' => route('payment.success'),
@@ -75,7 +77,7 @@ class PaymentController extends Controller
             $code = $webhook->code;
 
             if($code == '00'){
-                if($ordercode == $order->id && $order->status == "Pending"){
+                if($ordercode == $order->orderCode && $order->status == "Pending"){
                     DB::transaction(function () use ($ordercode, $user){
                     $payment = Payment::query()->lockForUpdate()->where('id',$ordercode)->first();
                     $user = User::query()->lockForUpdate()->where('id', $user->id)->first();
