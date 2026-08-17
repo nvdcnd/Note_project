@@ -50,7 +50,9 @@ return [
     'google' => [
         'client_id' => env("GOOGLE_CLIENT_ID"),
         'client_secret' => env("GOOGLE_CLIENT_SECRET"),
-        'redirect_uri' => env("GOOGLE_REDIRECT_URI")
+        // Socialite đọc đúng key tên `redirect` — đặt `redirect_uri` là nó
+        // báo thiếu redirect URI dù .env đã điền đủ.
+        'redirect' => env("GOOGLE_REDIRECT_URI")
     ]
 
 ];

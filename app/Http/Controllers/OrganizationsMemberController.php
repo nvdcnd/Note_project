@@ -17,17 +17,25 @@ class OrganizationsMemberController extends Controller
     public function share_add_member_link(Request $request, $id){
         $org = Organization::findOrFail($id);
         // $user = auth()->user();
-        $member = OrganizationsMember::where('orgID',$id)->where('userID',$request->user()->id)->first();
-        if($request->user){
-            if ($request->user->id == $org->hostID){
-                return redirect()->route("organization.home", $id)->with("error","Bạn đang là chủ của tổ chức này");
+        $member = OrganizationsMember::where('organizationID',$id)->where('userID',$request->user()->id)->first();
+        if($request->user()){
+            if ($request->user()->id == $org->hostID){
+                return redirect()->route("organization", $id)->with("error","Bạn đang là chủ của tổ chức này");
             } else if ($member){
-                return redirect()->route("organization.home", $id)->with("error","Bạn đã là thành viên của tổ chức này");
+                return redirect()->route("organization", $id)->with("error","Bạn đã là thành viên của tổ chức này");
             }
-            $user = User::findOrFail($request->user->id);
-            return view('organization.invite', compact('org','user'));
+            $user = User::findOrFail($request->user()->id);
+            // Tạo bản ghi thành viên chờ duyệt để màn hình invite có sẵn hai nút
+            // nhận/từ chối — member.accept và member.decline đều nhận id bản ghi
+            // này và tự kiểm tra đúng người được mời.
+            $member = OrganizationsMember::create([
+                'organizationID' => $org->id,
+                'userID' => $user->id,
+                'status' => false,
+            ]);
+            return view('organizations.invite', compact('org','user','member'));
         } else {
-            return redirect()->route('index')->with('Error','bạn chưa có tài khoản');
+            return redirect()->route('home')->with('Error','bạn chưa có tài khoản');
         }
     }
 

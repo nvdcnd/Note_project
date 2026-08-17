@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('theme4org_wallets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('organizationID')->references('id')->on('organizations')->onDelete('cascade');
-            $table->foreignId('theme3orgID')->references('id')->on('organizations')->onDelete('cascade');
+            $table->foreignId('theme2orgID')->nullable()->references('id')->on('organizations')->onDelete('cascade');
             // $table->float('balance')->default(0);
             $table->timestamps();
         });

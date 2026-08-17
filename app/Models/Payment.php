@@ -14,7 +14,8 @@ class Payment extends Model
         'userID',
         'amount',
         'status',
-        'point'
+        'point',
+        'orderCode',
     ];
 
     protected $casts = [

@@ -23,16 +23,28 @@ class OauthAuthenticationController extends Controller
         $providers = ['google','facebook','apple','github'];
         if(in_array($provider, $providers)){
             $user = Socialite::driver($provider)->user();
-
-            $new_user = User::updateOrCreate(
-                [
+            $check = User::where('email', $user->getEmail())->first();
+            if($check){
+                $check->update([
                     "provider_id" => $user->getId(),
                     "provider_name" => $provider
-                ],[
-                    'email'=>$user->getEmail(),
-                    'name'=>$user->getName(),
-                ]
-                );
+                ]);
+                // Email đã có tài khoản: nối provider vào tài khoản cũ và đăng nhập
+                // bằng chính nó — không được rơi xuống Auth::login($new_user) khi
+                // biến đó chưa tồn tại.
+                $new_user = $check;
+            } else {
+
+                $new_user = User::updateOrCreate(
+                    [
+                        "provider_id" => $user->getId(),
+                        "provider_name" => $provider
+                    ],[
+                        'email'=>$user->getEmail(),
+                        'name'=>$user->getName(),
+                    ]
+                    );
+            }
 
             Auth::login($new_user);
             $request->session()->regenerate();

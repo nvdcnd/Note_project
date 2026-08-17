@@ -619,9 +619,12 @@
         const PaymentButton = document.getElementById('payment_submit');
         if(PaymentButton){
             PaymentButton.addEventListener('click',async function (){
-                const point = document.getElementId('points_input').value;
+                // Cùng input #point_input với phần convert phía trên — id
+                // `points_input` không tồn tại trong DOM.
+                const point = document.getElementById('point_input').value;
                 try{
-                    const api = await fetch(`/point/payment/create/`, {
+                    // Không để trailing slash: POST bị redirect 301 sẽ rơi mất body.
+                    const api = await fetch(`/point/payment/create`, {
                         method: "POST",
                         headers: {"Content-Type": "application/json",
                                 "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -629,9 +632,10 @@
                         body: JSON.stringify({"points":point}),
                     });
 
-                    // Nếu Backend thực hiện Redirect 302, thuộc tính này sẽ bằng true
-                    if (response.redirected) {
-                        window.location.href = response.url; // Bắt trình duyệt chuyển hướng hẳn sang URL mới đó
+                    // fetch tự đi theo redirect 302 của backend; redirected=true
+                    // nghĩa là backend đã trỏ sang trang checkout của PayOS.
+                    if (api.redirected) {
+                        window.location.href = api.url; // Bắt trình duyệt chuyển hướng hẳn sang URL mới đó
                         return;
                     }
                 } catch {

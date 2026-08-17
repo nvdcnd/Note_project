@@ -3,6 +3,7 @@
 use App\Mail\Password_change;
 use App\Models\Note;
 use App\Models\Organization;
+use App\Models\OrganizationsMember;
 use App\Models\User;
 use App\Models\User2userTransaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -49,54 +50,59 @@ it('deletes the pending transaction when the OTP mail cannot be sent', function 
 });
 
 // ---------------------------------------------------------------------------
-// Hai endpoint share tỏa email theo danh sách người nhận, nên phải có trần
-// số người nhận và rate limit như các route giao dịch.
+// Luồng share đã đổi từ "gửi danh sách email" sang "chia sẻ bằng link":
+// GET /share/note/{id} và POST /share/organization/{id} không tỏa email nữa,
+// nên trần 20 người nhận và throttle 5,1 cũ không còn đối tượng để test.
+// Điều còn lại phải giữ: hai endpoint tuyệt đối không mở cho khách vãng lai,
+// và không được gửi bất kỳ email nào một cách âm thầm.
 // ---------------------------------------------------------------------------
 
-it('rejects sharing a note with more than 20 recipients', function () {
+it('requires login before touching the share endpoints and never sends mail from them', function () {
     Mail::fake();
 
     $owner = User::factory()->create();
     $note = Note::factory()->create(['creater_id' => $owner->id]);
+    $org = Organization::factory()->create(['hostID' => $owner->id]);
 
-    $emails = collect(range(1, 21))->map(fn ($i) => "nguoi{$i}@example.com")->all();
-
-    $this->actingAs($owner)
-        ->post(route('share.note', $note->id), ['shared_with' => $emails])
-        ->assertSessionHasErrors('shared_with');
+    $this->get(route('share.note', $note->id))->assertRedirect(route('login'));
+    $this->post(route('share.organization', $org->id))->assertRedirect(route('login'));
 
     Mail::assertNothingOutgoing();
 });
 
-it('rejects inviting more than 20 emails to an organization via the text input', function () {
-    Mail::fake();
-
+it('shows the invite screen when a non-member opens an organization share link', function () {
     $host = User::factory()->create();
+    $visitor = User::factory()->create();
     $org = Organization::factory()->create(['hostID' => $host->id]);
 
-    $emails = collect(range(1, 21))->map(fn ($i) => "nguoi{$i}@example.com")->implode(',');
+    $this->actingAs($visitor)
+        ->post(route('share.organization', $org->id))
+        ->assertOk()
+        ->assertViewIs('organizations.invite');
 
-    $this->actingAs($host)
-        ->post(route('share.organization', $org->id), ['user_list_text' => $emails])
-        ->assertRedirect(route('organization', $org->id))
-        ->assertSessionHas('error');
-
-    Mail::assertNothingOutgoing();
+    // Màn hình invite đi kèm bản ghi thành viên chờ duyệt — hai nút nhận/từ chối
+    // trên view trỏ vào member.accept / member.decline với id bản ghi này.
+    expect(
+        OrganizationsMember::where('organizationID', $org->id)
+            ->where('userID', $visitor->id)
+            ->where('status', false)
+            ->exists()
+    )->toBeTrue();
 });
 
-it('rate limits note sharing after 5 requests in a minute', function () {
-    Mail::fake();
+it('lets the invited visitor accept from the invite screen and become an active member', function () {
+    $host = User::factory()->create();
+    $visitor = User::factory()->create();
+    $org = Organization::factory()->create(['hostID' => $host->id]);
 
-    $owner = User::factory()->create();
-    $note = Note::factory()->create(['creater_id' => $owner->id]);
+    $this->actingAs($visitor)->post(route('share.organization', $org->id))->assertOk();
 
-    foreach (range(1, 5) as $i) {
-        $this->actingAs($owner)
-            ->post(route('share.note', $note->id), ['shared_with' => ["nguoi{$i}@example.com"]])
-            ->assertRedirect();
-    }
+    $member = OrganizationsMember::where('organizationID', $org->id)
+        ->where('userID', $visitor->id)->first();
 
-    $this->actingAs($owner)
-        ->post(route('share.note', $note->id), ['shared_with' => ['nguoi6@example.com']])
-        ->assertStatus(429);
+    $this->actingAs($visitor)
+        ->post(route('member.accept', $member->id))
+        ->assertRedirect(route('organization', $org->id));
+
+    expect($member->fresh()->status)->toBeTrue();
 });

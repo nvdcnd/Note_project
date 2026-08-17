@@ -4,7 +4,7 @@
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\PaymentController;
-// use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\MarkAsDoneController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\Organization2userTransactionController;
@@ -44,7 +44,9 @@ RateLimiter::for('authentication', function (Request $request){
 });
 
 RateLimiter::for('transaction', function (Request $request){
-    return Limit::perMinute(30)->by($request->user()->id);
+    // Webhook PayOS gọi không có session đăng nhập — thiếu dấu ?-> là mọi
+    // request khách vãng lai vào nhóm này 500 ngay từ middleware.
+    return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip());
 });
 
 Route::middleware(['throttle:authentication'])->group(function (){
@@ -82,11 +84,26 @@ Route::middleware(['throttle:smart'])->group(function (){
     // HOME
     Route::get('/', [NoteController::class, 'home'])->name('home');
 
-    // Nhận lời mời (công khai — người được mời chưa có tài khoản)
-    //Route::get('/invite/{token}', [InvitationController::class, 'show'])->name('invitation.show');
-    //Route::post('/invite/{token}', [InvitationController::class, 'accept'])
-    //    ->name('invitation.accept');
+    // Nhận lời mời (công khai — người được mời chưa có tài khoản).
+    // KHÔNG được comment cặp route này chừng nào OrganizationInvitation và
+    // Mail40account còn render route('invitation.show'): mail đổi chủ tổ chức
+    // (PivotChangeHostOrganizationController:72) vẫn queue OrganizationInvitation,
+    // thiếu route là worker render ném RouteNotFoundException và job chết.
+    Route::get('/invite/{token}', [InvitationController::class, 'show'])->name('invitation.show');
+    Route::post('/invite/{token}', [InvitationController::class, 'accept'])
+        ->name('invitation.accept');
 });
+
+
+// Webhook PayOS: nằm ngoài auth (bên gọi là server PayOS, không có session),
+// throttle theo IP qua limiter transaction đã null-safe, và được except CSRF
+// trong bootstrap/app.php. KHÔNG có {id}: PayOS chỉ đăng ký được một URL cố
+// định, payment được tra bằng orderCode trong payload đã verify chữ ký.
+// Đây chính là URL cần khai ở mục Webhook trên dashboard PayOS.
+Route::post('/point/payment/verify', [PaymentController::class, 'payment_verify'])
+    ->middleware('throttle:transaction')
+    ->name('point.payment.verify');
+
 
 
 Route::middleware(['auth', 'throttle:smart'])->group(function () {
@@ -202,14 +219,15 @@ Route::middleware(['auth', 'throttle:smart'])->group(function () {
              ->name('theme.org.buy.verify');
 
         // Points payment
-        Route::post('/point/payment/verify/{id}', [PaymentController::class, 'payment_verify'])->name('point.payment.verify');
         Route::post('/point/payment/create', [PaymentController::class, 'payment_for_point'])
              ->name('point.payment.create');
+
 
     });
 
     // Points payment history view
     Route::get('/point/payment/history', [PaymentController::class, 'history_view'])->name('point.history');
+    Route::get('/point/payment/bill/{id}', [PaymentController::class, 'payment_complete_bill'])->name('payment.bill');
     // Theme store
     // LƯU Ý THỨ TỰ: '/themes/org' phải đứng TRƯỚC '/themes/{id}', nếu không Laravel
     // sẽ khớp '/themes/org' vào route show với $id = 'org' và trả 404.

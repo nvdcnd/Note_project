@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\User2userTransactionController;
-use App\Mail\UserEmail;
 use App\Models\MarkAsDone;
 use App\Models\Note;
 use App\Models\Organization;
@@ -147,26 +146,37 @@ it('only the creator can delete a note', function () {
     expect(Note::find($note->id))->toBeNull();
 });
 
-it('only the creator can share a note', function () {
+// Chia sẻ note đã đổi mô hình: không còn "chủ note gửi email cho danh sách người
+// nhận" mà là "người nhận tự bấm vào link chia sẻ" (GET share.note).
+
+it('does not let the owner self-share a note through its own share link', function () {
     $owner = User::factory()->create();
-    $other = User::factory()->create();
-    $recipient = User::factory()->create(['email' => 'r@example.com']);
     $note = Note::factory()->create(['creater_id' => $owner->id]);
 
-    Mail::fake();
-
-    $this->actingAs($other)
-        ->post(route('share.note', $note->id), ['shared_with' => [$recipient->email]])
-        ->assertRedirect(route('note', $note->id));
+    // Chủ note bấm link của chính mình: không được tạo bản ghi chia sẻ nào,
+    // và người dùng được đưa về home kèm thông báo thay vì lỗi 500.
+    $this->actingAs($owner)
+        ->get(route('share.note', $note->id))
+        ->assertRedirect(route('home'));
 
     expect(PivotForNote::count())->toBe(0);
+});
 
-    $this->actingAs($owner)
-        ->post(route('share.note', $note->id), ['shared_with' => [$recipient->email]])
+it('lets a logged-in visitor join a note through its share link', function () {
+    $owner = User::factory()->create();
+    $visitor = User::factory()->create();
+    $note = Note::factory()->create(['creater_id' => $owner->id]);
+
+    $this->actingAs($visitor)
+        ->get(route('share.note', $note->id))
         ->assertRedirect(route('note', $note->id));
 
-    expect(PivotForNote::count())->toBe(1);
-    Mail::assertQueued(UserEmail::class, 1);
+    expect(
+        PivotForNote::where('note_id', $note->id)->where('shared_with', $visitor->id)->exists()
+    )->toBeTrue();
+
+    // Có quyền rồi thì phải mở được note.
+    $this->actingAs($visitor)->get(route('note', $note->id))->assertOk();
 });
 
 // ---------------------------------------------------------------------------

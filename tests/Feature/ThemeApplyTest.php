@@ -174,11 +174,35 @@ it('normalises an out-of-range drag type to the default', function () {
 // E-A4/E-A5 — áp dụng chủ đề cho tổ chức
 // ---------------------------------------------------------------------------
 
+// Bảng theme4org_wallets còn cột thừa `theme2orgID` (khóa ngoại trỏ về
+// organizations, không mang nghĩa) — đã nullable từ 17-08 nên create không cần
+// điền. Helper giữ lại để các test cũ không phải đổi; điền luôn cột thừa cho rõ.
+function makeOrgWallet(int $orgId, int $themeId): Theme4orgWallet
+{
+    return Theme4orgWallet::forceCreate([
+        'organizationID' => $orgId,
+        'theme4ID' => $themeId,
+        'theme2orgID' => $orgId,
+    ]);
+}
+
+it('lets an organization buy an org theme without hitting a NOT NULL column', function () {
+    $org = Organization::factory()->create(['hostID' => User::factory()->create()->id]);
+    $theme = makeOrgTheme();
+
+    // Đúng những gì Theme4orgWalletController làm sau khi OTP hợp lệ và đã trừ
+    // tiền — nếu cột thừa theme2orgID quay lại trạng thái NOT NULL, insert này
+    // sẽ nổ và test bắt được trước khi người dùng thật bị trừ tiền oan.
+    Theme4orgWallet::create(['organizationID' => $org->id, 'theme4ID' => $theme->id]);
+
+    expect(Theme4orgWallet::where('organizationID', $org->id)->exists())->toBeTrue();
+});
+
 it('lets the organization host apply an owned organization theme', function () {
     $host = User::factory()->create();
     $org = Organization::factory()->create(['hostID' => $host->id]);
     $theme = makeOrgTheme();
-    Theme4orgWallet::create(['organizationID' => $org->id, 'theme4ID' => $theme->id]);
+    makeOrgWallet($org->id, $theme->id);
 
     $this->actingAs($host)
         ->post(route('themes.org.apply', ['organizationID' => $org->id, 'themeID' => $theme->id]))
@@ -194,7 +218,7 @@ it('forbids a non-host member from applying an organization theme', function () 
     $org = Organization::factory()->create(['hostID' => $host->id]);
     OrganizationsMember::create(['organizationID' => $org->id, 'userID' => $member->id, 'status' => true]);
     $theme = makeOrgTheme();
-    Theme4orgWallet::create(['organizationID' => $org->id, 'theme4ID' => $theme->id]);
+    makeOrgWallet($org->id, $theme->id);
 
     $this->actingAs($member)
         ->post(route('themes.org.apply', ['organizationID' => $org->id, 'themeID' => $theme->id]))
@@ -235,9 +259,23 @@ it('keeps the organization alive when its applied theme is deleted', function ()
 
     $theme->delete();
 
-    // Khóa ngoại phải là nullOnDelete, tuyệt đối không phải cascade — nếu là
-    // cascade thì xóa một chủ đề sẽ xóa luôn cả tổ chức.
+    // Tối thiểu: xóa chủ đề không được kéo theo tổ chức (không cascade),
+    // và trang tổ chức vẫn phải render được dù themeID đang trỏ tới bản ghi đã xóa
+    // (quan hệ appliedTheme trả null nên layout rơi về palette mặc định).
     $org = $org->fresh();
     expect($org)->not->toBeNull()
-        ->and($org->themeID)->toBeNull();
+        ->and($org->appliedTheme)->toBeNull();
+
+    OrganizationsMember::create(['organizationID' => $org->id, 'userID' => $host->id, 'status' => true]);
+    $this->actingAs($host)->get(route('organization', $org->id))->assertOk();
+});
+
+it('clears themeID on the organization when its applied theme is deleted (nullOnDelete)', function () {
+    $host = User::factory()->create();
+    $theme = makeOrgTheme();
+    $org = Organization::factory()->create(['hostID' => $host->id, 'themeID' => $theme->id]);
+
+    $theme->delete();
+
+    expect($org->fresh()->themeID)->toBeNull();
 });
